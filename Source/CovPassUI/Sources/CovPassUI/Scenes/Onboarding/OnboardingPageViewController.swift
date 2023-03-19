@@ -41,30 +41,44 @@ public class OnboardingPageViewController: UIViewController {
         view.backgroundColor = UIColor.backgroundPrimary
         scrollView.backgroundColor = UIColor.backgroundPrimary
         scrollView.contentInset.bottom = .space_120
-        configureImageView()
         configureHeadline()
+        configureImageView()
         configureParagraphView()
-
+        configureAccessibilityRespondsToUserInteraction()
         accessibilityLabel = headline.attributedText?.string
+    }
+
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        configureImageView()
     }
 
     // MARK: - Methods
 
     private func configureImageView() {
         imageView.image = viewModel.image
-        imageView.enableAccessibility(label: Constants.Accessibility.image.label)
+        imageView.isAccessibilityElement = false
         imageView.pinHeightToScaleAspectFit()
+        imageView.isHidden = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
     }
 
     private func configureHeadline() {
         headline.attributedText = viewModel.title?.styledAs(.header_2)
-        headline.textableView.accessibilityTraits = .header
+        headline.enableAccessibility(label: viewModel.title, traits: .header)
         headline.layoutMargins = .init(top: .space_40, left: .space_24, bottom: .zero, right: .space_24)
     }
 
     private func configureParagraphView() {
         descriptionText.attributedText = viewModel.info?.styledAs(.body).colored(.onBackground70)
         descriptionText.layoutMargins = .init(top: .space_12, left: .space_24, bottom: .zero, right: .space_24)
+        descriptionText.enableAccessibility(label: viewModel.info, traits: .staticText)
+    }
+
+    private func configureAccessibilityRespondsToUserInteraction() {
+        if #available(iOS 13.0, *) {
+            headline.accessibilityRespondsToUserInteraction = true
+            descriptionText.accessibilityRespondsToUserInteraction = true
+        }
     }
 }
 

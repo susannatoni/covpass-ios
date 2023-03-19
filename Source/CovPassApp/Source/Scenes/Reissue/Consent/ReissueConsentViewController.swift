@@ -1,12 +1,11 @@
-import UIKit
 import CovPassUI
+import UIKit
 
 private enum Constants {
     static var customSpacingAfterDescription: CGFloat = 12
 }
 
 class ReissueConsentViewController: UIViewController {
-
     // MARK: - Properties
 
     @IBOutlet var titleLabel: UILabel!
@@ -40,10 +39,11 @@ class ReissueConsentViewController: UIViewController {
         updateView()
         configureActions()
         configureActivityIndicator()
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     // MARK: - Methods
-    
+
     private func configureActions() {
         agreeButton.action = viewModel.processAgree
         disagreeButton.action = viewModel.processDisagree
@@ -52,22 +52,25 @@ class ReissueConsentViewController: UIViewController {
 
     private func configureHintView() {
         hintView.isHidden = false
-        hintView.containerView.backgroundColor = .brandAccent10
-        hintView.containerView.layer.borderColor = UIColor.brandAccent20.cgColor
-        hintView.iconView.image = .infoSignal
+        hintView.style = .info
         hintView.titleLabel.attributedText = viewModel.hintTitle.styledAs(.header_3)
+        hintView.titleLabel.accessibilityTraits = .header
         hintView.bodyLabel.attributedText = viewModel.hintText
-        hintView.enableAccessibility(label: " ", traits: .staticText)
+        hintView.bodyLabel.accessibilityTraits = .staticText
         hintView.setConstraintsToEdge()
     }
-    
+
     func updateView() {
         titleLabel.attributedText = viewModel.titleText.styledAs(.header_2)
+        titleLabel.accessibilityTraits = .header
         subTitleLabel.attributedText = viewModel.subTitleText.styledAs(.header_3).colored(.onBackground70)
         certStack.subviews.forEach { $0.removeFromSuperview() }
-        viewModel.certItems.forEach { certStack.addArrangedSubview($0) }
+        viewModel.certItems.forEach { certificateItem in
+            certStack.addArrangedSubview(certificateItem)
+            certificateItem.setupAccessibility()
+        }
         configureHintView()
-        descriptionLabel.attributedText = viewModel.descriptionText.styledAs(.body)
+        descriptionLabel.attributedText = viewModel.descriptionText
         bodyStackView.setCustomSpacing(Constants.customSpacingAfterDescription, after: descriptionLabel)
         privacyHeadlineLabel.attributedText = viewModel.privacyHeadlineText.styledAs(.body).colored(.onBackground70)
         dataPrivacyLabel.textLabel.attributedText = viewModel.dataPrivacyText.styledAs(.header_3)
@@ -95,7 +98,7 @@ class ReissueConsentViewController: UIViewController {
         activityIndicator.centerXAnchor.constraint(equalTo: activityIndicatorContainerView.centerXAnchor).isActive = true
         activityIndicator.centerYAnchor.constraint(equalTo: activityIndicatorContainerView.centerYAnchor).isActive = true
     }
- }
+}
 
 extension ReissueConsentViewController: ViewModelDelegate {
     func viewModelDidUpdate() {
@@ -104,5 +107,19 @@ extension ReissueConsentViewController: ViewModelDelegate {
 
     func viewModelUpdateDidFailWithError(_: Error) {
         updateView()
+    }
+}
+
+private extension CertificateItem {
+    func setupAccessibility() {
+        let line3 = viewModel is RecoveryCertificateItemViewModel ?
+            viewModel.infoAccessibilityLabel :
+            viewModel.statusIconAccessibilityLabel
+        accessibilityLabel = titleLabel.textableView.text
+        accessibilityValue = [
+            viewModel.subtitle,
+            viewModel.info,
+            line3
+        ].compactMap { $0 }.joined(separator: "\n")
     }
 }

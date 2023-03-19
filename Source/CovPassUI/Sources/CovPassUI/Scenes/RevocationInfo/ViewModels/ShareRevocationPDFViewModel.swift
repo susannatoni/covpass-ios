@@ -1,8 +1,8 @@
 //
 //  ShareRevocationPDFViewModel.swift
-//  
 //
-//  Created by Thomas Kuleßa on 10.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import Foundation
@@ -13,11 +13,11 @@ struct ShareRevocationPDFViewModel: ShareRevocationPDFViewModelProtocol {
 
     init(exportData: RevocationPDFExportDataProtocol) {
         self.exportData = exportData
-        self.fileURL = exportData.fileURL
+        fileURL = exportData.fileURL
         exportData.write()
     }
 
-    func handleActivityResult(completed: Bool, activityError: Error?) {
+    func handleActivityResult(completed _: Bool, activityError: Error?) {
         if let error = activityError {
             print("Failed to share revocation PDF: \(error)")
         }

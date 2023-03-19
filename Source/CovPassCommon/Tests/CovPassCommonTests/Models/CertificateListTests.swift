@@ -1,8 +1,8 @@
 //
 //  CertificateListTests.swift
-//  
 //
-//  Created by Thomas Kuleßa on 23.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassCommon
@@ -27,7 +27,7 @@ class CertificateListTests: XCTestCase {
         let certificates: [ExtendedCBORWebToken] = [
             CBORWebToken.mockVaccinationCertificate.extended(),
             CBORWebToken.mockTestCertificate.extended(),
-            CBORWebToken.mockRecoveryCertificate.extended(),
+            CBORWebToken.mockRecoveryCertificate.extended()
         ]
         let sut = CertificateList(certificates: certificates)
 

@@ -13,9 +13,14 @@ import UIKit
 
 protocol CertificatesOverviewViewModelProtocol {
     var delegate: CertificatesOverviewViewModelDelegate? { get set }
-    var certificateViewModels: [CardViewModel] { get }
     var hasCertificates: Bool { get }
     var isLoading: Bool { get set }
+    var showMultipleCertificateHolder: Bool { get }
+    var accessibilityAddCertificate: String { get }
+    var accessibilityMoreInformation: String { get }
+    var openingAnnouncment: String { get }
+    var closingAnnouncment: String { get }
+    func revokeIfNeeded()
     func refresh() -> Promise<Void>
     func updateTrustList()
     func updateBoosterRules()
@@ -24,6 +29,9 @@ protocol CertificatesOverviewViewModelProtocol {
     func showAppInformation()
     func showRuleCheck()
     func showNotificationsIfNeeded()
+    func handleOpen(url: URL) -> Bool
+    func viewModel(for row: Int) -> CardViewModel
+    func countOfCells() -> Int
 }
 
 extension CertificatesOverviewViewModelProtocol {

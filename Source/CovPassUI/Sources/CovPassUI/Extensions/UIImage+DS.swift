@@ -41,16 +41,19 @@ public extension UIImage {
 
     @ImageLoader(name: "illustration_2")
     private(set) static var illustration2
-    
+
     @ImageLoader(name: "illustration_3")
     private(set) static var illustration3
-    
+
     @ImageLoader(name: "Illustration_4")
     private(set) static var illustration4
-    
+
+    @ImageLoader(name: "illustration_impfschutzgesetz")
+    private(set) static var illustrationImpfschutzgesetz
+
     @ImageLoader(name: "start_screen_1")
     private(set) static var startScreen
-    
+
     @ImageLoader(name: "reissue")
     private(set) static var reissue
 
@@ -62,9 +65,15 @@ public extension UIImage {
 
     @ImageLoader(name: "Field-Right")
     private(set) static var FieldRight
-    
+
     @ImageLoader(name: "button_close")
     private(set) static var close
+
+    @ImageLoader(name: "button_close_alternative")
+    private(set) static var closeAlternative
+
+    @ImageLoader(name: "close-white")
+    private(set) static var closeWhite
 
     @ImageLoader(name: "scan_proof_image")
     private(set) static var proofScreen
@@ -84,6 +93,9 @@ public extension UIImage {
     @ImageLoader(name: "star_partial")
     private(set) static var starPartial
 
+    @ImageLoader(name: "start-status-partial")
+    private(set) static var startStatusPartial
+
     @ImageLoader(name: "help")
     private(set) static var help
 
@@ -92,10 +104,16 @@ public extension UIImage {
 
     @ImageLoader(name: "star_48px")
     private(set) static var starEmpty
-    
+
     @ImageLoader(name: "prevention_label")
     private(set) static var completness
-    
+
+    @ImageLoader(name: "manage")
+    private(set) static var manage
+
+    @ImageLoader(name: "manage_notification")
+    private(set) static var manageNotification
+
     @ImageLoader(name: "prevention")
     private(set) static var prevention
 
@@ -105,11 +123,17 @@ public extension UIImage {
     @ImageLoader(name: "icon_qr")
     private(set) static var scan
 
+    @ImageLoader(name: "photo")
+    private(set) static var photo
+
     @ImageLoader(name: "icon_share")
     private(set) static var share
 
     @ImageLoader(name: "icon_card")
     private(set) static var card
+
+    @ImageLoader(name: "icon_card_circle")
+    private(set) static var cardCircle
 
     @ImageLoader(name: "invalid")
     private(set) static var iconRed
@@ -129,12 +153,15 @@ public extension UIImage {
     @ImageLoader(name: "checkbox_checked")
     private(set) static var checkboxChecked
 
+    @ImageLoader(name: "checkbox_partial")
+    private(set) static var checkboxPartial
+
     @ImageLoader(name: "checkbox_unchecked")
     private(set) static var checkboxUnchecked
 
     @ImageLoader(name: "result_success")
     private(set) static var resultSuccess
-    
+
     @ImageLoader(name: "result_open")
     private(set) static var resultOpen
 
@@ -159,9 +186,6 @@ public extension UIImage {
     @ImageLoader(name: "status_full_detail")
     private(set) static var statusFullDetail
 
-    @ImageLoader(name: "status_partial_detail")
-    private(set) static var statusPartialDetail
-
     @ImageLoader(name: "icon_test")
     private(set) static var iconTest
 
@@ -185,18 +209,27 @@ public extension UIImage {
 
     @ImageLoader(name: "status_expired")
     private(set) static var statusExpired
-    
+
     @ImageLoader(name: "info_hui")
     private(set) static var info
-    
+
     @ImageLoader(name: "signal_info_hui")
     private(set) static var infoSignal
-    
+
     @ImageLoader(name: "flag_de")
     private(set) static var flagDE
 
+    @ImageLoader(name: "flag_world")
+    private(set) static var flagWorld
+
     @ImageLoader(name: "status_full_notification")
     private(set) static var statusFullNotfication
+
+    @ImageLoader(name: "status_full_blue_notification")
+    private(set) static var statusFullBlueNotification
+
+    @ImageLoader(name: "success_large")
+    private(set) static var successLarge
 
     @ImageLoader(name: "flash-on")
     private(set) static var flashOn
@@ -212,27 +245,45 @@ public extension UIImage {
 
     @ImageLoader(name: "detail-status-full")
     private(set) static var detailStatusFull
-    
+
     @ImageLoader(name: "detail-status-failed")
     private(set) static var detailStatusFailed
-    
+
     @ImageLoader(name: "detail-status-full-empty")
     private(set) static var detailStatusFullEmpty
-    
+
     @ImageLoader(name: "detail-status-test-empty")
     private(set) static var detailStatusTestEmpty
-    
+
     @ImageLoader(name: "detail-status-test")
     private(set) static var detailStatusTest
-    
+
+    @ImageLoader(name: "detail-status-test-inverse")
+    private(set) static var detailStatusTestInverse
+
     @ImageLoader(name: "icon-card-inverse")
     private(set) static var iconCardInverse
-    
+
     @ImageLoader(name: "icon-card-inverse-warning")
     private(set) static var iconCardInverseWarning
 
     @ImageLoader(name: "detail-status-partial")
     private(set) static var detailStatusPartial
+
+    @ImageLoader(name: "infoWhite")
+    private(set) static var infoWhite
+
+    @ImageLoader(name: "vaccination_cycle_complete")
+    private(set) static var vaccinationCycleComplete
+
+    @ImageLoader(name: "vaccination_cycle_incomplete")
+    private(set) static var vaccinationCycleIncomplete
+
+    @ImageLoader(name: "certificate_invalid")
+    private(set) static var certificateInvalid
+
+    @ImageLoader(name: "card_empty")
+    private(set) static var cardEmpty
 
     @ImageLoader(name: "start-status-full-blue")
     private(set) static var startStatusFullBlue
@@ -242,6 +293,87 @@ public extension UIImage {
 
     @ImageLoader(name: "status-expired-circle")
     private(set) static var statusExpiredCircle
+
+    @ImageLoader(name: "status-full-circle")
+    private(set) static var statusFullCircle
+
+    @ImageLoader(name: "status-full-green")
+    private(set) static var statusFullGreen
+
+    @ImageLoader(name: "status-invalid-circle")
+    private(set) static var statusInvalidCircle
+
+    @ImageLoader(name: "status-mask-invalid-circle")
+    private(set) static var statusMaskInvalidCircle
+
+    @ImageLoader(name: "status-mask-no-rules-circle-large")
+    private(set) static var statusMaskNoRulesCircleLarge
+
+    @ImageLoader(name: "status-mask-no-rules-circle-small")
+    private(set) static var statusMaskNoRulesCircleSmall
+
+    @ImageLoader(name: "status-mask-optional-circle")
+    private(set) static var statusMaskOptionalCircle
+
+    @ImageLoader(name: "status-mask-optional-circle-large")
+    private(set) static var statusMaskOptionalCircleLarge
+
+    @ImageLoader(name: "status-mask-required-circle")
+    private(set) static var statusMaskRequiredCircle
+
+    @ImageLoader(name: "status-mask-required-circle-large")
+    private(set) static var statusMaskRequiredCircleLarge
+
+    @ImageLoader(name: "status-partial-circle")
+    private(set) static var statusPartialCircle
+
+    @ImageLoader(name: "status-partial-green")
+    private(set) static var statusPartialGreen
+
+    @ImageLoader(name: "status-test-negative")
+    private(set) static var statusTestNegative
+
+    @ImageLoader(name: "status-mask-required-reason-incomplete")
+    private(set) static var statusMaskRequiredReasonIncomplete
+
+    @ImageLoader(name: "status-mask-required-reason-other")
+    private(set) static var statusMaskRequiredReasonOther
+
+    @ImageLoader(name: "status-mask-required-reason-validity-date")
+    private(set) static var statusMaskRequiredReasonValidityDate
+
+    @ImageLoader(name: "status-mask-required-reason-qrcode")
+    private(set) static var statusMaskRequiredReasonQRCode
+
+    @ImageLoader(name: "status-mask-required-reason-second-certificate")
+    private(set) static var statusMaskRequiredReasonSecondCertificate
+
+    @ImageLoader(name: "half-shield-notification")
+    private(set) static var halfShieldNotification
+
+    @ImageLoader(name: "expired-notification")
+    private(set) static var expiredNotification
+
+    @ImageLoader(name: "test-notification")
+    private(set) static var testNotification
+
+    @ImageLoader(name: "partial-dot")
+    private(set) static var partialDotNotification
+
+    @ImageLoader(name: "valid-dot")
+    private(set) static var validDotNotification
+
+    @ImageLoader(name: "expired-dot")
+    private(set) static var expiredDotNotification
+
+    @ImageLoader(name: "icon_blue_down")
+    private(set) static var iconBlueDownArrow
+
+    @ImageLoader(name: "icon_blue_up")
+    private(set) static var iconBlueUpArrow
+
+    @ImageLoader(name: "external-link")
+    private(set) static var externalLink
 }
 
 @propertyWrapper

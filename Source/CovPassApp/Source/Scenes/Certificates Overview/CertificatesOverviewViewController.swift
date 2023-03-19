@@ -13,11 +13,6 @@ import Scanner
 import UIKit
 
 private enum Constants {
-    enum Accessibility {
-        static let addCertificate = VoiceOverOptions.Settings(label: "accessibility_vaccination_start_screen_label_add_certificate".localized)
-        static let moreInformation = VoiceOverOptions.Settings(label: "accessibility_vaccination_start_screen_label_information".localized)
-    }
-
     enum Layout {
         static let actionLineHeight: CGFloat = 17
     }
@@ -32,6 +27,7 @@ class CertificatesOverviewViewController: UIViewController {
     @IBOutlet var dotPageIndicator: DotPageIndicator!
 
     private(set) var viewModel: CertificatesOverviewViewModelProtocol
+    private(set) var cellWidthMargin: CGFloat = 40
 
     // MARK: - Lifecycle
 
@@ -62,6 +58,7 @@ class CertificatesOverviewViewController: UIViewController {
         viewModel.updateTrustList()
         viewModel.updateBoosterRules()
         viewModel.updateValueSets()
+        viewModel.revokeIfNeeded()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -69,20 +66,33 @@ class CertificatesOverviewViewController: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.openingAnnouncment)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.closingAnnouncment)
+    }
+
     // MARK: - Private
 
     private func setupDotIndicator() {
         dotPageIndicator.delegate = self
-        dotPageIndicator.numberOfDots = viewModel.certificateViewModels.count
-        dotPageIndicator.isHidden = viewModel.certificateViewModels.count == 1
+        dotPageIndicator.numberOfDots = viewModel.countOfCells()
+        dotPageIndicator.selectedColor = .brandAccent
+        dotPageIndicator.unselectedColor = .brandAccent.withAlphaComponent(0.1)
+        dotPageIndicator.borderColor = .brandAccent.withAlphaComponent(0.6)
+        dotPageIndicator.isHidden = !viewModel.showMultipleCertificateHolder
     }
 
     private func setupHeaderView() {
         headerView.attributedTitleText = "certificate_action_button_check_validity".localized.styledAs(.header_3).colored(.brandBase).lineHeight(Constants.Layout.actionLineHeight)
         headerView.titleButton.isHidden = !viewModel.hasCertificates
         headerView.titleIcon.isHidden = !viewModel.hasCertificates
-        headerView.image = .help
-        headerView.actionButton.enableAccessibility(label:  Constants.Accessibility.moreInformation.label)
+        headerView.image = .settings
+        headerView.actionButton.enableAccessibility(label: viewModel.accessibilityMoreInformation)
 
         headerView.titleAction = { [weak self] in
             self?.viewModel.showRuleCheck()
@@ -96,17 +106,17 @@ class CertificatesOverviewViewController: UIViewController {
         collectionView.clipsToBounds = false
         collectionView.delegate = self
         collectionView.dataSource = self
-        let layout = CardFlowLayout()
+        let layout = CardFlowLayout(spacing: 10, leftSectionInset: cellWidthMargin / 2)
         layout.scrollDirection = .horizontal
         collectionView.collectionViewLayout = layout
         collectionView.register(UINib(nibName: "\(NoCertificateCollectionViewCell.self)", bundle: Bundle.uiBundle), forCellWithReuseIdentifier: "\(NoCertificateCollectionViewCell.self)")
-        collectionView.register(UINib(nibName: "\(CertificateCollectionViewCell.self)", bundle: Bundle.uiBundle), forCellWithReuseIdentifier: "\(CertificateCollectionViewCell.self)")
+        collectionView.register(UINib(nibName: "\(CertificateOverviewCollectionViewCell.self)", bundle: Bundle.uiBundle), forCellWithReuseIdentifier: "\(CertificateOverviewCollectionViewCell.self)")
         collectionView.showsHorizontalScrollIndicator = false
     }
 
     private func setupActionButton() {
         addButton.icon = .plus
-        addButton.innerButton.accessibilityLabel = Constants.Accessibility.addCertificate.label
+        addButton.innerButton.accessibilityLabel = viewModel.accessibilityAddCertificate
         addButton.action = { [weak self] in
             self?.viewModel.scanCertificate()
         }
@@ -119,10 +129,9 @@ class CertificatesOverviewViewController: UIViewController {
 
     private func reloadCollectionView() {
         collectionView.reloadData()
-        dotPageIndicator.numberOfDots = viewModel.certificateViewModels.count
-        let hasOnlyOneCertificate = viewModel.certificateViewModels.count == 1
-        dotPageIndicator.isHidden = hasOnlyOneCertificate
-        collectionView.isScrollEnabled = !hasOnlyOneCertificate
+        dotPageIndicator.numberOfDots = viewModel.countOfCells()
+        dotPageIndicator.isHidden = !viewModel.showMultipleCertificateHolder
+        collectionView.isScrollEnabled = viewModel.showMultipleCertificateHolder
     }
 }
 
@@ -134,17 +143,17 @@ extension CertificatesOverviewViewController: UICollectionViewDataSource {
     }
 
     public func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-        viewModel.certificateViewModels.count
+        viewModel.countOfCells()
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard viewModel.certificateViewModels.count > indexPath.row else { return UICollectionViewCell() }
-        let vm = viewModel.certificateViewModels[indexPath.row]
+        guard viewModel.countOfCells() > indexPath.row else { return UICollectionViewCell() }
+        let vm = viewModel.viewModel(for: indexPath.row)
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.reuseIdentifier, for: indexPath) as? CardCollectionViewCell else { return UICollectionViewCell() }
-
         cell.viewModel = vm
         cell.viewModel?.delegate = cell
-
+        (cell as? CertificateOverviewCollectionViewCell)?.contentStackView.layoutMargins.top = 20
+        (cell as? CertificateOverviewCollectionViewCell)?.contentStackView.layoutMargins.bottom = 0
         return cell
     }
 }
@@ -164,7 +173,7 @@ extension CertificatesOverviewViewController: UICollectionViewDelegate {
 
 extension CertificatesOverviewViewController: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, layout _: UICollectionViewLayout, sizeForItemAt _: IndexPath) -> CGSize {
-        CGSize(width: collectionView.bounds.width - 40, height: collectionView.bounds.height)
+        CGSize(width: collectionView.bounds.width - cellWidthMargin, height: collectionView.bounds.height)
     }
 }
 

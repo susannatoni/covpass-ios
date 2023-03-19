@@ -28,13 +28,19 @@ struct CertificateDetailSceneFactory: ResolvableSceneFactory {
     }
 
     func make(resolvable: Resolver<CertificateDetailSceneResult>) -> UIViewController {
-        let viewModel = CertificateDetailViewModel(
-            router: router,
-            repository: VaccinationRepository.create(),
-            boosterLogic: BoosterLogic.create(),
-            certificates: certificates,
-            resolvable: resolvable
-        )
+        guard let certificateHolderStatusModel = CertificateHolderStatusModel(),
+              let viewModel = CertificateDetailViewModel(
+                  router: router,
+                  repository: VaccinationRepository.create(),
+                  boosterLogic: BoosterLogic.create(),
+                  certificates: certificates,
+                  resolvable: resolvable,
+                  certificateHolderStatusModel: certificateHolderStatusModel,
+                  userDefaults: UserDefaultsPersistence()
+              )
+        else {
+            fatalError("Failed to initialize dependency.")
+        }
         let viewController = CertificateDetailViewController(viewModel: viewModel)
         return viewController
     }

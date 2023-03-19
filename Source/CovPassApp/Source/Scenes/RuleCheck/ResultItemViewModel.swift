@@ -12,6 +12,8 @@ import Foundation
 import UIKit
 
 struct ResultItemViewModel: CertificateItemViewModel {
+    var isNeutral: Bool = false
+
     let result: CertificateResult
 
     var icon: UIImage {
@@ -98,6 +100,7 @@ struct ResultItemViewModel: CertificateItemViewModel {
     var statusIconAccessibilityLabel: String? { nil }
 
     var activeTitle: String? { nil }
+    var warningText: String?
 
     init(_ result: CertificateResult) {
         self.result = result

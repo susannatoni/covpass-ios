@@ -5,72 +5,65 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import CovPassCommon
 import CertLogic
-import PromiseKit
+import CovPassCommon
 import Foundation
+import PromiseKit
+import XCTest
 
 class DCCCertLogicMock: DCCCertLogicProtocol {
-    
-    var lastUpdateDccrRules: Date?
+    var rulesAreAvailable: Bool = true
+
+    var rulesShouldBeUpdated: Bool = true
+
+    var boosterRulesShouldBeUpdated: Bool = true
+
+    var valueSetsShouldBeUpdated: Bool = true
+
+    var domesticRulesShouldBeUpdated: Bool = true
+
+    var domesticRulesUpdateTestExpectation = XCTestExpectation()
+
+    var domesticRulesUpdateIfNeededTestExpectation = XCTestExpectation()
+
+    var throwErrorOnUpdateRules: Bool = false
+
+    var rules: [Rule] = []
 
     func updateBoosterRulesIfNeeded() -> Promise<Void> {
         .value
     }
-    
+
+    var didUpdateValueSets: (() -> Void)?
+
     func updateValueSets() -> Promise<Void> {
-        .value
+        didUpdateValueSets?()
+        return Promise.value
     }
-    
+
     func updateValueSetsIfNeeded() -> Promise<Void> {
         .value
     }
-    
-    func boosterRulesShouldBeUpdated() -> Promise<Bool> {
-        .value(boosterRulesShouldBeUpdated())
-    }
-    
-    func boosterRulesShouldBeUpdated() -> Bool {
-        return true
-    }
-    
-    func valueSetsShouldBeUpdated() -> Promise<Bool> {
-        .value(valueSetsShouldBeUpdated())
-    }
-    
-    func valueSetsShouldBeUpdated() -> Bool {
-        return true
-    }
-    
+
     var countries: [Country] {
         [Country("DE")]
     }
-    
+
     func updateBoosterRules() -> Promise<Void> {
         .value
     }
 
-    public func rulesShouldBeUpdated() -> Promise<Bool> {
-        .value(rulesShouldBeUpdated())
+    func rulesAvailable(logicType _: CovPassCommon.DCCCertLogic.LogicType, region _: String?) -> Bool {
+        rulesAreAvailable
     }
 
-    public func rulesShouldBeUpdated() -> Bool {
-        if let lastUpdated = self.lastUpdatedDCCRules(),
-           let date = Calendar.current.date(byAdding: .day, value: 1, to: lastUpdated),
-           Date() < date
-        {
-            return false
-        }
-        return true
-    }
-
-    func lastUpdatedDCCRules() -> Date? {
-        lastUpdateDccrRules
+    func rules(logicType _: DCCCertLogic.LogicType, country _: String?, region _: String?) -> [Rule] {
+        rules
     }
 
     var validationError: Error?
     var validateResult: [ValidationResult]?
-    func validate(type _: DCCCertLogic.LogicType, countryCode _: String, validationClock _: Date, certificate _: CBORWebToken) throws -> [ValidationResult] {
+    func validate(type _: DCCCertLogic.LogicType, countryCode _: String, region _: String?, validationClock _: Date, certificate _: CovPassCommon.CBORWebToken) throws -> [CertLogic.ValidationResult] {
         if let err = validationError {
             throw err
         }
@@ -80,11 +73,25 @@ class DCCCertLogicMock: DCCCertLogicProtocol {
     func updateRulesIfNeeded() -> Promise<Void> {
         Promise.value
     }
-    
-    var didUpdateRules: (()->Void)?
+
+    var didUpdateRules: (() -> Void)?
 
     func updateRules() -> Promise<Void> {
-        didUpdateRules?()
-        return Promise.value
+        if throwErrorOnUpdateRules {
+            return .init(error: NSError(domain: "No Internet", code: NSURLErrorNotConnectedToInternet))
+        } else {
+            didUpdateRules?()
+            return Promise.value
+        }
+    }
+
+    func updateDomesticIfNeeded() -> Promise<Void> {
+        domesticRulesUpdateIfNeededTestExpectation.fulfill()
+        return .value
+    }
+
+    func updateDomesticRules() -> Promise<Void> {
+        domesticRulesUpdateTestExpectation.fulfill()
+        return .value
     }
 }

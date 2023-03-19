@@ -12,7 +12,6 @@ import PromiseKit
 import UIKit
 
 class VaccinationResultViewModel: ValidationResultViewModel {
-    
     // MARK: - Properties
 
     weak var delegate: ResultViewModelDelegate?
@@ -22,6 +21,9 @@ class VaccinationResultViewModel: ValidationResultViewModel {
     var certificate: ExtendedCBORWebToken?
     var token: VAASValidaitonResultToken?
     let revocationKeyFilename = ""
+    let countdownTimerModel: CountdownTimerModel? = nil
+    let revocationRepository: CertificateRevocationRepositoryProtocol? = nil
+    let audioPlayer: AudioPlayerProtocol? = nil
 
     var icon: UIImage? {
         .resultSuccess
@@ -36,7 +38,7 @@ class VaccinationResultViewModel: ValidationResultViewModel {
     }
 
     var paragraphs: [Paragraph] {
-        return [
+        [
             Paragraph(
                 icon: .none,
                 title: "",
@@ -46,16 +48,15 @@ class VaccinationResultViewModel: ValidationResultViewModel {
     }
 
     var info: String? {
-        return nil
+        nil
     }
-    
+
     var buttonHidden: Bool = false
-    var _2GContext: Bool = false
     var userDefaults: Persistence
     var isLoadingScan: Bool = false
-    
+
     // MARK: - Lifecycle
-    
+
     init(resolvable: Resolver<ExtendedCBORWebToken>,
          router: ValidationResultRouterProtocol,
          repository: VaccinationRepositoryProtocol,
@@ -69,12 +70,12 @@ class VaccinationResultViewModel: ValidationResultViewModel {
         self.userDefaults = userDefaults
         self.resolvable = resolvable
     }
-    
+
     func scanCertificateStarted() {
-        self.isLoadingScan = true
+        isLoadingScan = true
     }
-    
+
     func scanCertificateEnded() {
-        self.isLoadingScan = false
+        isLoadingScan = false
     }
 }

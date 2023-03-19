@@ -12,9 +12,12 @@ import PromiseKit
 import UIKit
 
 protocol CertificateDetailRouterProtocol: DialogRouterProtocol {
-    func showDetail(for certificate: ExtendedCBORWebToken) -> Promise<CertificateDetailSceneResult>
+    func showDetail(for certificate: ExtendedCBORWebToken,
+                    certificates: [ExtendedCBORWebToken]) -> Promise<CertificateDetailSceneResult>
     func showWebview(_ url: URL)
     @discardableResult
     func showCertificate(for token: ExtendedCBORWebToken) -> Promise<Void>
-    func showReissue(for tokens: [ExtendedCBORWebToken]) -> Promise<Void>
+    func showReissue(for tokens: [ExtendedCBORWebToken],
+                     context: ReissueContext) -> Promise<Void>
+    func showStateSelection() -> Promise<Void>
 }

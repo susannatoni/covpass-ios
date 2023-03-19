@@ -19,19 +19,24 @@ enum ScanCountErrorResponse {
 
 protocol CertificatesOverviewRouterProtocol: DialogRouterProtocol {
     func showAnnouncement() -> Promise<Void>
-    func showCertificates(_ certificates: [ExtendedCBORWebToken]) -> Promise<CertificateDetailSceneResult>
+    func showCertificates(certificates: [ExtendedCBORWebToken],
+                          vaccinationRepository: VaccinationRepositoryProtocol,
+                          boosterLogic: BoosterLogicProtocol) -> Promise<CertificateDetailSceneResult>
+    func showCertificatesDetail(certificates: [ExtendedCBORWebToken]) -> Promise<CertificateDetailSceneResult>
     func showHowToScan() -> Promise<Void>
     func showScanCountWarning() -> Promise<Bool>
     func showScanCountError() -> Promise<ScanCountErrorResponse>
     func showRuleCheck() -> Promise<Void>
-    func scanQRCode() -> Promise<ScanResult>
+    func showQRCodeScanAndSelectionView() -> Promise<QRCodeImportResult>
     func showAppInformation()
     func showBoosterNotification() -> Promise<Void>
-    func showScanPleaseHint() -> Promise<Void>
     func showDataPrivacy() -> Promise<Void>
     func toAppstoreCheckApp()
     func toFaqWebsite(_ url: URL)
     func startValidationAsAService(with data: ValidationServiceInitialisation)
-    func showCheckSituation(userDefaults: Persistence) -> Promise<Void>
-    func showCertificatesReissue(for cborWebTokens: [ExtendedCBORWebToken]) -> Promise<Void>
+    func showBoosterRenewalReissue(for cborWebTokens: [ExtendedCBORWebToken]) -> Promise<Void>
+    func showExtensionRenewalReissue(for cborWebTokens: [ExtendedCBORWebToken]) -> Promise<Void>
+    func showCertificatePicker(tokens: [ExtendedCBORWebToken]) -> Promise<Void>
+    func showCertificateImportError()
+    func showCertificateExpiredNotDe()
 }

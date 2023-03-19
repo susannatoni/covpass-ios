@@ -10,7 +10,8 @@ import CovPassCommon
 import Foundation
 
 enum CertificateDetailSceneResult {
+    case didReissuedCertificate
     case didDeleteCertificate
-    case showCertificatesOnOverview([ExtendedCBORWebToken])
+    case showCertificatesOnOverview(ExtendedCBORWebToken)
     case addNewCertificate
 }

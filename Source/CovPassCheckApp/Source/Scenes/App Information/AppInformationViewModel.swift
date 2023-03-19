@@ -12,91 +12,131 @@ import Foundation
 
 class CheckAppInformationBaseViewModel: AppInformationBaseViewModel {
     override var entries: [AppInformationEntry] {
-        super.entries + [checkSituationEntry, revocationSettingsEntry]
+        super.entries + [
+            checkSituationEntry,
+            revocationSettingsEntry,
+            acousticFeedbackSettingsEntry
+        ]
     }
 
-    private let userDefaults: Persistence
-    private var checkSituationEntry: AppInformationEntry {
-        let checkSituationInfo = userDefaults.selectedLogicType.checkSituationInfo
-        let scene = CheckSituationSceneFactory(contextType: .settings, userDefaults: userDefaults)
-        return AppInformationEntry(title: LocalText.rulesTitle, scene: scene, rightTitle: checkSituationInfo)
+    internal var checkSituationEntry: AppInformationEntry {
+        let scene = CheckSituationSceneFactory(
+            router: CheckSituationRouter(sceneCoordinator: router.sceneCoordinator),
+            userDefaults: persistence
+        )
+        return AppInformationEntry(title: LocalText.rulesTitle, scene: scene)
     }
-    private var revocationSettingsEntry: AppInformationEntry {
-        let rightTitle = userDefaults.revocationExpertMode ? LocalText.revocationHintOn : LocalText.revocationHintOff
-        let revocationSettingsRouter: RevocationSettingsRouter = RevocationSettingsRouter(sceneCoordinator: router.sceneCoordinator)
-        let scene = RevocationSettingsSceneFactory(router: revocationSettingsRouter, userDefaults: userDefaults)
+
+    internal var revocationSettingsEntry: AppInformationEntry {
+        let rightTitle = persistence.revocationExpertMode ? LocalText.revocationHintOn : LocalText.revocationHintOff
+        let revocationSettingsRouter = RevocationSettingsRouter(sceneCoordinator: router.sceneCoordinator)
+        let scene = RevocationSettingsSceneFactory(router: revocationSettingsRouter, userDefaults: persistence)
         return AppInformationEntry(title: LocalText.revocationTitle, scene: scene, rightTitle: rightTitle)
     }
 
-    init(router:AppInformationRouterProtocol, entries: [AppInformationEntry], userDefaults: Persistence) {
-        self.userDefaults = userDefaults
-        super.init(router: router, entries: entries)
-    }
-}
-
-class GermanAppInformationViewModel: CheckAppInformationBaseViewModel {
-    init(
-        router: AppInformationRouterProtocol,
-        userDefaults: Persistence,
-        mainBundle: Bundle = .main,
-        licenseBundle: Bundle = .commonBundle
-    ) {
-        let entries: [AppInformationEntry] = [
-            .webEntry(title: Texts.leichteSprache, url: URL(string: "https://digitaler-impfnachweis-app.de/webviews/leichte-sprache/covpasscheckapp")!),
-            .webEntry(title: Texts.contactTitle, url: mainBundle.url(forResource: "contact-covpasscheck-de", withExtension: "html")!),
-            .webEntry(title: Texts.faqTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/verification-app/faq/")!),
-            .webEntry(title: Texts.datenschutzTitle, url: mainBundle.url(forResource: "privacy-covpasscheck-de", withExtension: "html")!),
-            .webEntry(title: Texts.companyDetailsTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/imprint/")!),
-            .webEntry(title: Texts.openSourceLicenseTitle, url: licenseBundle.url(forResource: "license_de" , withExtension: "html")!),
-            .webEntry(title: Texts.accessibilityStatementTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/covpasscheck-app-ios-barrierefreiheitserklaerung/")!),
-            AppInformationEntry(title: Texts.appInformationTitle, scene: TrustedListDetailsSceneFactory(sceneCoordinator: router.sceneCoordinator)),
-        ]
-        super.init(router: router, entries: entries, userDefaults: userDefaults)
-    }
-}
-
-class EnglishAppInformationViewModel: CheckAppInformationBaseViewModel {
-    init(
-        router: AppInformationRouterProtocol,
-        userDefaults: Persistence,
-        mainBundle: Bundle = .main,
-        licenseBundle: Bundle = .commonBundle
-    ) {
-        let entries: [AppInformationEntry] = [
-            .webEntry(title: Texts.contactTitle, url: mainBundle.url(forResource: "contact-covpasscheck-en", withExtension: "html")!),
-            .webEntry(title: Texts.faqTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/client-app/faq/")!),
-            .webEntry(title: Texts.datenschutzTitle, url: mainBundle.url(forResource: "privacy-covpasscheck-en", withExtension: "html")!),
-            .webEntry(title: Texts.companyDetailsTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/imprint/")!),
-            .webEntry(title: Texts.openSourceLicenseTitle, url: licenseBundle.url(forResource: "license_en" , withExtension: "html")!),
-            .webEntry(title: Texts.accessibilityStatementTitle, url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/covpasscheck-app-ios-accessibility-statement/")!),
-            AppInformationEntry(title: Texts.appInformationTitle, scene: TrustedListDetailsSceneFactory(sceneCoordinator: router.sceneCoordinator)),
-        ]
-        super.init(router: router, entries: entries, userDefaults: userDefaults)
-    }
-}
-
-private enum LocalText {
-    static let rulesTitle = "app_information_title_local_rules".localized
-    static let revocationTitle = "app_information_authorities_function_title".localized
-    static let revocationHintOn = "app_information_authorities_function_state_on".localized
-    static let revocationHintOff = "app_information_authorities_function_state_off".localized
-}
-
-private extension AppInformationEntry {
-    static func webEntry(title: String, url: URL) -> AppInformationEntry {
-        .init(
-            title: title,
-            scene: WebviewSceneFactory(title: title, url: url)
+    internal var acousticFeedbackSettingsEntry: AppInformationEntry {
+        let rightTitle = persistence.enableAcousticFeedback ?
+            LocalText.acousticFeedbackOn : LocalText.acousticFeedbackOff
+        let acousticFeedbackSettingsRouter = AcousticFeedbackSettingsRouter(
+            sceneCoordinator: router.sceneCoordinator
+        )
+        let scene = AcousticFeedbackSettingsSceneFactory(
+            router: acousticFeedbackSettingsRouter
+        )
+        return AppInformationEntry(
+            title: LocalText.acousticFeedbackTitle,
+            scene: scene,
+            rightTitle: rightTitle
         )
     }
 }
 
-private extension DCCCertLogic.LogicType {
-    var checkSituationInfo: String {
-        switch self {
-        case .de: return "app_information_title_local_rules_status_DE".localized
-        case .eu: return "app_information_title_local_rules_status_EU".localized
-        case .booster: return ""
-        }
+class GermanAppInformationViewModel: CheckAppInformationBaseViewModel {
+    override var entries: [AppInformationEntry] {
+        [
+            checkSituationEntry,
+            whatsNewEntry,
+            .webEntry(title: Texts.faqTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/verification-app/faq/")!,
+                      openingAnnounce: Accessibility.Opening.faqTitle,
+                      closingAnnounce: Accessibility.Closing.faqTitle),
+            acousticFeedbackSettingsEntry,
+            .webEntry(title: Texts.leichteSprache,
+                      url: URL(string: "https://digitaler-impfnachweis-app.de/webviews/leichte-sprache/covpasscheckapp")!,
+                      openingAnnounce: Accessibility.Opening.leichteSprache,
+                      closingAnnounce: Accessibility.Closing.leichteSprache),
+            .webEntry(title: Texts.contactTitle,
+                      url: mainBundle.url(forResource: "contact-covpasscheck-de", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.contactTitle,
+                      closingAnnounce: Accessibility.Closing.contactTitle),
+            .webEntry(title: Texts.datenschutzTitle,
+                      url: mainBundle.url(forResource: "privacy-covpasscheck-de", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.datenschutzTitle,
+                      closingAnnounce: Accessibility.Closing.datenschutzTitle),
+            .webEntry(title: Texts.companyDetailsTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/imprint/")!,
+                      openingAnnounce: Accessibility.Opening.companyDetailsTitle,
+                      closingAnnounce: Accessibility.Closing.companyDetailsTitle),
+            .webEntry(title: Texts.openSourceLicenseTitle,
+                      url: licenseBundle.url(forResource: "license_de", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.openSourceLicenseTitle,
+                      closingAnnounce: Accessibility.Closing.openSourceLicenseTitle),
+            .webEntry(title: Texts.accessibilityStatementTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/webviews/covpasscheck-app-ios-barrierefreiheitserklaerung/")!,
+                      openingAnnounce: Accessibility.Opening.accessibilityStatementTitle,
+                      closingAnnounce: Accessibility.Closing.accessibilityStatementTitle),
+            revocationSettingsEntry
+        ]
     }
+}
+
+class EnglishAppInformationViewModel: CheckAppInformationBaseViewModel {
+    override var entries: [AppInformationEntry] {
+        [
+            checkSituationEntry,
+            whatsNewEntry,
+            .webEntry(title: Texts.faqTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/client-app/faq/")!,
+                      openingAnnounce: Accessibility.Opening.faqTitle,
+                      closingAnnounce: Accessibility.Closing.faqTitle),
+            acousticFeedbackSettingsEntry,
+            .webEntry(title: Texts.contactTitle,
+                      url: mainBundle.url(forResource: "contact-covpasscheck-en", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.contactTitle,
+                      closingAnnounce: Accessibility.Closing.contactTitle),
+            .webEntry(title: Texts.datenschutzTitle,
+                      url: mainBundle.url(forResource: "privacy-covpasscheck-en", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.datenschutzTitle,
+                      closingAnnounce: Accessibility.Closing.datenschutzTitle),
+            .webEntry(title: Texts.companyDetailsTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/imprint/")!,
+                      openingAnnounce: Accessibility.Opening.companyDetailsTitle,
+                      closingAnnounce: Accessibility.Closing.companyDetailsTitle),
+            .webEntry(title: Texts.openSourceLicenseTitle,
+                      url: licenseBundle.url(forResource: "license_en", withExtension: "html")!,
+                      enableDynamicFonts: true,
+                      openingAnnounce: Accessibility.Opening.openSourceLicenseTitle,
+                      closingAnnounce: Accessibility.Closing.openSourceLicenseTitle),
+            .webEntry(title: Texts.accessibilityStatementTitle,
+                      url: URL(string: "https://www.digitaler-impfnachweis-app.de/en/webviews/covpasscheck-app-ios-accessibility-statement/")!,
+                      openingAnnounce: Accessibility.Opening.accessibilityStatementTitle,
+                      closingAnnounce: Accessibility.Closing.accessibilityStatementTitle),
+            revocationSettingsEntry
+        ]
+    }
+}
+
+private enum LocalText {
+    static let rulesTitle = "settings_rules_list_title".localized
+    static let revocationTitle = "app_information_authorities_function_title".localized
+    static let revocationHintOn = "app_information_authorities_function_state_on".localized
+    static let revocationHintOff = "app_information_authorities_function_state_off".localized
+    static let acousticFeedbackTitle = "app_information_beep_when_checking_title".localized
+    static let acousticFeedbackOn = "app_information_authorities_function_state_on".localized
+    static let acousticFeedbackOff = "app_information_authorities_function_state_off".localized
 }

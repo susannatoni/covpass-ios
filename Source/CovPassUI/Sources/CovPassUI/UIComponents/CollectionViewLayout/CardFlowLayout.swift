@@ -19,16 +19,28 @@ open class CardFlowLayout: UICollectionViewFlowLayout {
         var size: CGSize
         var direction: UICollectionView.ScrollDirection
         func isEqual(_ otherState: LayoutState) -> Bool {
-            return size.equalTo(otherState.size) && direction == otherState.direction
+            size.equalTo(otherState.size) && direction == otherState.direction
         }
     }
 
     @IBInspectable open var sideItemScale: CGFloat = 1
     @IBInspectable open var sideItemAlpha: CGFloat = 0.8
     @IBInspectable open var sideItemShift: CGFloat = 0.7
-    open var spacingMode = CardFlowLayoutSpacingMode.fixed(spacing: 10)
+    public var leftSectionInset: CGFloat
+    public var spacingMode: CardFlowLayoutSpacingMode
 
     fileprivate var state = LayoutState(size: CGSize.zero, direction: .horizontal)
+
+    public init(spacing: CGFloat, leftSectionInset: CGFloat) {
+        spacingMode = .fixed(spacing: spacing)
+        self.leftSectionInset = leftSectionInset
+        super.init()
+    }
+
+    @available(*, unavailable)
+    public required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override open func prepare() {
         super.prepare()
@@ -42,21 +54,21 @@ open class CardFlowLayout: UICollectionViewFlowLayout {
     }
 
     fileprivate func setupCollectionView() {
-        guard let collectionView = self.collectionView else { return }
+        guard let collectionView = collectionView else { return }
         if collectionView.decelerationRate != UIScrollView.DecelerationRate.fast {
             collectionView.decelerationRate = UIScrollView.DecelerationRate.fast
         }
     }
 
     fileprivate func updateLayout() {
-        guard let collectionView = self.collectionView else { return }
+        guard let collectionView = collectionView else { return }
 
         let collectionSize = collectionView.bounds.size
         let isHorizontal = (scrollDirection == .horizontal)
 
         let yInset = (collectionSize.height - itemSize.height) / 2
         let xInset = (collectionSize.width - itemSize.width) / 2
-        sectionInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: xInset)
+        sectionInset = UIEdgeInsets(top: 0, left: leftSectionInset, bottom: 0, right: xInset)
 
         let side = isHorizontal ? itemSize.width : itemSize.height
         let scaledItemOffset = (side - side * sideItemScale) / 2
@@ -80,7 +92,7 @@ open class CardFlowLayout: UICollectionViewFlowLayout {
     }
 
     fileprivate func transformLayoutAttributes(_ attributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        guard let collectionView = self.collectionView else { return attributes }
+        guard let collectionView = collectionView else { return attributes }
         let isHorizontal = (scrollDirection == .horizontal)
 
         let collectionCenter = isHorizontal ? collectionView.frame.size.width / 2 : collectionView.frame.size.height / 2

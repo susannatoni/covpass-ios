@@ -1,8 +1,8 @@
 //
 //  File.swift
-//  
 //
-//  Created by Thomas Kuleßa on 24.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassCommon
@@ -27,7 +27,6 @@ class SecKeyCoseSign1MessageTests: XCTestCase {
             payload: [],
             signature: [1, 2, 3]
         )
-
 
         // When & Then
         XCTAssertThrowsError(try sut.verify(message))

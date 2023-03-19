@@ -20,8 +20,8 @@ class CertificateItemDetailViewController: UIViewController {
     @IBOutlet var itemStackView: UIStackView!
     @IBOutlet var buttonStackView: UIStackView!
     @IBOutlet var titleLabel: PlainLabel!
-    @IBOutlet var subtitleLabel: PlainLabel!
     @IBOutlet var hintView: HintView!
+    @IBOutlet var expirationHintView: HintButton!
     @IBOutlet var qrCodeButton: MainButton!
     @IBOutlet var pdfExportButton: MainButton!
     @IBOutlet var infoLabel1: LinkLabel!
@@ -31,7 +31,7 @@ class CertificateItemDetailViewController: UIViewController {
 
     private(set) var viewModel: CertificateItemDetailViewModelProtocol
 
-    private let toolbar: CustomToolbarView = CustomToolbarView(frame: .zero)
+    private let toolbar: CustomToolbarView = .init(frame: .zero)
 
     // MARK: - Lifecycle
 
@@ -53,9 +53,9 @@ class CertificateItemDetailViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .backgroundPrimary
         scrollView.contentInset = .init(top: .space_24, left: .zero, bottom: .space_70, right: .zero)
-
         setupNavigationBar()
         setupHeadline()
+        hintView.isHidden = true
         if viewModel.hasValidationResult {
             setupVAASResultHintView()
         } else {
@@ -87,49 +87,31 @@ class CertificateItemDetailViewController: UIViewController {
     }
 
     private func setupHeadline() {
+        titleLabel.textableView.accessibilityTraits = .header
         if viewModel.hasValidationResult {
             titleLabel.attributedText = viewModel.items.first?.value.styledAs(.header_2)
             titleLabel.layoutMargins = .init(top: .zero, left: .space_24, bottom: .space_2, right: .space_24)
-            subtitleLabel.attributedText = viewModel.headline.styledAs(.body).colored(.onBackground70)
-            subtitleLabel.layoutMargins = .init(top: .zero, left: .space_24, bottom: .zero, right: .space_24)
-            subtitleLabel.isHidden = false
-            stackView.setCustomSpacing(.space_24, after: subtitleLabel)
             return
         }
         titleLabel.attributedText = viewModel.headline.styledAs(.header_1).colored(.onBackground100)
         titleLabel.layoutMargins = .init(top: .zero, left: .space_24, bottom: .space_24, right: .space_24)
-        subtitleLabel.attributedText = "vaccination_certificate_detail_view_vaccination_note".localized.styledAs(.body).colored(.onBackground70)
-        subtitleLabel.layoutMargins = .init(top: .zero, left: .space_24, bottom: .zero, right: .space_24)
-        subtitleLabel.isHidden = !viewModel.showSubtitle
-        stackView.setCustomSpacing(.space_24, after: subtitleLabel)
     }
 
     private func setupHintView() {
-        hintView.isHidden = true
-        hintView.iconView.image = .warning
-        hintView.containerView.backgroundColor = .infoBackground
-        hintView.containerView?.layer.borderColor = UIColor.infoAccent.cgColor
-        stackView.setCustomSpacing(.space_24, after: hintView)
-        if viewModel.isExpired {
-            hintView.isHidden = false
-            hintView.titleLabel.attributedText = "certificate_expired_detail_view_note_title".localized.styledAs(.header_3)
-            hintView.bodyLabel.attributedText = "certificate_expired_detail_view_note_message".localized.styledAs(.body)
-        } else if let date = viewModel.expiresSoonDate {
-            hintView.isHidden = false
-            hintView.iconView.image = .activity
-            hintView.titleLabel.attributedText = String(format: "certificate_expires_detail_view_note_title".localized, DateUtils.displayDateFormatter.string(from: date), DateUtils.displayTimeFormatter.string(from: date)).styledAs(.header_3)
-            hintView.bodyLabel.attributedText = "certificate_expires_detail_view_note_message".localized.styledAs(.body)
-            hintView.containerView.backgroundColor = .onBackground50
-            hintView.containerView.layer.borderColor = UIColor.onBrandBase.cgColor
-        } else if viewModel.isInvalid {
-            hintView.isHidden = false
-            hintView.titleLabel.attributedText = "certificate_invalid_detail_view_note_title".localized.styledAs(.header_3)
-            hintView.bodyLabel.attributedText = "certificate_invalid_detail_view_note_message".localized.styledAs(.body)
-        } else if viewModel.isRevoked {
-            hintView.isHidden = false
-            hintView.titleLabel.attributedText = "certificate_invalid_detail_view_note_title".localized.styledAs(.header_3)
-            hintView.bodyLabel.attributedText = viewModel.revocationText.styledAs(.body)
-        }
+        expirationHintView.isHidden = viewModel.expirationHintIsHidden
+        guard !viewModel.expirationHintIsHidden else { return }
+        expirationHintView.iconImageView.image = viewModel.expirationHintIcon
+        expirationHintView.containerView.backgroundColor = viewModel.expirationHintBackgroundColor
+        expirationHintView.containerView?.layer.borderColor = viewModel.expirationHintBorderColor?.cgColor
+        expirationHintView.titleLabel.attributedText = viewModel.expirationHintTitle?.styledAs(.header_3)
+        expirationHintView.bodyTextView.attributedText = viewModel.expirationHintBodyText?.styledAs(.body)
+        expirationHintView.bodyTextView.backgroundColor = .clear
+        expirationHintView.bodyTextView.textContainerInset = .init(top: -6, left: -6, bottom: 6, right: 6)
+        expirationHintView.button.title = viewModel.expirationHintButtonTitle
+        expirationHintView.hintButtonWrapper.isHidden = viewModel.expirationHintButtonIsHidden ?? true
+        expirationHintView.button.action = viewModel.triggerVaccinationExpiryReissue
+        expirationHintView.backgroundColor = .backgroundPrimary
+        stackView.setCustomSpacing(.space_24, after: expirationHintView)
     }
 
     private func setupVAASResultHintView() {
@@ -142,7 +124,7 @@ class CertificateItemDetailViewController: UIViewController {
             hintView.containerView?.layer.borderColor = UIColor.resultGreen.cgColor
             hintView.titleLabel.attributedText = "share_certificate_detail_view_requirements_met_title".localized.styledAs(.header_3)
             hintView.subTitleLabel.attributedText =
-            String(format: "share_certificate_detail_view_requirements_met_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
+                String(format: "share_certificate_detail_view_requirements_met_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
             hintView.bodyLabel.layoutMargins = .init(top: .space_24, left: .zero, bottom: .zero, right: .zero)
             hintView.bodyLabel.attributedText = String(format: "share_certificate_detail_view_requirements_met_message".localized, viewModel.vaasResultToken?.provider ?? "").styledAs(.body)
         case .crossCheck:
@@ -152,7 +134,7 @@ class CertificateItemDetailViewController: UIViewController {
             hintView.containerView?.layer.borderColor = UIColor.resultYellow.cgColor
             hintView.titleLabel.attributedText = "share_certificate_detail_view_requirements_not_verifiable_title".localized.styledAs(.header_3)
             hintView.subTitleLabel.attributedText =
-            String(format: "share_certificate_detail_view_requirements_not_verifiable_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
+                String(format: "share_certificate_detail_view_requirements_not_verifiable_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
             hintView.bodyLabel.layoutMargins = .init(top: .space_14, left: .zero, bottom: .zero, right: .zero)
             hintView.bodyLabel.attributedText = String(format: "share_certificate_detail_view_requirements_not_verifiable_message".localized, viewModel.vaasResultToken?.provider ?? "").styledAs(.body)
         case .fail:
@@ -162,7 +144,7 @@ class CertificateItemDetailViewController: UIViewController {
             hintView.containerView?.layer.borderColor = UIColor.resultRed.cgColor
             hintView.titleLabel.attributedText = "share_certificate_detail_view_requirements_not_met_title".localized.styledAs(.header_3)
             hintView.subTitleLabel.attributedText =
-            String(format: "share_certificate_detail_view_requirements_not_met_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
+                String(format: "share_certificate_detail_view_requirements_not_met_subline".localized, viewModel.vaasResultToken?.verifyingService ?? "").styledAs(.body).colored(.onBackground70)
             hintView.bodyLabel.layoutMargins = .init(top: .space_14, left: .zero, bottom: .zero, right: .zero)
             hintView.bodyLabel.attributedText = String(format: "share_certificate_detail_view_requirements_not_met_message".localized, viewModel.vaasResultToken?.provider ?? "").styledAs(.body)
         default:
@@ -174,8 +156,11 @@ class CertificateItemDetailViewController: UIViewController {
         viewModel.items.forEach { item in
             if !item.value.isEmpty {
                 let view = ParagraphView()
-                view.attributedTitleText = item.label.styledAs(.header_3)
-                view.attributedBodyText = item.value.styledAs(.body)
+                if #available(iOS 13.0, *) {
+                    view.accessibilityRespondsToUserInteraction = true
+                }
+                view.updateView(title: item.label.styledAs(.header_3),
+                                body: item.value.styledAs(.body))
                 view.accessibilityLabel = item.accessibilityLabel
                 view.accessibilityIdentifier = item.accessibilityIdentifier
                 view.layoutMargins.top = .space_12
@@ -189,20 +174,23 @@ class CertificateItemDetailViewController: UIViewController {
 
         qrCodeButton.title = "vaccination_certificate_detail_view_qrcode_action_button_title".localized
         qrCodeButton.style = .primary
-        qrCodeButton.icon = .scan
-        qrCodeButton.tintColor = .white
+        if #available(iOS 13.0, *) {
+            qrCodeButton.icon = .scan.withTintColor(.white)
+        } else {
+            qrCodeButton.icon = .scan
+        }
         qrCodeButton.action = viewModel.showQRCode
         qrCodeButton.isHidden = viewModel.hideQRCodeButtons
-        
+
         pdfExportButton.title = "vaccination_certificate_detail_view_pdf_action_button_title".localized
         pdfExportButton.style = .secondary
         pdfExportButton.icon = .share
         pdfExportButton.action = viewModel.startPDFExport
 
         pdfExportButton.disable()
-        if viewModel.hideQRCodeButtons  {
-           pdfExportButton.isHidden = true
-       } else if viewModel.canExportToPDF {
+        if viewModel.hideQRCodeButtons {
+            pdfExportButton.isHidden = true
+        } else if viewModel.canExportToPDF {
             // Some certificates such as tests or non-German ones cannot be exported
             pdfExportButton.enable()
         } else {
@@ -211,8 +199,8 @@ class CertificateItemDetailViewController: UIViewController {
             disclaimer.bodyAttributedString = "vaccination_certificate_detail_view_pdf_action_button_note".localized.styledAs(.body)
             buttonStackView.addArrangedSubview(disclaimer)
         }
-        
-        if pdfExportButton.isHidden && qrCodeButton.isHidden {
+
+        if pdfExportButton.isHidden, qrCodeButton.isHidden {
             stackView.setCustomSpacing(0, after: buttonStackView)
         } else {
             stackView.setCustomSpacing(40, after: buttonStackView)
@@ -220,17 +208,23 @@ class CertificateItemDetailViewController: UIViewController {
     }
 
     private func setupInfo() {
+        infoLabel1.backgroundColor = .neutralWhite
+        infoLabel1.linkFont = .scaledBoldBody
         infoLabel1.attributedText = "vaccination_certificate_detail_view_data_vaccine_note_de".localized.styledAs(.body)
         infoLabel1.layoutMargins = .init(top: .zero, left: .space_24, bottom: .space_24, right: .space_24)
+        infoLabel1.applyRightImage(image: .externalLink)
+        stackView.setCustomSpacing(.space_8, after: infoLabel1)
+        infoLabel2.backgroundColor = .neutralWhite
+        infoLabel2.linkFont = .scaledBoldBody
         infoLabel2.attributedText = "vaccination_certificate_detail_view_data_vaccine_note_en".localized.styledAs(.body)
         infoLabel2.layoutMargins = .init(top: .zero, left: .space_24, bottom: .space_40, right: .space_24)
+        infoLabel2.applyRightImage(image: .externalLink)
     }
 
     @objc private func deleteCertificate() {
         viewModel.deleteCertificate()
     }
 }
-
 
 extension CertificateItemDetailViewController: CustomToolbarViewDelegate {
     func customToolbarView(_: CustomToolbarView, didTap buttonType: ButtonItemType) {

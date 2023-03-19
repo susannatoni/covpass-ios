@@ -9,14 +9,18 @@
 @testable import CovPassApp
 import CovPassUI
 import Foundation
+import XCTest
 
 class MockCertificateViewModelDelegate: CertificatesOverviewViewModelDelegate {
     var updateCalled = false
     var needsFirstCertificateVisibleCalled = false
     var needsCertificateVisibleAtIndex: Int?
+    let viewModelDidUpdateExpectation = XCTestExpectation(description: "viewModelDidUpdateExpectation")
+    let viewModelNeedsCertificateVisibleExpectation = XCTestExpectation(description: "viewModelNeedsCertificateVisibleExpectation")
 
     func viewModelDidUpdate() {
         updateCalled = true
+        viewModelDidUpdateExpectation.fulfill()
     }
 
     func viewModelNeedsFirstCertificateVisible() {
@@ -25,5 +29,6 @@ class MockCertificateViewModelDelegate: CertificatesOverviewViewModelDelegate {
 
     func viewModelNeedsCertificateVisible(at index: Int) {
         needsCertificateVisibleAtIndex = index
+        viewModelNeedsCertificateVisibleExpectation.fulfill()
     }
 }

@@ -9,11 +9,6 @@
 import Foundation
 import PromiseKit
 
-public enum ScanType: Int {
-    case _3G = 0
-    case _2G = 1
-}
-
 private enum Constants {
     static let firstLimit = 2
     static let secondLimit = 10
@@ -27,6 +22,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
     private let boosterLogic: BoosterLogicProtocol
     private let publicKeyURL: URL
     private let initialDataURL: URL
+    private let queue: DispatchQueue
     static let entityBlacklist = [
         "81d51278c45f29dbba6b243c9c25cb0266b3d32e425b7a9db1fa6fcd58ad308c5b3857be6470a84403680d833a3f28fb02fb8c809324811b573c131d1ae52599",
         "75f6df21f51b4998740bf3e1cdaff1c76230360e1baf5ac0a2b9a383a1f9fa34dd77b6aa55a28cc5843d75b7c4a89bdbfc9a9177da244861c4068e76847dd150",
@@ -36,14 +32,12 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
     private var trustList: TrustList? {
         // Try to load trust list from keychain
         if let trustListData = try? keychain.fetch(KeychainPersistence.Keys.trustList.rawValue) as? Data,
-           let list = try? JSONDecoder().decode(TrustList.self, from: trustListData)
-        {
+           let list = try? JSONDecoder().decode(TrustList.self, from: trustListData) {
             return list
         }
         // Try to load local trust list
         if let localTrustList = try? Data(contentsOf: initialDataURL),
-           let list = try? JSONDecoder().decode(TrustList.self, from: localTrustList)
-        {
+           let list = try? JSONDecoder().decode(TrustList.self, from: localTrustList) {
             return list
         }
         return nil
@@ -55,7 +49,9 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
                 userDefaults: Persistence,
                 boosterLogic: BoosterLogicProtocol,
                 publicKeyURL: URL,
-                initialDataURL: URL) {
+                initialDataURL: URL,
+                queue: DispatchQueue) {
+        self.queue = queue
         self.revocationRepo = revocationRepo
         self.service = service
         self.keychain = keychain
@@ -97,8 +93,10 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
             var list = list
             var checkedCertificates = [ExtendedCBORWebToken]()
             for var certificate in list.certificates {
-                if (try? checkCertificate(certificate.vaccinationQRCodeData).wait()) == nil {
+                if (try? checkCertificate(certificate.vaccinationQRCodeData, expirationRuleIsActive: false).wait()) == nil {
                     certificate.invalid = true
+                } else {
+                    certificate.invalid = false
                 }
                 checkedCertificates.append(certificate)
             }
@@ -108,7 +106,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
     }
 
     public func saveCertificateList(_ certificateList: CertificateList) -> Promise<CertificateList> {
-        return Promise { seal in
+        Promise { seal in
             let data = try JSONEncoder().encode(certificateList)
             try keychain.store(KeychainPersistence.Keys.certificateList.rawValue, value: data)
             seal.fulfill(certificateList)
@@ -130,19 +128,18 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
     public func trustListShouldBeUpdated() -> Bool {
         if let lastUpdated = userDefaults.lastUpdatedTrustList,
            let date = Calendar.current.date(byAdding: .day, value: 1, to: lastUpdated),
-           Date() < date
-        {
+           Date() < date {
             return false
         }
         return true
     }
-    
+
     public func trustListShouldBeUpdated() -> Promise<Bool> {
-        return Promise { seal in
+        Promise { seal in
             seal.fulfill(trustListShouldBeUpdated())
         }
     }
-    
+
     public func updateTrustListIfNeeded() -> Promise<Void> {
         firstly {
             trustListShouldBeUpdated()
@@ -151,7 +148,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
             trustListShouldBeUpdated ? self.updateTrustList() : .value
         }
     }
-    
+
     public func updateTrustList() -> Promise<Void> {
         let promise = firstly {
             service.fetchTrustList()
@@ -211,7 +208,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
             try self.keychain.store(KeychainPersistence.Keys.trustList.rawValue, value: data)
             self.userDefaults.lastUpdatedTrustList = Date()
         }
-        
+
         promise.catch { error in
             if let error = error as? APIError, error == .notModified {
                 self.userDefaults.lastUpdatedTrustList = Date()
@@ -250,7 +247,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
             QRCoder.parse(data)
         }
         .map(on: .global()) {
-            try self.parseCertificate($0, expirationRuleIsActive: expirationRuleIsActive)
+            try self.parseCertificate($0, expirationRuleIsActive: expirationRuleIsActive, checkSealCertificate: false)
         }
         .map(on: .global()) { certificate in
             if let t = certificate.hcert.dgc.t?.first, t.isPositive {
@@ -271,35 +268,31 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
                     if certList.certificates.contains(where: { $0.vaccinationQRCodeData == data }) {
                         throw QRCodeError.qrCodeExists
                     }
-                    
-                    let personsCountBeforeAddingNew: Int = {
-                        self.matchedCertificates(for: certList).count
-                    }()
-                    
+
+                    let personsCountBeforeAddingNew: Int = self.matchedCertificates(for: certList).count
+
                     certList.certificates.append(extendedCBORWebToken)
-                    
-                    let personsCount: Int = {
-                        self.matchedCertificates(for: certList).count
-                    }()
-                    
+
+                    let personsCount: Int = self.matchedCertificates(for: certList).count
+
                     var warnAddingPersonReachedIfNeeded: Bool {
                         let newCountMustBeTwoOrTen = personsCount == Constants.firstLimit || personsCount == Constants.secondLimit
                         let oldCountMustNotBeTwoOrTen = personsCountBeforeAddingNew != Constants.firstLimit && personsCountBeforeAddingNew != Constants.secondLimit
                         return newCountMustBeTwoOrTen && oldCountMustNotBeTwoOrTen && isCountRuleEnabled
                     }
-                    
+
                     if warnAddingPersonReachedIfNeeded {
                         throw QRCodeError.warningCountOfCertificates
                     }
-                    
+
                     var errorAddingPersonReachedIfNeeded: Bool {
                         personsCount > 20 && isCountRuleEnabled
                     }
-                    
+
                     if errorAddingPersonReachedIfNeeded {
                         throw QRCodeError.errorCountOfCertificatesReached
                     }
-                    
+
                     // Mark first certificate as favorite
                     if certList.certificates.count == 1 {
                         certList.favoriteCertificateId = extendedCBORWebToken.vaccinationCertificate.hcert.dgc.v?.first?.ci
@@ -311,18 +304,18 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
         }
     }
 
-    public func checkCertificate(_ data: String) -> Promise<CBORWebToken> {
+    public func checkCertificate(_ data: String, expirationRuleIsActive: Bool, checkSealCertificate: Bool = false) -> Promise<CBORWebToken> {
         firstly {
             QRCoder.parse(data)
         }
         .map(on: .global()) {
-            try self.parseCertificate($0, expirationRuleIsActive: true)
+            try self.parseCertificate($0, expirationRuleIsActive: expirationRuleIsActive, checkSealCertificate: checkSealCertificate)
         }
     }
 
-    public func validCertificate(_ data: String) -> Promise<ExtendedCBORWebToken> {
+    public func validCertificate(_ data: String, expirationRuleIsActive: Bool, checkSealCertificate: Bool = false) -> Promise<ExtendedCBORWebToken> {
         firstly {
-            return checkCertificate(data)
+            checkCertificate(data, expirationRuleIsActive: expirationRuleIsActive, checkSealCertificate: checkSealCertificate)
         }
         .then {
             Promise.value(ExtendedCBORWebToken(vaccinationCertificate: $0,
@@ -346,7 +339,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
             list.favoriteCertificateId == id
         }
     }
-    
+
     public func setExpiryAlert(shown _: Bool, tokens: [ExtendedCBORWebToken]) -> Promise<Void> {
         firstly {
             getCertificateList()
@@ -364,7 +357,7 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
         }
         .asVoid()
     }
-    
+
     public func setReissueProcess(initialAlreadySeen: Bool,
                                   newBadgeAlreadySeen: Bool,
                                   tokens: [ExtendedCBORWebToken]) -> Promise<Void> {
@@ -402,17 +395,17 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
     // MARK: - Private Helpers
 
     /// Parse certificate payload, verify signature, check expiration, check extended key usage, and validate blacklisted entities
-    func parseCertificate(_ cosePayload: CoseSign1Message, expirationRuleIsActive: Bool) throws -> CBORWebToken {
-        guard let trustList = self.trustList else {
+    func parseCertificate(_ cosePayload: CoseSign1Message, expirationRuleIsActive: Bool, checkSealCertificate: Bool) throws -> CBORWebToken {
+        guard let trustList = trustList else {
             throw ApplicationError.general("Missing TrustList")
         }
 
-        let trustCert = try HCert.verify(message: cosePayload, trustList: trustList)
+        let trustCert = try HCert.verify(message: cosePayload, trustList: trustList, checkSealCertificate: checkSealCertificate)
 
         let cosePayloadJsonData = try cosePayload.toJSON()
         let certificate = try JSONDecoder().decode(CBORWebToken.self, from: cosePayloadJsonData)
 
-        if let exp = certificate.exp, Date() > exp && expirationRuleIsActive {
+        if let exp = certificate.exp, Date() > exp, expirationRuleIsActive {
             throw CertificateError.expiredCertifcate
         }
 
@@ -427,5 +420,44 @@ public class VaccinationRepository: VaccinationRepositoryProtocol {
         if certificate.isFraud {
             throw CertificateError.invalidEntity
         }
+    }
+
+    public func replace(_ token: ExtendedCBORWebToken) -> Promise<Void> {
+        getCertificateList()
+            .then { certificateList -> Promise<CertificateList> in
+                var mutableCertificateList = certificateList
+                var certificates = certificateList.certificates
+                guard let index = certificates.firstIndex(of: token) else {
+                    return .init(error: ApplicationError.general(""))
+                }
+                certificates[index] = token
+                mutableCertificateList.certificates = certificates
+                return .value(mutableCertificateList)
+            }
+            .then(saveCertificateList)
+            .asVoid()
+    }
+
+    public func update(_ tokens: [ExtendedCBORWebToken]) -> Promise<Void> {
+        getCertificateList()
+            .map(\.certificates)
+            .then { existingTokens -> Promise<Void> in
+                self.update(tokens, existingTokens: existingTokens)
+            }
+    }
+
+    private func update(_ tokens: [ExtendedCBORWebToken], existingTokens: [ExtendedCBORWebToken]) -> Promise<Void> {
+        Promise { seal in
+            queue.async {
+                for token in tokens {
+                    try? self.update(token, existingTokens: existingTokens).wait()
+                }
+                seal.fulfill_()
+            }
+        }
+    }
+
+    private func update(_ token: ExtendedCBORWebToken, existingTokens: [ExtendedCBORWebToken]) -> Promise<Void> {
+        existingTokens.contains(token) ? replace(token) : add(tokens: [token])
     }
 }

@@ -27,14 +27,16 @@ public class HintView: XibView {
     @IBOutlet public var iconStackViewAlignToTopTile: NSLayoutConstraint!
     @IBOutlet public var titleSuperViewBottomConstraint: NSLayoutConstraint!
 
+    @IBOutlet var titleToSubTitleConstraint: NSLayoutConstraint!
+
     // MARK: -
-    
-    enum Style {
+
+    public enum Style {
         case warning
         case info
     }
 
-    var style: Style = .warning {
+    public var style: Style = .warning {
         didSet {
             switch style {
             case .warning:
@@ -53,7 +55,7 @@ public class HintView: XibView {
 
     private lazy var infoStyle = CovPassUI.Style(
         backgroundColor: .brandAccent10,
-        borderColor: .onBackground50,
+        borderColor: .brandAccent40,
         icon: .infoSignal
     )
 
@@ -90,7 +92,7 @@ public class HintView: XibView {
         subTitleConstraint.isActive = !(subTitleLabel.text?.isEmpty ?? true)
         super.updateConstraints()
     }
-    
+
     public func setConstraintsToEdge() {
         containerTopConstraint.constant = 0
         containerLeadingConstraint.constant = 0

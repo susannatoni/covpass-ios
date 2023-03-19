@@ -178,10 +178,10 @@ class DigitalGreenCertificateTests: XCTestCase {
     func testRevocationUCICountryHash() {
         // Given
         let expectedHash: [UInt8] = [
-            4, 153, 42, 67, 146, 255, 202, 22,
-            248, 34, 101, 61, 62, 65, 8, 8,
-            71, 63, 127, 124, 145, 206, 81, 56,
-            120, 1, 0, 215, 63, 5, 209, 115
+            242, 5, 246, 242, 252, 210, 81, 48,
+            233, 179, 167, 15, 142, 20, 249, 19,
+            79, 180, 86, 59, 76, 233, 249, 152,
+            146, 161, 29, 46, 251, 69, 33, 169
         ]
         let ci = "01DE/84503/1119349007/DXSGWLWL40SU8ZFKIYIBK39A3#S"
         let sut = DigitalGreenCertificate.with(vaccination: .with(ci: ci, co: "DE"))
@@ -191,6 +191,62 @@ class DigitalGreenCertificateTests: XCTestCase {
 
         // Then
         XCTAssertEqual(hash, expectedHash)
+    }
+
+    func testInitWithCoder_dob_is_year_only() throws {
+        // Given
+        let components: Set<Calendar.Component> = [.year, .month, .day]
+
+        // When
+        try initSut(dob: "1964")
+
+        // Then
+        let dob = try XCTUnwrap(sut.dob)
+        let dateComponents = Calendar.current.dateComponents(components, from: dob)
+        XCTAssertEqual(dateComponents.year, 1965)
+        XCTAssertEqual(dateComponents.month, 1)
+        XCTAssertEqual(dateComponents.day, 1)
+    }
+
+    private func initSut(dob: String = "1964") throws {
+        let dgcString = String(
+            format: """
+            {"nam":{"gn":"Erika","fn":"Schmidt-Mustermann","gnt":"ERIKA","fnt":"SCHMIDT<MUSTERMANN"},"dob":"%@","v":[{"ci":"01DE/84503/1119349007/DXSGWLWL40SU8ZFKIYIBK39A3#S","co":"DE","dn":1,"dt":"2021-02-02","is":"Bundesministerium für Gesundheit","ma":"ORG-100030215","mp":"EU/1/20/1528","sd":2,"tg":"840539006","vp":"1119349007"}],"ver":"1.0.0"}
+            """,
+            dob
+        )
+        let data = try XCTUnwrap(dgcString.data(using: .utf8))
+        sut = try JSONDecoder().decode(DigitalGreenCertificate.self, from: data)
+    }
+
+    func testInitWithCoder_dob_is_year_and_month() throws {
+        // Given
+        let components: Set<Calendar.Component> = [.year, .month, .day]
+
+        // When
+        try initSut(dob: "1964-07")
+
+        // Then
+        let dob = try XCTUnwrap(sut.dob)
+        let dateComponents = Calendar.current.dateComponents(components, from: dob)
+        XCTAssertEqual(dateComponents.year, 1964)
+        XCTAssertEqual(dateComponents.month, 8)
+        XCTAssertEqual(dateComponents.day, 1)
+    }
+
+    func testInitWithCoder_dob_is_year_and_month_day() throws {
+        // Given
+        let components: Set<Calendar.Component> = [.year, .month, .day]
+
+        // When
+        try initSut(dob: "1964-07-31")
+
+        // Then
+        let dob = try XCTUnwrap(sut.dob)
+        let dateComponents = Calendar.current.dateComponents(components, from: dob)
+        XCTAssertEqual(dateComponents.year, 1964)
+        XCTAssertEqual(dateComponents.month, 7)
+        XCTAssertEqual(dateComponents.day, 31)
     }
 }
 

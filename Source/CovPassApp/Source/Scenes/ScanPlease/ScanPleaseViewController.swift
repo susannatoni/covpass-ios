@@ -10,14 +10,6 @@ import UIKit
 import WebKit
 
 private enum Constants {
-    enum Text {
-        static let buttonOkText = "certificates_start_screen_pop_up_app_reference_button".localized
-    }
-    enum Accessibility {
-        static let image = VoiceOverOptions.Settings(label: "accessibility_image_alternative_text".localized)
-        static let close = VoiceOverOptions.Settings(label: "accessibility_certificates_start_screen_pop_up_app_reference_label".localized)
-    }
-
     enum Layout {
         static let actionLineHeight: CGFloat = 17
     }
@@ -30,12 +22,13 @@ class ScanPleaseViewController: UIViewController {
     @IBOutlet var toolbarView: CustomToolbarView!
     @IBOutlet var headerImageView: UIImageView!
 
-    @IBOutlet weak var stackView: UIStackView!
-    @IBOutlet weak var textView: ParagraphView!
-    @IBOutlet weak var linkDescriptionView: ParagraphView!
-    @IBOutlet weak var actionView: ListItemView!
+    @IBOutlet var stackView: UIStackView!
+    @IBOutlet var textView: ParagraphView!
+    @IBOutlet var linkDescriptionView: ParagraphView!
+    @IBOutlet var actionView: ListItemView!
 
-    @IBOutlet weak var contentStackView: UIStackView!
+    @IBOutlet var contentStackView: UIStackView!
+
     // MARK: - Properties
 
     private(set) var viewModel: ScanPleaseViewModel
@@ -50,28 +43,37 @@ class ScanPleaseViewController: UIViewController {
         super.init(nibName: String(describing: Self.self), bundle: .main)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.accessibilityOpeningAnnounce)
+        UIAccessibility.post(notification: .layoutChanged, argument: headline.textLabel)
+    }
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         configureHeadline()
         configureToolbarView()
         configureContentView()
         configureAccessiblity()
     }
 
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        configureContentView()
+    }
+
     // MARK: - Private
 
     private func configureContentView() {
         headerImageView.image = UIImage.scanPleaseIllustration
-
-        textView.attributedTitleText = nil
-        textView.attributedBodyText = viewModel.text.styledAs(.body)
+        headerImageView.isAccessibilityElement = false
+        headerImageView.isHidden = UIScreen.isLandscape
+        textView.updateView(body: viewModel.text.styledAs(.body))
         textView.bottomBorder.isHidden = true
 
-        linkDescriptionView.attributedTitleText = nil
-        linkDescriptionView.attributedBodyText = viewModel.linkDescription.styledAs(.body)
+        linkDescriptionView.updateView(body: viewModel.linkDescription.styledAs(.body))
         linkDescriptionView.bottomBorder.isHidden = true
 
         actionView.textLabel.attributedText = viewModel.linkText.styledAs(.header_3).lineHeight(Constants.Layout.actionLineHeight)
@@ -94,16 +96,14 @@ class ScanPleaseViewController: UIViewController {
     }
 
     private func configureToolbarView() {
-        toolbarView.state = .confirm(Constants.Text.buttonOkText)
+        toolbarView.state = .confirm(viewModel.buttonOkText)
         toolbarView.layoutMargins.top = .space_24
         toolbarView.delegate = self
     }
 
     private func configureAccessiblity() {
-        headline.actionButton.enableAccessibility(label: Constants.Accessibility.close.label)
-        headerImageView.enableAccessibility(label: Constants.Accessibility.image.label)
+        headline.actionButton.enableAccessibility(label: viewModel.accessibilityClose)
     }
-
 }
 
 // MARK: - CustomToolbarViewDelegate

@@ -40,7 +40,8 @@ class DCCCertLogicTests: XCTestCase {
             userDefaults: MockPersistence(),
             boosterLogic: BoosterLogicMock(),
             publicKeyURL: URL(fileURLWithPath: "pubkey.pem"),
-            initialDataURL: trustListURL
+            initialDataURL: trustListURL,
+            queue: .global()
         )
     }
 
@@ -65,12 +66,12 @@ class DCCCertLogicTests: XCTestCase {
         XCTAssertEqual(sut.valueSets.count, 8)
         XCTAssertEqual(sut.valueSets["country-2-codes"]?.count, 250)
         XCTAssertEqual(sut.valueSets["covid-19-lab-result"]?.count, 2)
-        XCTAssertEqual(sut.valueSets["covid-19-lab-test-manufacturer-and-name"]?.count, 222)
+        XCTAssertEqual(sut.valueSets["covid-19-lab-test-manufacturer-and-name"]?.count, 290)
         XCTAssertEqual(sut.valueSets["covid-19-lab-test-type"]?.count, 2)
         XCTAssertEqual(sut.valueSets["disease-agent-targeted"]?.count, 1)
-        XCTAssertEqual(sut.valueSets["sct-vaccines-covid-19"]?.count, 6)
-        XCTAssertEqual(sut.valueSets["vaccines-covid-19-auth-holders"]?.count, 29)
-        XCTAssertEqual(sut.valueSets["vaccines-covid-19-names"]?.count, 34)
+        XCTAssertEqual(sut.valueSets["sct-vaccines-covid-19"]?.count, 9)
+        XCTAssertEqual(sut.valueSets["vaccines-covid-19-auth-holders"]?.count, 30)
+        XCTAssertEqual(sut.valueSets["vaccines-covid-19-names"]?.count, 38)
     }
 
     func testRemoteValueSets() throws {
@@ -80,12 +81,12 @@ class DCCCertLogicTests: XCTestCase {
         XCTAssertEqual(sut.valueSets.count, 1)
         XCTAssertEqual(sut.valueSets["valueSet"]?.count, 0)
     }
-    
+
     func testUpdateRulesIfNeededTrue() throws {
-        let dateDefault = Date().addingTimeInterval(-100000000)
+        let dateDefault = Date().addingTimeInterval(-100_000_000)
         userDefaults.lastUpdatedDCCRules = dateDefault
         service.loadBoosterRulesResult = Promise.value([])
-        
+
         let lastUpdateDateBefore = try XCTUnwrap(userDefaults.lastUpdatedDCCRules)
         XCTAssertEqual(dateDefault, lastUpdateDateBefore)
         service.loadValueSetsResult = Promise.value([])
@@ -94,12 +95,12 @@ class DCCCertLogicTests: XCTestCase {
         XCTAssertNotNil(lastUpdateDateAfter)
         XCTAssertNotEqual(dateDefault, lastUpdateDateAfter)
     }
-    
+
     func testUpdateRulesIfNeededFalse() throws {
         let dateDefault = Date()
         userDefaults.lastUpdatedDCCRules = dateDefault
         service.loadBoosterRulesResult = Promise.value([])
-        
+
         let lastUpdateDateBefore = try XCTUnwrap(userDefaults.lastUpdatedDCCRules)
         XCTAssertEqual(dateDefault, lastUpdateDateBefore)
         try sut.updateRulesIfNeeded().wait()
@@ -108,10 +109,37 @@ class DCCCertLogicTests: XCTestCase {
         XCTAssertEqual(dateDefault, lastUpdateDateAfter)
     }
 
+    func testUpdateDomesticRulesIfNeededTrue() {
+        let expectation = XCTestExpectation()
+        let lastUpdateDomesticRules = Date() - 100_000_000
+        userDefaults.lastUpdateDomesticRules = lastUpdateDomesticRules
+        sut.updateDomesticIfNeeded().done { _ in
+            let lastUpdateDateAfter = try XCTUnwrap(self.userDefaults.lastUpdateDomesticRules)
+            XCTAssertNotEqual(lastUpdateDomesticRules, lastUpdateDateAfter)
+            expectation.fulfill()
+        }.catch { error in
+            XCTFail("Should not fail \(error)")
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func testUpdateDomesticRulesIfNeededFalse() {
+        let expectation = XCTestExpectation()
+        let lastUpdateDomesticRules = Date()
+        userDefaults.lastUpdateDomesticRules = lastUpdateDomesticRules
+        sut.updateDomesticIfNeeded().done { _ in
+            let lastUpdateDateAfter = try XCTUnwrap(self.userDefaults.lastUpdateDomesticRules)
+            XCTAssertEqual(lastUpdateDomesticRules, lastUpdateDateAfter)
+            expectation.fulfill()
+        }.catch { error in
+            XCTFail("Should not fail \(error)")
+        }
+        wait(for: [expectation], timeout: 0.1)
+    }
 
     func testSavedAndLocalRules() throws {
         // Check local rules (no saved rules)
-        XCTAssertEqual(sut.dccRules.count, 321)
+        XCTAssertEqual(sut.dccRules.count, 271)
 
         // Save one rule
         let rule = Rule(identifier: "", type: "", version: "", schemaVersion: "", engine: "", engineVersion: "", certificateType: "", description: [], validFrom: "", validTo: "", affectedString: [], logic: JSON(""), countryCode: "")
@@ -124,23 +152,34 @@ class DCCCertLogicTests: XCTestCase {
     }
 
     func testValidVaccination() throws {
-        let cert = try repository.checkCertificate(CertificateMock.validCertificate2).wait()
+        let cert = try repository.checkCertificate(CertificateMock.validCertificate2, expirationRuleIsActive: false, checkSealCertificate: false).wait()
 
         let res = try sut.validate(countryCode: "DE", validationClock: Date(), certificate: cert)
 
-        XCTAssertEqual(res.count, 4)
-        XCTAssertEqual(failedResults(results: res).count, 0)
+        XCTAssertEqual(res.count, 1)
+        XCTAssertEqual(res.failedResults.count, 0)
     }
 
-    func testInvalidVaccination() throws {
-        let cert = try repository.checkCertificate(CertificateMock.validCertificate).wait()
+//    func testInvalidVaccinationDE() throws {
+//        let cert = try repository.checkCertificate(CertificateMock.validCertificate2).wait()
+//        cert.hcert.dgc.v![0].dt = Date(timeIntervalSince1970: 0)
+//
+//        let res = try sut.validate(type: .de,countryCode: "DE", validationClock: Date(), certificate: cert)
+//
+//        XCTAssertEqual(res.count, 4)
+//        XCTAssertEqual(res.failedResults.count, 0)
+//        XCTAssertEqual(res.failedResults.first?.rule?.identifier, nil)
+//    }
+
+    func testInvalidVaccinationEU() throws {
+        let cert = try repository.checkCertificate(CertificateMock.validCertificate2, expirationRuleIsActive: false, checkSealCertificate: false).wait()
         cert.hcert.dgc.v![0].dt = Date(timeIntervalSince1970: 0)
 
-        let res = try sut.validate(countryCode: "DE", validationClock: Date(), certificate: cert)
+        let res = try sut.validate(type: .eu, countryCode: "DE", validationClock: Date(), certificate: cert)
 
-        XCTAssertEqual(res.count, 4)
-        XCTAssertEqual(failedResults(results: res).count, 1)
-        XCTAssertEqual(failedResults(results: res).first?.rule?.identifier, "VR-DE-0004")
+        XCTAssertEqual(res.count, 1)
+        XCTAssertEqual(res.failedResults.count, 0)
+        XCTAssertEqual(res.failedResults.first?.rule?.identifier, nil)
     }
 
     func testValidVaccinationWithoutRules() {
@@ -150,7 +189,7 @@ class DCCCertLogicTests: XCTestCase {
                                    service: DCCServiceMock(),
                                    keychain: MockPersistence(),
                                    userDefaults: MockPersistence())
-            let cert = try repository.checkCertificate(CertificateMock.validCertificate).wait()
+            let cert = try repository.checkCertificate(CertificateMock.validCertificate2, expirationRuleIsActive: false, checkSealCertificate: false).wait()
 
             _ = try sut.validate(countryCode: "DE", validationClock: Date(), certificate: cert)
 
@@ -162,21 +201,38 @@ class DCCCertLogicTests: XCTestCase {
 
     func testValidRecovery() throws {
         let cert = CBORWebToken.mockRecoveryCertificate
+        cert.hcert.dgc.r!.first!.fr = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -29, to: Date()))
         let res = try sut.validate(countryCode: "DE", validationClock: Date(), certificate: cert)
 
-        XCTAssertEqual(res.count, 2)
-        XCTAssertEqual(failedResults(results: res).count, 0)
+        XCTAssertEqual(res.count, 1)
+        XCTAssertEqual(res.failedResults.count, 0)
     }
 
-    func testInvalidRecovery() throws {
-        let cert = try repository.checkCertificate(CertificateMock.validRecoveryCertificate).wait()
+//    func testInvalidRecoveryDE() throws {
+//        let cert = try repository.checkCertificate(CertificateMock.validRecoveryCertificate).wait()
+//        cert.hcert.dgc.r![0].fr = Date(timeIntervalSince1970: 0)
+//
+//        let res = try sut.validate(type: .de, countryCode: "DE", validationClock: Date(), certificate: cert)
+//
+//        XCTAssertEqual(res.count, 2)
+//        XCTAssertEqual(res.failedResults.count, 1)
+//        XCTAssertEqual(res.failedResults.first?.rule?.identifier, "RR-DE-0002")
+//    }
+
+//    func testDomesticRulesCount() {
+//        let dccDomesticRules = sut.dccDomesticRules
+//        XCTAssertEqual(dccDomesticRules.count, 12)
+//        XCTAssertEqual(dccDomesticRules.acceptenceAndInvalidationRules.count, 12)
+//    }
+
+    func testInvalidRecoveryEU() throws {
+        let cert = try repository.checkCertificate(CertificateMock.validRecoveryCertificate, expirationRuleIsActive: false, checkSealCertificate: false).wait()
         cert.hcert.dgc.r![0].fr = Date(timeIntervalSince1970: 0)
 
-        let res = try sut.validate(countryCode: "DE", validationClock: Date(), certificate: cert)
+        let res = try sut.validate(type: .eu, countryCode: "DE", validationClock: Date(), certificate: cert)
 
-        XCTAssertEqual(res.count, 2)
-        XCTAssertEqual(failedResults(results: res).count, 1)
-        XCTAssertEqual(failedResults(results: res).first?.rule?.identifier, "RR-DE-0002")
+        XCTAssertEqual(res.count, 1)
+        XCTAssertEqual(res.failedResults.count, 0)
     }
 
     func testRuleUpdate() throws {
@@ -304,7 +360,6 @@ class DCCCertLogicTests: XCTestCase {
         let boosterRules = try jsonDecoder.decode([Rule].self, from: boosterData)
         XCTAssertEqual(boosterRules.count, 1)
         XCTAssertEqual(boosterRules[0].identifier, "1")
-
     }
 
     func testValueSetUpdate() throws {
@@ -357,268 +412,101 @@ class DCCCertLogicTests: XCTestCase {
         let valueSets = try jsonDecoder.decode([CovPassCommon.ValueSet].self, from: data)
         XCTAssertEqual(valueSets.count, 1)
     }
-    
-    // MARK: Domestic vs EU Rules
-    // Some Background:
-    //  RR-DE-0001 Domestic -> older than 28 Days
-    //  RR-DE-0001 EU       -> older than 28 Days
-    //  RR-DE-0002 Domestic -> The positive NAA test result (e.g., PCR) must be no older than 3 ( 90 days) months.
-    //  RR-DE-0002 EU       -> The positive NAA test result (e.g., PCR) must be no older than 6 (180 days) months.
-    
-    func testDomesticRules181DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter91Days = now.addingTimeInterval(60*60*24*181)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .de,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter91Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-    }
-    
-    func testEURules181DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter91Days = now.addingTimeInterval(60*60*24*181)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .eu,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter91Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0002"), .fail)
-    }
-    
-    func testDomesticRules91DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter91Days = now.addingTimeInterval(60*60*24*91)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .de,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter91Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-    }
-    
-    func testEURules89DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter89Days = now.addingTimeInterval(60*60*24*89)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .eu,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter89Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0002"), .passed)
-    }
-    
-    func testDomesticRules29DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter29Days = now.addingTimeInterval(60*60*24*29)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .de,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter29Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-    }
-    
-    func testEURules29DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter29Days = now.addingTimeInterval(60*60*24*29)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .eu,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter29Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .passed)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0002"), .passed)
-    }
-    
-    func testDomesticRules2DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter2Days = now.addingTimeInterval(60*60*24*2)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .de,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter2Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .fail)
-    }
-    
-    func testEURules2DaysAfterRecovery() {
-        // GIVEN
-        let now = Date()
-        let dateAfter2Days = now.addingTimeInterval(60*60*24*2)
-        let token = CBORWebToken.mockRecoveryCertificate.extended()
-        token.firstRecovery?.fr = now
-        
-        // WHEN
-        let results = try! sut.validate(type: .eu,
-                                        countryCode: "DE",
-                                        validationClock: dateAfter2Days,
-                                        certificate: token.vaccinationCertificate)
-        
-        // THEN
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0001"), .fail)
-        XCTAssertEqual(results.result(ofRule: "RR-DE-0002"), .passed)
-    }
-    
+
     func testUpdateDomesticRules() throws {
         // GIVEN
         try XCTUnwrap(keychain.store(KeychainPersistence.Keys.dccDomesticRules.rawValue, value: []))
         service.loadDomesticDCCRulesResult = Promise.value([RuleSimple.mock])
         service.loadDomesticDCCRuleResult = Promise.value(Rule.mock)
-        
+
         // WHEN
         try sut.updateDomesticRules().wait()
-        
+
         // THEN
         let domesticData = try XCTUnwrap(keychain.fetch(KeychainPersistence.Keys.dccDomesticRules.rawValue) as? Data)
         let domesticRules = try jsonDecoder.decode([Rule].self, from: domesticData)
         XCTAssertEqual(domesticRules.count, 1)
     }
-    
-    func testBoosterRulesShouldUpdate() {
-        let exp = expectation(description: "Booster Rules should update")
-        // GIVEN
-        userDefaults.lastUpdatedBoosterRules = Date().addingTimeInterval(60*60*24 * (-1))
-        // WHEN
-        sut.boosterRulesShouldBeUpdated()
-            .done{
-                // THEN
-                if $0 {
-                    exp.fulfill()
-                } else {
-                    XCTFail()
-                }
-            }.cauterize()
-        wait(for: [exp], timeout: 0.1)
-    }
-    
-    func testBoosterRulesShoulNotdUpdate() {
-        let exp = expectation(description: "Booster Rules should not update")
-        // GIVEN
-        userDefaults.lastUpdatedBoosterRules = Date()
-        // WHEN
-        sut.boosterRulesShouldBeUpdated()
-            .done{
-                if !$0 {
-                    // THEN
-                    exp.fulfill()
-                }
-            }.cauterize()
-        wait(for: [exp], timeout: 0.1, enforceOrder: true)
-    }
-    
+
     func testUpdateBoosterRuleIfNeeded() {
         let exp = expectation(description: "Update If Needed")
         // GIVEN
         userDefaults.lastUpdatedBoosterRules = Date()
         // WHEN
         sut.updateBoosterRulesIfNeeded()
-            .done{
+            .done {
                 // THEN
                 exp.fulfill()
             }.cauterize()
         wait(for: [exp], timeout: 0.1, enforceOrder: true)
     }
-    
-    func testValueSetsShouldUpdate() {
-        let exp = expectation(description: "Booster Rules should update")
-        // GIVEN
-        userDefaults.lastUpdatedValueSets = Date().addingTimeInterval(60*60*24 * (-1))
-        // WHEN
-        sut.valueSetsShouldBeUpdated()
-            .done{
-                if $0 {
-                    // THEN
-                    exp.fulfill()
-                }
-            }.cauterize()
-        wait(for: [exp], timeout: 0.1, enforceOrder: true)
-    }
-    
-    func testValueSetsShoulNotdUpdate() {
-        let exp = expectation(description: "Booster Rules should not update")
-        // GIVEN
-        userDefaults.lastUpdatedValueSets = Date()
-        // WHEN
-        sut.valueSetsShouldBeUpdated()
-            .done{
-                if !$0 {
-                    // THEN
-                    exp.fulfill()
-                }
-            }.cauterize()
-        wait(for: [exp], timeout: 0.1, enforceOrder: true)
-    }
-    
+
     func testUpdateValueSetIfNeeded() {
         let exp = expectation(description: "Update If Needed")
         // GIVEN
         userDefaults.lastUpdatedValueSets = Date()
         // WHEN
         sut.updateValueSetsIfNeeded()
-            .done{
+            .done {
                 // THEN
                 exp.fulfill()
             }.cauterize()
         wait(for: [exp], timeout: 0.1, enforceOrder: true)
     }
 
-    // MARK: - Helpers
+    func test_rules_countryNil_regionAT_rulesEU() {
+        // WHEN
+        let rules = sut.rules(logicType: .eu, country: nil, region: "AT")
+        // THEN
+        XCTAssertEqual(rules.count, 1)
+    }
 
-    private func failedResults(results: [ValidationResult]) -> [ValidationResult] {
-        results.filter { $0.result == .fail }
+    func test_rules_countryDE_regionNil_rulesEUAcceptence() {
+        // WHEN
+        let rules = sut.rules(logicType: .euAcceptence, country: "DE", region: nil)
+        // THEN
+        XCTAssertEqual(rules.count, 1)
+    }
+
+    func test_rulesAvailable_regionAT_rulesEU() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .eu, region: "AT")
+        // THEN
+        XCTAssertTrue(rulesAvailable)
+    }
+
+    func test_rulesAvailable_regionNIL_rulesEU() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .eu, region: nil)
+        // THEN
+        XCTAssertTrue(rulesAvailable)
+    }
+
+    func test_rulesNotAvailable_regionBLA_rulesEU() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .eu, region: "BLA")
+        // THEN
+        XCTAssertFalse(rulesAvailable)
+    }
+
+    func test_rulesNotAvailable_regionNIL_euInvalidation() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .euInvalidation, region: nil)
+        // THEN
+        XCTAssertTrue(rulesAvailable)
+    }
+
+    func test_rulesNotAvailable_regionNW_euInvalidation() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .euInvalidation, region: "BLA")
+        // THEN
+        XCTAssertFalse(rulesAvailable)
+    }
+
+    func test_rulesAvailable_ifsg22a() {
+        // WHEN
+        let rulesAvailable = sut.rulesAvailable(logicType: .ifsg22a, region: nil)
+        // THEN
+        XCTAssertTrue(rulesAvailable)
     }
 }

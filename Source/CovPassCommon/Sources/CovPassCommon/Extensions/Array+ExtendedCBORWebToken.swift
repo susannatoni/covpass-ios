@@ -9,7 +9,6 @@
 import Foundation
 
 public extension Array where Element == ExtendedCBORWebToken {
-    
     /// Splits the receiver in an array of sub-arrays. Eachs sub-array contains the certificates for one owner.
     var partitionedByOwner: [Self] {
         var partitions = [Self]()
@@ -22,67 +21,209 @@ public extension Array where Element == ExtendedCBORWebToken {
         }
         return partitions
     }
-    
+
     func filterMatching(_ extendedCBORWebToken: ExtendedCBORWebToken) -> [ExtendedCBORWebToken] {
         filter { $0.matches(extendedCBORWebToken) }
     }
-    
+
     private func containsMatching(_ extendedCBORWebToken: ExtendedCBORWebToken) -> Bool {
         contains { $0.matches(extendedCBORWebToken) }
     }
-    
-    var qualifiedForReissue: Bool {
+
+    var qualifiedForBoosterRenewal: Bool {
         guard filter2Of1.isEmpty else {
             return false
         }
         return !filterBoosterAfterVaccinationAfterRecoveryFromGermany.isEmpty
     }
-    
+
+    var areVaccinationsQualifiedForExpiryReissue: Bool {
+        vaccinationExpiryReissueCandidate != nil
+    }
+
+    var areRecoveriesQualifiedForExpiryReissue: Bool {
+        !recoveryExpiryReissueCandidates.isEmpty
+    }
+
+    var areCertificatesQualifiedForExpiryReissue: Bool {
+        areVaccinationsQualifiedForExpiryReissue || areRecoveriesQualifiedForExpiryReissue
+    }
+
+    var qualifiedCertificatesForVaccinationExpiryReissue: Self {
+        let allCertificatesOrderedByDate = sortedByDtFrAndSc
+        guard let reissueCandidate = allCertificatesOrderedByDate.vaccinationExpiryReissueCandidate else {
+            return []
+        }
+        let results = allCertificatesOrderedByDate
+            .sixCertificatesExcludingTests(from: reissueCandidate)
+        return results
+    }
+
+    var sortedByDtFrAndSc: Self {
+        sorted { element1, element2 in
+            element1.dtFrOrSc > element2.dtFrOrSc
+        }
+    }
+
+    private var vaccinationExpiryReissueCandidate: ExtendedCBORWebToken? {
+        guard let latestVaccination = sortLatest().firstVaccination?.vaccinationCertificate,
+              latestVaccination.willExpireInLessOrEqual28Days ||
+              latestVaccination.expiredForLessOrEqual90Days else {
+            return nil
+        }
+        return filterExpiryReissueCandidates
+            .first(where: \.vaccinationCertificate.isVaccination)
+    }
+
+    private var filterExpiryReissueCandidates: Self {
+        filter {
+            let cborToken = $0.vaccinationCertificate
+            return cborToken.willExpireInLessOrEqual28Days || cborToken.expiredForLessOrEqual90Days
+        }
+        .filterIssuedByGerman
+        .filter { !$0.isRevoked }
+        .filter { !$0.vaccinationCertificate.isTest }
+    }
+
+    private func sixCertificatesExcludingTests(from token: ExtendedCBORWebToken) -> Self {
+        Array(drop { $0 != token })
+            .filter { !$0.vaccinationCertificate.isTest }
+            .takeFirst(6)
+    }
+
+    var qualifiedCertificatesForRecoveryExpiryReissue: [Self] {
+        let allCertificatesOrderedByDate = sortedByDtFrAndSc
+        let reissueCandidates = allCertificatesOrderedByDate.recoveryExpiryReissueCandidates
+        let results: [Self] = reissueCandidates.map { token in
+            allCertificatesOrderedByDate
+                .sixCertificatesExcludingTests(from: token)
+        }
+        return results
+    }
+
+    private var recoveryExpiryReissueCandidates: [ExtendedCBORWebToken] {
+        filterExpiryReissueCandidates
+            .filter(\.vaccinationCertificate.isRecovery)
+    }
+
     var reissueProcessInitialNotAlreadySeen: Bool { !reissueProcessInitialAlreadySeen }
-    
-    var reissueProcessInitialAlreadySeen: Bool { first(where: { $0.reissueProcessInitialAlreadySeen ?? false }) != nil }
-    
+
+    var reissueProcessInitialAlreadySeen: Bool {
+        first?.reissueProcessInitialAlreadySeen ?? false
+    }
+
     var reissueNewBadgeAlreadySeen: Bool { first(where: { $0.reissueProcessNewBadgeAlreadySeen ?? false }) != nil }
+
+    var vaccinationExpiryReissueNewBadgeAlreadySeen: Bool {
+        vaccinationExpiryReissueCandidate?.reissueProcessNewBadgeAlreadySeen ?? false
+    }
 
     var tokensOfVaccinationWithSingleDoseFromGermany: [ExtendedCBORWebToken] {
         filter {
             guard let vaccinations = $0.vaccinations else {
                 return false
             }
-            return !vaccinations.filter{ $0.isSingleDoseComplete }.isEmpty
+            return !vaccinations.filter(\.isSingleDoseComplete).isEmpty
         }.filterIssuedByGerman
     }
-    
+
+    private var cleanVaccinationDuplicates: Self {
+        var cleanTokens = [ExtendedCBORWebToken]()
+        for token in filterVaccinations {
+            if cleanTokens.containsSameVaccinationDateAndIsIssuedBefore(token),
+               let tokenIndex = cleanTokens.firstIndex(where: { $0.isVaccinatedOnSameDateAndIsIssuedBefore(token) }) {
+                cleanTokens[tokenIndex] = token
+            } else if cleanTokens.notContainSameVaccinationDate(like: token) {
+                cleanTokens.append(token)
+            }
+        }
+        return cleanTokens
+    }
+
+    private var cleanRecoveryDuplicates: Self {
+        var cleanTokens = [ExtendedCBORWebToken]()
+        for token in filterRecoveries {
+            if cleanTokens.containsSameRecoveryTestDateAndIsIssuedBefore(token),
+               let tokenIndex = cleanTokens.firstIndex(where: { $0.isTestedForRecoveryOnSameDateAndIsIssuedBefore(token) }) {
+                cleanTokens[tokenIndex] = token
+            } else if cleanTokens.notContainSameRecoveryTestDate(like: token) {
+                cleanTokens.append(token)
+            }
+        }
+        return cleanTokens
+    }
+
+    private var cleanDateDuplicates: Self {
+        var cleanTokens = [ExtendedCBORWebToken]()
+        for token in self {
+            if cleanTokens.containsSameDate(like: token) {
+                if token.vaccinationCertificate.certType == .vaccination,
+                   let tokenIndex = cleanTokens.firstIndex(where: { $0.dtFrOrSc.daysSince(token.dtFrOrSc) == 0 }) {
+                    cleanTokens[tokenIndex] = token
+                }
+            } else {
+                cleanTokens.append(token)
+            }
+        }
+        return cleanTokens
+    }
+
+    var cleanDuplicates: Self {
+        let certs = cleanVaccinationDuplicates + cleanRecoveryDuplicates
+        let cleanedList = certs.cleanDateDuplicates + filterTests
+        return filter { token in cleanedList.contains { token == $0 } }
+    }
+
+    func notContainSameVaccinationDate(like token: ExtendedCBORWebToken) -> Bool {
+        !contains(where: { $0.sameDateVaccination(for: token) })
+    }
+
+    func containsSameVaccinationDateAndIsIssuedBefore(_ token: ExtendedCBORWebToken) -> Bool {
+        contains(where: { $0.isVaccinatedOnSameDateAndIsIssuedBefore(token) })
+    }
+
+    func notContainSameRecoveryTestDate(like token: ExtendedCBORWebToken) -> Bool {
+        !contains(where: { $0.sameRecoveryTestDate(for: token) })
+    }
+
+    func containsSameRecoveryTestDateAndIsIssuedBefore(_ token: ExtendedCBORWebToken) -> Bool {
+        contains(where: { $0.isTestedForRecoveryOnSameDateAndIsIssuedBefore(token) })
+    }
+
+    func containsSameDate(like token: ExtendedCBORWebToken) -> Bool {
+        contains(where: { $0.dtFrOrSc.daysSince(token.dtFrOrSc) == 0 })
+    }
+
     var tokensOfVaccinationWithDoubleDoseCompleteFromGermany: [ExtendedCBORWebToken] {
         filter {
             guard let vaccinations = $0.vaccinations else {
                 return false
             }
-            return !vaccinations.filter{ $0.isDoubleDoseComplete }.isEmpty
+            return !vaccinations.filter(\.isDoubleDoseComplete).isEmpty
         }.filterIssuedByGerman
     }
-    
+
     var tokensOfRecoveryFromGermany: [ExtendedCBORWebToken] {
         let recoveriesIssuedByGerman = filter(by: .recovery).filterIssuedByGerman
         return recoveriesIssuedByGerman.filterOlderThanDoubleDoseVaccination(datesOfGermanDoubleDoseVaccinations: datesOfGermanDoubleDoseVaccinations)
     }
-    
+
     func filterOlderThanDoubleDoseVaccination(datesOfGermanDoubleDoseVaccinations: [Date]) -> [ExtendedCBORWebToken] {
         filter { token in
             datesOfGermanDoubleDoseVaccinations.contains { doubleDoseVaccinationDate in
-                return token.firstRecovery!.fr < doubleDoseVaccinationDate
+                token.firstRecovery!.fr < doubleDoseVaccinationDate
             }
         }
     }
-    
+
     var recoveryDates: [Date] {
-        tokensOfRecoveryFromGermany.map{ $0.firstRecovery!.fr }
+        tokensOfRecoveryFromGermany.map { $0.firstRecovery!.fr }
     }
-    
-    var datesOfGermanDoubleDoseVaccinations : [Date] {
-        tokensOfVaccinationWithDoubleDoseCompleteFromGermany.map{ $0.firstVaccination!.dt }
+
+    var datesOfGermanDoubleDoseVaccinations: [Date] {
+        tokensOfVaccinationWithDoubleDoseCompleteFromGermany.map { $0.firstVaccination!.dt }
     }
-    
+
     var filterBoosterAfterVaccinationAfterRecoveryFromGermany: [ExtendedCBORWebToken] {
         guard !tokensOfVaccinationWithSingleDoseFromGermany.isEmpty else {
             return []
@@ -93,7 +234,7 @@ public extension Array where Element == ExtendedCBORWebToken {
 
         return tokensOfRecoveryFromGermany + tokensOfVaccinationWithSingleDoseFromGermany + tokensOfVaccinationWithDoubleDoseCompleteFromGermany
     }
-    
+
     var sortByIssuedAtTime: [ExtendedCBORWebToken] {
         sorted(by: { c1, c2 -> Bool in
             guard let c1Iat = c1.vaccinationCertificate.iat else {
@@ -105,7 +246,7 @@ public extension Array where Element == ExtendedCBORWebToken {
             return c1Iat >= c2Iat
         })
     }
-    
+
     var sortByDateOfBirth: [ExtendedCBORWebToken] {
         sorted(by: { c1, c2 -> Bool in
             guard let c1Iat = c1.dateOfBirth else {
@@ -117,29 +258,29 @@ public extension Array where Element == ExtendedCBORWebToken {
             return c1Iat > c2Iat
         })
     }
-    
+
     var sortTestsByDateTimeOfSampleCollection: [ExtendedCBORWebToken] {
         sorted(by: {
             guard let lhs = $0.firstTest?.sc,
-                    let rhs = $1.firstTest?.sc else {
+                  let rhs = $1.firstTest?.sc else {
                 return false
             }
             return lhs > rhs
         })
     }
-    
+
     var sortByVaccinationDate: [ExtendedCBORWebToken] {
         sorted(by: { c1, c2 -> Bool in
-            return c1.firstVaccination?.dt ?? Date() > c2.firstVaccination?.dt ?? Date()
+            c1.firstVaccination?.dt ?? Date() > c2.firstVaccination?.dt ?? Date()
         })
     }
-    
+
     var sortByFirstPositiveResultDate: [ExtendedCBORWebToken] {
         sorted(by: { c1, c2 -> Bool in
-            return c1.firstRecovery?.fr ?? Date() > c2.firstRecovery?.fr ?? Date()
+            c1.firstRecovery?.fr ?? Date() > c2.firstRecovery?.fr ?? Date()
         })
     }
-    
+
     var filterNegativePCRTestsNotOlderThan72Hours: [ExtendedCBORWebToken] {
         filter {
             if let t = $0.firstTest, t.isPCR, !t.isPositive, Date() <= Calendar.current.date(byAdding: .hour, value: 72, to: t.sc) ?? Date() {
@@ -148,13 +289,11 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
+
     var filterIssuedByGerman: [ExtendedCBORWebToken] {
-        filter {
-            $0.vaccinationCertificate.isGermanIssuer
-        }
+        filter(\.vaccinationCertificate.isGermanIssuer)
     }
-    
+
     var filterNegativeQuickTestsNotOlderThan48Hours: [ExtendedCBORWebToken] {
         filter {
             if let t = $0.firstTest, !t.isPCR, !t.isPositive, Date() <= Calendar.current.date(byAdding: .hour, value: 48, to: t.sc) ?? Date() {
@@ -163,16 +302,16 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
-    var filterBoosted: [ExtendedCBORWebToken] {
+
+    var filterBoosters: [ExtendedCBORWebToken] {
         filter {
-            if let v = $0.firstVaccination, v.isBoosted {
+            if let v = $0.firstVaccination, v.isBoosted(vaccinations: vaccinations, recoveries: recoveries) {
                 return true
             }
             return false
         }
     }
-    
+
     var filter2Of1: [ExtendedCBORWebToken] {
         filter {
             if let v = $0.firstVaccination, v.is2Of1 {
@@ -193,7 +332,7 @@ public extension Array where Element == ExtendedCBORWebToken {
             return vaccination1 < vaccination2
         }
     }
-    
+
     var filterNotFullImmunization: [ExtendedCBORWebToken] {
         filter {
             if let v = $0.firstVaccination, !v.fullImmunization {
@@ -202,24 +341,71 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
+
     var filterVaccinations: [ExtendedCBORWebToken] {
         filter { $0.vaccinations != nil }
     }
-    
-    var vaccinations: [Vaccination] {
-        filterVaccinations.map{ $0.vaccinations }.compactMap{$0}.flatMap{$0}
+
+    var filterRecoveries: [ExtendedCBORWebToken] {
+        filter { $0.recoveries != nil }
     }
-    
-    var firstNotBosstedValidFullImmunization: ExtendedCBORWebToken? {
+
+    var filterTests: [ExtendedCBORWebToken] {
+        filter { $0.tests != nil }
+    }
+
+    var firstVaccination: ExtendedCBORWebToken? { first(where: \.vaccinationCertificate.isVaccination) }
+
+    var firstRecovery: ExtendedCBORWebToken? { first(where: \.vaccinationCertificate.isRecovery) }
+
+    var firstTest: ExtendedCBORWebToken? { first(where: \.vaccinationCertificate.isTest) }
+
+    var filterNotInvalid: Self { filter(\.isNotInvalid) }
+
+    var filterNotRevoked: Self { filter(\.isNotRevoked) }
+
+    var filterNotExpired: Self { filter(\.isNotExpired) }
+
+    var filterFirstOfAllTypesNotExpired: [ExtendedCBORWebToken] {
+        let sortedList = sortLatest().filterNotInvalid.filterNotRevoked.filterNotExpired
+        return sortedList.filterFirstOfAllTypes
+    }
+
+    var filterFirstOfAllTypes: [ExtendedCBORWebToken] {
+        var firstOfAll: [ExtendedCBORWebToken] = []
+        if let firstTest = firstTest {
+            firstOfAll.append(firstTest)
+        }
+        if let firstVaccination = firstVaccination {
+            firstOfAll.append(firstVaccination)
+        }
+        if let firstRecovery = firstRecovery {
+            firstOfAll.append(firstRecovery)
+        }
+        return firstOfAll
+    }
+
+    var vaccinations: [Vaccination] {
+        filterVaccinations.map(\.vaccinations).compactMap { $0 }.flatMap { $0 }
+    }
+
+    var recoveries: [Recovery] {
+        filterRecoveries.map(\.recoveries).compactMap { $0 }.flatMap { $0 }
+    }
+
+    var tests: [Test] {
+        filterTests.map(\.tests).compactMap { $0 }.flatMap { $0 }
+    }
+
+    var firstNotBoostedValidFullImmunization: ExtendedCBORWebToken? {
         first(where: {
-            if let v = $0.firstVaccination, v.fullImmunization, v.fullImmunizationValid, !v.isBoosted /* Boosters are currently lower prioritized (see 5.1) */ {
-                return true
+            guard $0.isNotRevoked, $0.isNotExpired, $0.isNotInvalid, let v = $0.firstVaccination else {
+                return false
             }
-            return false
+            return v.fullImmunization && v.fullImmunizationValid && !v.isBoosted(vaccinations: vaccinations, recoveries: recoveries)
         })
     }
-    
+
     var firstNotValidButFullImmunization: ExtendedCBORWebToken? {
         first(where: {
             if let v = $0.firstVaccination, v.fullImmunization, !v.fullImmunizationValid {
@@ -228,8 +414,8 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         })
     }
-    
-    var filterRecoveryWhoseDateIsStillValid: [ExtendedCBORWebToken]  {
+
+    var filterRecoveryWhoseDateIsStillValid: [ExtendedCBORWebToken] {
         filter {
             if let r = $0.firstRecovery, Date() <= r.du {
                 return true
@@ -237,8 +423,8 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
-    var filterRecoveryWhoseDateNotAnyMoreValid: [ExtendedCBORWebToken]  {
+
+    var filterRecoveryWhoseDateNotAnyMoreValid: [ExtendedCBORWebToken] {
         filter {
             if let r = $0.firstRecovery, Date() > r.du {
                 return true
@@ -246,7 +432,7 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
+
     var filterAllTestsNegativeAndNotValid: [ExtendedCBORWebToken] {
         filter {
             if let t = $0.firstTest, !t.isPositive, !t.isValid {
@@ -255,11 +441,11 @@ public extension Array where Element == ExtendedCBORWebToken {
             return false
         }
     }
-    
+
     var filterValidAndNotExpiredCertsWhichArenNotFraud: [ExtendedCBORWebToken] {
-        self.filter({ ($0.vaccinationCertificate.isExpired && !$0.vaccinationCertificate.isFraud) || !$0.isInvalid  })
+        filter { ($0.vaccinationCertificate.isExpired && !$0.vaccinationCertificate.isFraud) || !$0.isInvalid }
     }
-    
+
     func firstIndex(of certificate: Element?) -> Int? {
         firstIndex {
             $0.vaccinationCertificate.hcert.dgc == certificate?.vaccinationCertificate.hcert.dgc
@@ -278,17 +464,17 @@ public extension Array where Element == ExtendedCBORWebToken {
         }
         return pairableCertificates(for: certificate)
     }
-    
+
     func filter(types: [CertType],
-                       givenName: String,
-                       familyName: String,
-                       dob: String) -> [ExtendedCBORWebToken] {
-        return filter(by: types)
-                .filter(by: .givenName, for: givenName)
-                .filter(by: .familyName, for: familyName)
-                .filter(by: .dateOfBirth, for: dob)
+                givenName: String,
+                familyName: String,
+                dob: String) -> [ExtendedCBORWebToken] {
+        filter(by: types)
+            .filter(by: .givenName, for: givenName)
+            .filter(by: .familyName, for: familyName)
+            .filter(by: .dateOfBirth, for: dob)
     }
-    
+
     func filter(by types: [CertType]) -> [ExtendedCBORWebToken] {
         var filteredCerts = [ExtendedCBORWebToken]()
         types.forEach { type in
@@ -296,7 +482,7 @@ public extension Array where Element == ExtendedCBORWebToken {
         }
         return filteredCerts
     }
-    
+
     func filter(by type: CertType) -> [ExtendedCBORWebToken] {
         switch type {
         case .recovery:
@@ -313,69 +499,161 @@ public extension Array where Element == ExtendedCBORWebToken {
             }
         }
     }
-    
+
     func filter(by property: Property, for value: String) -> [ExtendedCBORWebToken] {
         switch property {
         case .givenName:
-            return filter{
+            return filter {
                 $0.givenName?.contains(value) == true
             }
         case .familyName:
-            return filter{
+            return filter {
                 $0.familyName.contains(value) == true
             }
         case .dateOfBirth:
-            return filter{
+            return filter {
                 $0.dateOfBirthString == value
             }.sortByDateOfBirth
         }
     }
-    
+
+    func filter(by name: Name, dateOfBirth: Date?) -> Self {
+        filter {
+            let dgc = $0.vaccinationCertificate.hcert.dgc
+            return dgc.nam == name && dgc.dob == dateOfBirth
+        }
+    }
+
+    var latestVaccination: Vaccination? { sortLatestVaccinations.first?.firstVaccination }
+
+    var latestRecovery: Recovery? { sortLatestRecoveries.first?.firstRecovery }
+
+    var sortLatestPcrTest: [ExtendedCBORWebToken] {
+        filterNegativePCRTestsNotOlderThan72Hours
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByIssuedAtTime
+            .sortTestsByDateTimeOfSampleCollection
+    }
+
+    var sortLatestQuickTests: [ExtendedCBORWebToken] {
+        filterNegativeQuickTestsNotOlderThan48Hours
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByIssuedAtTime
+            .sortTestsByDateTimeOfSampleCollection
+    }
+
+    var sortLatestBooster: [ExtendedCBORWebToken] {
+        filterBoosters
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByIssuedAtTime
+            .sortByVaccinationDate
+    }
+
+    var sortLatestVaccinations: [ExtendedCBORWebToken] {
+        filterVaccinations
+            .sortByIssuedAtTime
+            .sortByVaccinationDate
+    }
+
+    var sortLatestRecoveries: [ExtendedCBORWebToken] {
+        filterRecoveries
+            .sortByIssuedAtTime
+            .sortByFirstPositiveResultDate
+    }
+
+    var sortLatestVaccinationsfirstNotBoostedValidFullImmunization: ExtendedCBORWebToken? {
+        sortLatestVaccinations
+            .firstNotBoostedValidFullImmunization
+    }
+
+    var sortLatestVaccinationsFirstNotValidButFullImmunization: ExtendedCBORWebToken? {
+        sortLatestVaccinations
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .firstNotValidButFullImmunization
+    }
+
+    var sortLatestRecoveryWhoseDateIsStillValidSortByFirstPositiveResultDate: [ExtendedCBORWebToken] {
+        filterRecoveryWhoseDateIsStillValid
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByFirstPositiveResultDate
+    }
+
+    var sortLatestNotFullImmunization: [ExtendedCBORWebToken] {
+        filterNotFullImmunization
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByIssuedAtTime
+            .sortByVaccinationDate
+    }
+
+    var sortLatestRecoveryWhoseDateNotAnyMoreValidSortByFirstPositiveResultDate: [ExtendedCBORWebToken] {
+        filterRecoveryWhoseDateNotAnyMoreValid
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+            .sortByFirstPositiveResultDate
+    }
+
+    var sortLatestTestsNegativeAndNotValid: [ExtendedCBORWebToken] {
+        filterAllTestsNegativeAndNotValid
+            .filterNotInvalid.filterNotRevoked.filterNotExpired
+    }
+
+    func sortLatestRest(_ res: [ExtendedCBORWebToken]) -> [ExtendedCBORWebToken] {
+        filter { !res.contains($0) }.sortedByDtFrAndSc
+    }
+
     func sortLatest() -> [ExtendedCBORWebToken] {
         var res = [ExtendedCBORWebToken]()
         // #1 Test certificate
         //  Negative PCR Test not older than (=<)72h, ordered by date (newest first)
-        let pcrTests = filterNegativePCRTestsNotOlderThan72Hours
-        res.append(contentsOf: pcrTests.sortByIssuedAtTime.sortTestsByDateTimeOfSampleCollection)
+        res.append(contentsOf: sortLatestPcrTest)
         // #2 Test certificate
         //  Negative quick test, not older than 48 hrs, ordered by date (newest first)
-        var quickTests = filterNegativeQuickTestsNotOlderThan48Hours
-        quickTests  = quickTests.sortByIssuedAtTime
-        quickTests  = quickTests.sortTestsByDateTimeOfSampleCollection
-        res.append(contentsOf: quickTests)
+        res.append(contentsOf: sortLatestQuickTests)
         // #3 Booster Certificate
         //  Latest booster vaccination of a vaccination series (3/3, 4/4, ...)
-        res.append(contentsOf: filterBoosted.sortByIssuedAtTime.sortByVaccinationDate)
+        res.append(contentsOf: sortLatestBooster)
         // #4 Vaccination certificate
         //  Latest vaccination of a vaccination series (1/1, 2/2), older then (>) 14 days, and where the iat is the latest
-        let vaccinationCertificates = filterVaccinations.sortByIssuedAtTime.sortByVaccinationDate
-        if let latestVaccination = vaccinationCertificates.firstNotBosstedValidFullImmunization {
+        if let latestVaccination = sortLatestVaccinationsfirstNotBoostedValidFullImmunization {
             res.append(latestVaccination)
         }
         // #5 Recovery certificate
         //  Recovery after SARS-Cov-2-Infection, not older then (=<) 180 Days
-        res.append(contentsOf: filterRecoveryWhoseDateIsStillValid.sortByFirstPositiveResultDate)
+        res.append(contentsOf: sortLatestRecoveryWhoseDateIsStillValidSortByFirstPositiveResultDate)
         // #6 Vaccination Certificate
         //  Latest vaccination of a vaccination series, not older then (=<) 14 days
-        if let latestVaccination = vaccinationCertificates.firstNotValidButFullImmunization {
+        if let latestVaccination = sortLatestVaccinationsFirstNotValidButFullImmunization {
             res.append(latestVaccination)
         }
         // #7 Vaccination Certificate
         //  Not-latest (partial immunization) of a vaccination series (1/2)
-        res.append(contentsOf: filterNotFullImmunization)
+        res.append(contentsOf: sortLatestNotFullImmunization)
         // #8 Recovery Certificate
         //  Recovery after SARS-Cov-2-Infection, older then (>) 180 Days
-        res.append(contentsOf: filterRecoveryWhoseDateNotAnyMoreValid.sortByFirstPositiveResultDate)
+        res.append(contentsOf: sortLatestRecoveryWhoseDateNotAnyMoreValidSortByFirstPositiveResultDate)
         // #9 Test certificate
         //  Negative PCR-Test, older then (>) 72 Hrs, or negative quick test older then (>) 48 Hrs
-        res.append(contentsOf: filterAllTestsNegativeAndNotValid)
+        res.append(contentsOf: sortLatestTestsNegativeAndNotValid)
         // #10 Now add everything that did not match any of the rules above
-        res.append(contentsOf: filter { !res.contains($0) })
-
+        res.append(contentsOf: sortLatestRest(res))
         return res
     }
-}
 
+    var joinedTokens: CBORWebToken? {
+        let dgcs = map(\.vaccinationCertificate.hcert.dgc)
+        guard let joinedDgcs = dgcs.joinCertificates() else { return nil }
+        guard var certificate = first?.vaccinationCertificate else { return nil }
+        certificate.hcert.dgc = joinedDgcs
+        return certificate
+    }
+
+    var joinedAllTokens: CBORWebToken? {
+        let dgcs = map(\.vaccinationCertificate.hcert.dgc)
+        guard let joinedDgcs = dgcs.joinCertificates(latestOnly: false) else { return nil }
+        guard var certificate = first?.vaccinationCertificate else { return nil }
+        certificate.hcert.dgc = joinedDgcs
+        return certificate
+    }
+}
 
 private extension ExtendedCBORWebToken {
     func matches(_ extendedCBORWebToken: ExtendedCBORWebToken) -> Bool {

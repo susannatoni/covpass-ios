@@ -18,24 +18,39 @@ extension CBORWebToken {
         token.hcert.dgc.nam = name
         return token
     }
-    
+
     func mockVaccinationUVCI(_ uvci: String) -> Self {
         hcert.dgc.v?.first?.ci = uvci
         return self
     }
-    
+
     func mockTestUVCI(_ uvci: String) -> Self {
         hcert.dgc.t?.first?.ci = uvci
         return self
     }
-    
+
     func mockRecoveryUVCI(_ uvci: String) -> Self {
         hcert.dgc.r?.first?.ci = uvci
         return self
     }
-    
+
+    func mockRecovery(fr: Date) -> Self {
+        hcert.dgc.r?.first?.fr = fr
+        return self
+    }
+
     func mockVaccinationSetDate(_ date: Date) -> Self {
         hcert.dgc.v?.first?.dt = date
+        return self
+    }
+
+    func mockTestSetDate(_ date: Date) -> Self {
+        hcert.dgc.t?.first?.sc = date
+        return self
+    }
+
+    func mockRecoverySetDate(_ date: Date) -> Self {
+        hcert.dgc.r?.first?.fr = date
         return self
     }
 
@@ -43,12 +58,12 @@ extension CBORWebToken {
         hcert.dgc.v?.first?.dn = dn
         return self
     }
-    
+
     func seriesOfDoses(_ sd: Int) -> Self {
         hcert.dgc.v?.first?.sd = sd
         return self
     }
-    
+
     func medicalProduct(_ mp: MedicalProduct) -> Self {
         hcert.dgc.v?.first?.mp = mp.rawValue
         return self
@@ -61,7 +76,6 @@ extension CBORWebToken {
 }
 
 class CertificateSorterTests: XCTestCase {
-    
     func testSorting() throws {
         let certificates = [
             CBORWebToken
@@ -81,7 +95,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "2")
         XCTAssertEqual(sortedCertifiates[1].vaccinationCertificate.hcert.dgc.uvci, "1")
     }
-    
+
     func testTwoVaccinationsSameVacDateButDifferentIssueDate() throws {
         // GIVEN
         let dateOld = Date().addingTimeInterval(-100)
@@ -103,7 +117,7 @@ class CertificateSorterTests: XCTestCase {
             cert1,
             cert2
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -114,7 +128,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.first?.vaccinationCertificate.hcert.dgc.isVaccinationBoosted, false)
         XCTAssertEqual(sortedCertifiates.last?.vaccinationCertificate.hcert.dgc.isVaccinationBoosted, false)
     }
-    
+
     func testTwoBoostersSameVacDateButDifferentIssueDate() throws {
         // Given
         let dateOld = Date().addingTimeInterval(-100)
@@ -140,7 +154,7 @@ class CertificateSorterTests: XCTestCase {
             cert1,
             cert2
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -151,7 +165,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.first?.vaccinationCertificate.hcert.dgc.isVaccinationBoosted, true)
         XCTAssertEqual(sortedCertifiates.last?.vaccinationCertificate.hcert.dgc.isVaccinationBoosted, true)
     }
-    
+
     func testSortLatest_vaccinations() throws {
         // GIVEN
         let vacinationDateFirstCert = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -159,28 +173,28 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDateFirstCert)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
 
         let vacinationDateSecondCert = DateUtils.parseDate("2021-05-26T15:05:00")!
         let secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDateSecondCert)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
 
         let vacinationDateThirdCert = DateUtils.parseDate("2021-05-26T15:05:01")!
         let thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDateThirdCert)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
 
         let certificates = [
             secondCert,
             firstCert,
             thirdCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -190,7 +204,42 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates[1].vaccinationCertificate.hcert.dgc.uvci, "2")
         XCTAssertEqual(sortedCertifiates[2].vaccinationCertificate.hcert.dgc.uvci, "1")
     }
-    
+
+    func testSortLatest_firstNotBoostedValidFullImmunizationDowngrading2Of1AlsoIf1Of1IsExpired() throws {
+        // GIVEN
+        let vacinationDateFirstCert = DateUtils.parseDate("2021-10-26T15:05:00")!
+        var firstCertToken = CBORWebToken
+            .mockVaccinationCertificate
+            .medicalProduct(.johnsonjohnson)
+            .seriesOfDoses(1)
+            .doseNumber(1)
+            .mockVaccinationUVCI("1")
+            .mockVaccinationSetDate(vacinationDateFirstCert)
+        firstCertToken.exp = Calendar.current.date(byAdding: .month, value: -13, to: Date())
+        let firstCert = firstCertToken.extended(vaccinationQRCodeData: "1")
+
+        let vacinationDateSecondCert = DateUtils.parseDate("2021-05-26T15:05:00")!
+        let secondCert: ExtendedCBORWebToken = CBORWebToken
+            .mockVaccinationCertificate
+            .medicalProduct(.biontech)
+            .seriesOfDoses(1)
+            .doseNumber(2)
+            .mockVaccinationUVCI("2")
+            .mockVaccinationSetDate(vacinationDateSecondCert)
+            .extended(vaccinationQRCodeData: "2")
+
+        let certificates = [
+            firstCert,
+            secondCert
+        ]
+
+        // WHEN
+        let firstNotBoostedValidFullImmunization = try XCTUnwrap(certificates.firstNotBoostedValidFullImmunization)
+
+        // THEN
+        XCTAssertEqual(firstNotBoostedValidFullImmunization.vaccinationCertificate.hcert.dgc.uvci, "2")
+    }
+
     func testLatestIatCertOnSameVaccinationDateButTwoOfThemHasNoIatButOneOfTheseTwoIsLatestVac() throws {
         // GIVEN
         let vacinationDate = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -199,35 +248,35 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
         firstCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-26T15:05:00")
 
         var secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
         secondCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-27T15:05:00")
 
         var thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
         thirdCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-28T15:05:00")
 
         var fourthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("4")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"4")
+            .extended(vaccinationQRCodeData: "4")
         fourthCert.vaccinationCertificate.iat = nil
-        
+
         var fifthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("5")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"5")
+            .extended(vaccinationQRCodeData: "5")
         fifthCert.vaccinationCertificate.iat = nil
 
         let certificates = [
@@ -237,7 +286,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -245,7 +294,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 5)
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "5")
     }
-    
+
     func testSortingVacBasedOnIatAndWithCertWhereIatIsNilAndOneCertificateIsNotPosNotPcr() throws {
         // GIVEN
         let vacinationDate = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -255,43 +304,42 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
         firstCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-26T15:05:00")
 
         var secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
         secondCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-27T15:05:00")
 
         var thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
         thirdCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-28T15:05:00")
 
         var fourthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("4")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"4")
+            .extended(vaccinationQRCodeData: "4")
         fourthCert.vaccinationCertificate.iat = nil
-        
+
         var fifthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("5")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"5")
+            .extended(vaccinationQRCodeData: "5")
         fifthCert.vaccinationCertificate.iat = nil
 
-        
         let sixtCert: ExtendedCBORWebToken = CBORWebToken
             .mockTestCertificate
             .mockTestUVCI("6")
             .mockVaccinationSetDate(testDateLater)
-            .extended(vaccinationQRCodeData:"6")
+            .extended(vaccinationQRCodeData: "6")
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.tt = "NOT PCR"
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.tr = "NOT POSTIIVE"
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.sc = testDateLater
@@ -304,7 +352,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -312,8 +360,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 6)
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "6")
     }
-    
-    
+
     func testSortingVacBasedOnIatAndAllCerIatIsNil() throws {
         // GIVEN
         let vacinationDate = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -322,35 +369,35 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
         firstCert.vaccinationCertificate.iat = nil
 
         var secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
         secondCert.vaccinationCertificate.iat = nil
 
         var thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
         thirdCert.vaccinationCertificate.iat = nil
 
         var fourthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("4")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"4")
+            .extended(vaccinationQRCodeData: "4")
         fourthCert.vaccinationCertificate.iat = nil
-        
+
         var fifthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("5")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"5")
+            .extended(vaccinationQRCodeData: "5")
         fifthCert.vaccinationCertificate.iat = nil
 
         let certificates = [
@@ -360,7 +407,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -368,8 +415,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 5)
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "5")
     }
-    
-    
+
     func testSortingVacBasedOnIatAndAllCerIatIsNilOneCertVacDateDiffer() throws {
         // GIVEN
         let vacinationDate = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -378,35 +424,35 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
         firstCert.vaccinationCertificate.iat = nil
 
         var secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
         secondCert.vaccinationCertificate.iat = nil
 
         var thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
         thirdCert.vaccinationCertificate.iat = nil
 
         var fourthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("4")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"4")
+            .extended(vaccinationQRCodeData: "4")
         fourthCert.vaccinationCertificate.iat = nil
-        
+
         var fifthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("5")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"5")
+            .extended(vaccinationQRCodeData: "5")
         fifthCert.vaccinationCertificate.iat = nil
 
         let certificates = [
@@ -416,7 +462,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -424,7 +470,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 5)
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "2")
     }
-    
+
     func testSortingVacBasedOnIatAndWithCertWhereIatIsNilAndOneCertificateIsNotPosNotPcrWithIat() throws {
         // GIVEN
         let vacinationDate = DateUtils.parseDate("2021-04-26T15:05:00")!
@@ -434,41 +480,41 @@ class CertificateSorterTests: XCTestCase {
             .mockVaccinationCertificate
             .mockVaccinationUVCI("1")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"1")
+            .extended(vaccinationQRCodeData: "1")
         firstCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-26T15:05:00")
 
         var secondCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("2")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"2")
+            .extended(vaccinationQRCodeData: "2")
         secondCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-27T15:05:00")
 
         var thirdCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("3")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"3")
+            .extended(vaccinationQRCodeData: "3")
         thirdCert.vaccinationCertificate.iat = DateUtils.parseDate("2021-04-28T15:05:00")
 
         var fourthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("4")
             .mockVaccinationSetDate(vacinationDate)
-            .extended(vaccinationQRCodeData:"4")
+            .extended(vaccinationQRCodeData: "4")
         fourthCert.vaccinationCertificate.iat = nil
-        
+
         var fifthCert: ExtendedCBORWebToken = CBORWebToken
             .mockVaccinationCertificate
             .mockVaccinationUVCI("5")
             .mockVaccinationSetDate(vacinationDateLate)
-            .extended(vaccinationQRCodeData:"5")
+            .extended(vaccinationQRCodeData: "5")
         fifthCert.vaccinationCertificate.iat = nil
-        
+
         var sixtCert: ExtendedCBORWebToken = CBORWebToken
             .mockTestCertificate
             .mockTestUVCI("6")
-            .extended(vaccinationQRCodeData:"6")
+            .extended(vaccinationQRCodeData: "6")
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.tt = "NOT PCR"
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.tr = "NOT POSTIIVE"
         sixtCert.vaccinationCertificate.hcert.dgc.t!.first!.sc = testDateYesterday
@@ -477,7 +523,7 @@ class CertificateSorterTests: XCTestCase {
         var seventhCert: ExtendedCBORWebToken = CBORWebToken
             .mockTestCertificate
             .mockTestUVCI("7")
-            .extended(vaccinationQRCodeData:"7")
+            .extended(vaccinationQRCodeData: "7")
         seventhCert.vaccinationCertificate.hcert.dgc.t!.first!.tt = "NOT PCR"
         seventhCert.vaccinationCertificate.hcert.dgc.t!.first!.tr = "NOT POSTIIVE"
         seventhCert.vaccinationCertificate.hcert.dgc.t!.first!.sc = testDateYesterday
@@ -492,7 +538,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.sortLatest()
 
@@ -500,7 +546,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 7)
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, "7")
     }
-    
+
     func testFilter() throws {
         // GIVEN
         let dateOfBirthString = "2021-04-26T15:05:00"
@@ -525,7 +571,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -536,7 +582,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 1)
         XCTAssertEqual(sortedCertifiates.first, firstCert)
     }
-    
+
     func testFilterMatchingAllVaccination() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -556,7 +602,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -566,7 +612,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 5)
     }
-    
+
     func testFilterMatchingAllTests() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -586,7 +632,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.test],
                                                     givenName: "DOE",
@@ -596,7 +642,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 2)
     }
-    
+
     func testFilterMatchingAllRecoveries() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -618,7 +664,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.recovery],
                                                     givenName: "DOE",
@@ -628,7 +674,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 1)
     }
-    
+
     func testFilterMissingDob() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -648,7 +694,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -658,7 +704,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 0)
     }
-    
+
     func testFilterMissingGivenName() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -680,7 +726,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.recovery],
                                                     givenName: "",
@@ -690,7 +736,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 0)
     }
-    
+
     func testFilterMissingFamilyNameName() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -712,7 +758,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -722,7 +768,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 0)
     }
-    
+
     func testFilterMissingAllVariables() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -744,7 +790,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "",
@@ -754,7 +800,7 @@ class CertificateSorterTests: XCTestCase {
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 0)
     }
-    
+
     func testFilterMissingSeveralPersonsCertificates() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -782,7 +828,7 @@ class CertificateSorterTests: XCTestCase {
             thirdCert,
             fourthCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -793,7 +839,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates.count, 3)
         XCTAssertEqual(sortedCertifiates.first, secondCert)
     }
-    
+
     func testFilterMissingSeveralPersonsCertificatesDifferentArrayOrder() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -821,7 +867,7 @@ class CertificateSorterTests: XCTestCase {
             fourthCert,
             secondCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination],
                                                     givenName: "DOE",
@@ -834,7 +880,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates[1], fifthCert)
         XCTAssertEqual(sortedCertifiates[2], fourthCert)
     }
-    
+
     func testFilterVacAndRequestRecAlsoWhereNotMatchBecuaseofPerson() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -862,7 +908,7 @@ class CertificateSorterTests: XCTestCase {
             fourthCert,
             secondCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination, .recovery],
                                                     givenName: "DOE",
@@ -875,7 +921,7 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates[1], fifthCert)
         XCTAssertEqual(sortedCertifiates[2], fourthCert)
     }
-    
+
     func testFilterVacAndRec() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -901,7 +947,7 @@ class CertificateSorterTests: XCTestCase {
             fourthCert,
             secondCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination, .recovery],
                                                     givenName: "DOE",
@@ -910,28 +956,28 @@ class CertificateSorterTests: XCTestCase {
 
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 4)
-        
+
         XCTAssertEqual(sortedCertifiates[0], secondCert)
         XCTAssertNotNil(sortedCertifiates[0].firstVaccination)
         XCTAssertNil(sortedCertifiates[0].firstTest)
         XCTAssertNil(sortedCertifiates[0].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[1], fifthCert)
         XCTAssertNotNil(sortedCertifiates[1].firstVaccination)
         XCTAssertNil(sortedCertifiates[1].firstTest)
         XCTAssertNil(sortedCertifiates[1].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[2], fourthCert)
         XCTAssertNotNil(sortedCertifiates[2].firstVaccination)
         XCTAssertNil(sortedCertifiates[2].firstTest)
         XCTAssertNil(sortedCertifiates[2].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[3], eightCert)
         XCTAssertNil(sortedCertifiates[3].firstVaccination)
         XCTAssertNil(sortedCertifiates[3].firstTest)
         XCTAssertNotNil(sortedCertifiates[3].firstRecovery)
     }
-    
+
     func testFilterVacRecTest() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended()
@@ -959,7 +1005,7 @@ class CertificateSorterTests: XCTestCase {
             fourthCert,
             secondCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination, .recovery, .test],
                                                     givenName: "DOE",
@@ -968,33 +1014,33 @@ class CertificateSorterTests: XCTestCase {
 
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 5)
-        
+
         XCTAssertEqual(sortedCertifiates[0], secondCert)
         XCTAssertNotNil(sortedCertifiates[0].firstVaccination)
         XCTAssertNil(sortedCertifiates[0].firstTest)
         XCTAssertNil(sortedCertifiates[0].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[1], fifthCert)
         XCTAssertNotNil(sortedCertifiates[1].firstVaccination)
         XCTAssertNil(sortedCertifiates[1].firstTest)
         XCTAssertNil(sortedCertifiates[1].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[2], fourthCert)
         XCTAssertNotNil(sortedCertifiates[2].firstVaccination)
         XCTAssertNil(sortedCertifiates[2].firstTest)
         XCTAssertNil(sortedCertifiates[2].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[3], sixtCert)
         XCTAssertNil(sortedCertifiates[3].firstVaccination)
         XCTAssertNotNil(sortedCertifiates[3].firstTest)
         XCTAssertNil(sortedCertifiates[3].firstRecovery)
-        
+
         XCTAssertEqual(sortedCertifiates[4], seventhCert)
         XCTAssertNil(sortedCertifiates[4].firstVaccination)
         XCTAssertNotNil(sortedCertifiates[4].firstTest)
         XCTAssertNil(sortedCertifiates[4].firstRecovery)
     }
-    
+
     func testFilterVacRecTestAllSamePerson() throws {
         // GIVEN
         let firstCert: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.mockVaccinationUVCI("1").extended()
@@ -1016,7 +1062,7 @@ class CertificateSorterTests: XCTestCase {
             fourthCert,
             secondCert
         ]
-        
+
         // WHEN
         let sortedCertifiates = certificates.filter(types: [.vaccination, .recovery, .test],
                                                     givenName: "DOE",
@@ -1025,7 +1071,7 @@ class CertificateSorterTests: XCTestCase {
 
         // THEN
         XCTAssertEqual(sortedCertifiates.count, 8)
-        
+
         XCTAssertEqual(sortedCertifiates[0].vaccinationCertificate.hcert.dgc.uvci, firstCert.vaccinationCertificate.hcert.dgc.uvci)
         XCTAssertEqual(sortedCertifiates[1].vaccinationCertificate.hcert.dgc.uvci, fifthCert.vaccinationCertificate.hcert.dgc.uvci)
         XCTAssertEqual(sortedCertifiates[2].vaccinationCertificate.hcert.dgc.uvci, thirdCert.vaccinationCertificate.hcert.dgc.uvci)
@@ -1035,36 +1081,34 @@ class CertificateSorterTests: XCTestCase {
         XCTAssertEqual(sortedCertifiates[6].vaccinationCertificate.hcert.dgc.uvci, sixtCert.vaccinationCertificate.hcert.dgc.uvci)
         XCTAssertEqual(sortedCertifiates[7].vaccinationCertificate.hcert.dgc.uvci, seventhCert.vaccinationCertificate.hcert.dgc.uvci)
 
-
-        
         XCTAssertNotNil(sortedCertifiates[0].firstVaccination)
         XCTAssertNil(sortedCertifiates[0].firstTest)
         XCTAssertNil(sortedCertifiates[0].firstRecovery)
-        
+
         XCTAssertNotNil(sortedCertifiates[1].firstVaccination)
         XCTAssertNil(sortedCertifiates[1].firstTest)
         XCTAssertNil(sortedCertifiates[1].firstRecovery)
-        
+
         XCTAssertNotNil(sortedCertifiates[2].firstVaccination)
         XCTAssertNil(sortedCertifiates[2].firstTest)
         XCTAssertNil(sortedCertifiates[2].firstRecovery)
-        
+
         XCTAssertNotNil(sortedCertifiates[3].firstVaccination)
         XCTAssertNil(sortedCertifiates[3].firstTest)
         XCTAssertNil(sortedCertifiates[3].firstRecovery)
-        
+
         XCTAssertNotNil(sortedCertifiates[4].firstVaccination)
         XCTAssertNil(sortedCertifiates[4].firstTest)
         XCTAssertNil(sortedCertifiates[4].firstRecovery)
-        
+
         XCTAssertNil(sortedCertifiates[5].firstVaccination)
         XCTAssertNil(sortedCertifiates[5].firstTest)
         XCTAssertNotNil(sortedCertifiates[5].firstRecovery)
-        
+
         XCTAssertNil(sortedCertifiates[6].firstVaccination)
         XCTAssertNotNil(sortedCertifiates[6].firstTest)
         XCTAssertNil(sortedCertifiates[6].firstRecovery)
-        
+
         XCTAssertNil(sortedCertifiates[7].firstVaccination)
         XCTAssertNotNil(sortedCertifiates[7].firstTest)
         XCTAssertNil(sortedCertifiates[7].firstRecovery)

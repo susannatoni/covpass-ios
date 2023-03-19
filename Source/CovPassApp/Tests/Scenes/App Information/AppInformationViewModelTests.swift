@@ -13,25 +13,27 @@ class GermanAppInformationViewModelTests: XCTestCase {
     func testEntries_default() {
         // Given
         let expectedTitles = [
+            AppInformationBaseViewModel.Texts.appInformationTitle,
+            "app_information_list_update_notifications".localized,
+            AppInformationBaseViewModel.Texts.faqTitle,
             AppInformationBaseViewModel.Texts.leichteSprache,
             AppInformationBaseViewModel.Texts.contactTitle,
-            AppInformationBaseViewModel.Texts.faqTitle,
             AppInformationBaseViewModel.Texts.datenschutzTitle,
             AppInformationBaseViewModel.Texts.companyDetailsTitle,
             AppInformationBaseViewModel.Texts.openSourceLicenseTitle,
-            AppInformationBaseViewModel.Texts.accessibilityStatementTitle,
-            AppInformationBaseViewModel.Texts.appInformationTitle
+            AppInformationBaseViewModel.Texts.accessibilityStatementTitle
         ]
         let sut = GermanAppInformationViewModel(
-            router: AppInformationRouterMock()
+            router: AppInformationRouterMock(),
+            persistence: MockPersistence()
         )
 
         // When
         let entries = sut.entries
 
         // Then
-        XCTAssertEqual(entries.count, 8)
-        for index in 0..<min(entries.count, expectedTitles.count) {
+        XCTAssertEqual(entries.count, 9)
+        for index in 0 ..< min(entries.count, expectedTitles.count) {
             XCTAssertEqual(entries[index].title, expectedTitles[index])
         }
     }
@@ -41,24 +43,26 @@ class EnglishAppInformationViewModelTests: XCTestCase {
     func testEntries_default() {
         // Given
         let expectedTitles = [
-            AppInformationBaseViewModel.Texts.contactTitle,
+            AppInformationBaseViewModel.Texts.appInformationTitle,
+            "app_information_list_update_notifications".localized,
             AppInformationBaseViewModel.Texts.faqTitle,
+            AppInformationBaseViewModel.Texts.contactTitle,
             AppInformationBaseViewModel.Texts.datenschutzTitle,
             AppInformationBaseViewModel.Texts.companyDetailsTitle,
             AppInformationBaseViewModel.Texts.openSourceLicenseTitle,
-            AppInformationBaseViewModel.Texts.accessibilityStatementTitle,
-            AppInformationBaseViewModel.Texts.appInformationTitle
+            AppInformationBaseViewModel.Texts.accessibilityStatementTitle
         ]
         let sut = EnglishAppInformationViewModel(
-            router: AppInformationRouterMock()
+            router: AppInformationRouterMock(),
+            persistence: MockPersistence()
         )
 
         // When
         let entries = sut.entries
 
         // Then
-        XCTAssertEqual(entries.count, 7)
-        for index in 0..<min(entries.count, expectedTitles.count) {
+        XCTAssertEqual(entries.count, 8)
+        for index in 0 ..< min(entries.count, expectedTitles.count) {
             XCTAssertEqual(entries[index].title, expectedTitles[index])
         }
     }

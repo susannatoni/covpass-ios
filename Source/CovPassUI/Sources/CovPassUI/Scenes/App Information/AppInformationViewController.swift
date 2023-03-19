@@ -32,14 +32,28 @@ open class AppInformationViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .backgroundPrimary
+
+        let backButton = UIBarButtonItem(image: .arrowBack, style: .done, target: self, action: #selector(backButtonTapped))
+        backButton.accessibilityLabel = "accessibility_app_information_contact_label_back".localized // TODO: change accessibility text when they are available
+        navigationItem.leftBarButtonItem = backButton
+        navigationController?.navigationBar.tintColor = .onBackground100
+
         configureDescription()
         configureAppVersion()
         configureEntries()
     }
-    
-    open override func viewWillAppear(_ animated: Bool) {
+
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        UIAccessibility.post(notification: .layoutChanged,
+                             argument: AppInformationBaseViewModel.Accessibility.Opening.informationAnnounce)
         configureEntries()
+    }
+
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        UIAccessibility.post(notification: .layoutChanged,
+                             argument: AppInformationBaseViewModel.Accessibility.Closing.informationAnnounce)
     }
 
     // MARK: - Methods
@@ -76,5 +90,9 @@ open class AppInformationViewController: UIViewController {
             self?.viewModel.showSceneForEntry(entry)
         }
         return view
+    }
+
+    @objc private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
 }

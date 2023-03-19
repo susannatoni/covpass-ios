@@ -14,7 +14,9 @@ public enum MainButtonStyle {
     case tertiary
     case plain
     case alternative
-    
+    case alternativeWhiteTitle
+    case invisible
+
     public var textColor: UIColor {
         switch self {
         case .primary:
@@ -27,9 +29,13 @@ public enum MainButtonStyle {
             return .brandBase
         case .alternative:
             return .brandBase
+        case .alternativeWhiteTitle:
+            return .white
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var selectedTextColor: UIColor {
         switch self {
         case .primary:
@@ -40,11 +46,13 @@ public enum MainButtonStyle {
             return .neutralBlack
         case .plain:
             return .brandBase
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var highlightedTextColor: UIColor {
         switch self {
         case .primary:
@@ -55,11 +63,13 @@ public enum MainButtonStyle {
             return .neutralBlack
         case .plain:
             return .brandBase
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var disabledTextColor: UIColor {
         switch self {
         case .primary:
@@ -70,11 +80,13 @@ public enum MainButtonStyle {
             return .neutralBlack
         case .plain:
             return .onBackground70
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var backgroundColor: UIColor {
         switch self {
         case .primary:
@@ -85,11 +97,13 @@ public enum MainButtonStyle {
             return .onBackground20
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
+            return .clear
+        case .invisible:
             return .clear
         }
     }
-    
+
     public var selectedBackgroundColor: UIColor {
         switch self {
         case .primary:
@@ -100,11 +114,13 @@ public enum MainButtonStyle {
             return .onBackground20
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
+            return .clear
+        case .invisible:
             return .clear
         }
     }
-    
+
     public var highlightedBackgroundColor: UIColor {
         switch self {
         case .primary:
@@ -115,11 +131,13 @@ public enum MainButtonStyle {
             return .onBackground20
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
+            return .clear
+        case .invisible:
             return .clear
         }
     }
-    
+
     public var disabledBackgroundColor: UIColor {
         switch self {
         case .primary:
@@ -130,11 +148,13 @@ public enum MainButtonStyle {
             return .backgroundSecondary20
         case .plain:
             return .backgroundSecondary20
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
+            return .clear
+        case .invisible:
             return .clear
         }
     }
-    
+
     public var borderColor: UIColor? {
         switch self {
         case .primary:
@@ -143,13 +163,15 @@ public enum MainButtonStyle {
             return .onBackground20
         case .tertiary:
             return .clear
-        case .plain:
+        case .plain, .alternativeWhiteTitle:
             return .clear
         case .alternative:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var selectedBorderColor: UIColor? {
         switch self {
         case .primary:
@@ -160,11 +182,13 @@ public enum MainButtonStyle {
             return .clear
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var highlightedBorderColor: UIColor? {
         switch self {
         case .primary:
@@ -175,11 +199,13 @@ public enum MainButtonStyle {
             return .clear
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var disabledBorderColor: UIColor? {
         switch self {
         case .primary:
@@ -190,11 +216,13 @@ public enum MainButtonStyle {
             return .clear
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
             return .brandBase
+        case .invisible:
+            return .clear
         }
     }
-    
+
     public var shadowColor: UIColor? {
         switch self {
         case .primary:
@@ -205,11 +233,13 @@ public enum MainButtonStyle {
             return .clear
         case .plain:
             return .clear
-        case .alternative:
+        case .alternative, .alternativeWhiteTitle:
+            return .clear
+        case .invisible:
             return .clear
         }
     }
-    
+
     public var disabledShadowColor: UIColor? {
         .clear
     }

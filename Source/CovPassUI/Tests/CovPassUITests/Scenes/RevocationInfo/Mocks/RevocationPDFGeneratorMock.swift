@@ -1,8 +1,8 @@
 //
 //  File.swift
-//  
 //
-//  Created by Thomas Kuleßa on 09.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassUI
@@ -16,7 +16,7 @@ class RevocationPDFGeneratorMock: RevocationPDFGeneratorProtocol {
     var pdfDocument = PDFDocument()
     var responseDelay: TimeInterval = 0.0
 
-    func generate(with info: RevocationInfo) -> Promise<PDFDocument> {
+    func generate(with _: RevocationInfo) -> Promise<PDFDocument> {
         generateExpectation.fulfill()
         if let error = error {
             return after(seconds: responseDelay).then {

@@ -14,7 +14,7 @@ import UIKit
 
 private enum Constants {
     enum Text {
-        static let scanHintTitle = "certificates_start_screen_pop_up_app_reference_title".localized
+        static let scanHintTitle = "certificates_overview_all_certificates_app_reference_title".localized
         static let scanHintText = "certificates_overview_all_certificates_app_reference_text".localized
     }
 }
@@ -30,7 +30,7 @@ class CertificateDetailViewController: UIViewController {
     @IBOutlet var immunizationView: ParagraphView!
     @IBOutlet var immunizationButtonContainerView: UIStackView!
     @IBOutlet var immunizationButton: MainButton!
-    @IBOutlet var reissueHintView: HintButton!
+    @IBOutlet var reissueStackView: UIStackView!
     @IBOutlet var boosterHintView: HintView!
     @IBOutlet var personalDataHeadline: PlainLabel!
     @IBOutlet var allCertificatesHeadline: PlainLabel!
@@ -38,6 +38,7 @@ class CertificateDetailViewController: UIViewController {
     @IBOutlet var nameTransliteratedView: ParagraphView!
     @IBOutlet var birtdateView: ParagraphView!
     @IBOutlet var scanHintView: HintView!
+    @IBOutlet var immunizationStatusView: ParagraphView!
 
     // MARK: - Properties
 
@@ -67,23 +68,34 @@ class CertificateDetailViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .backgroundPrimary
         scrollView.contentInset = .init(top: .space_24, left: .zero, bottom: .space_70, right: .zero)
-
         setupHeadline()
         setupImmunizationView()
         setupBoosterHintView()
-        setupReissueHintView()
+        setupReissueStackView()
         setupPersonalData()
         setupScanHintView()
         setupCertificates()
         setupNavigationBar()
+        setupStatusView()
+    }
+
+    private func setupStatusView() {
+        immunizationStatusView.setup(with: viewModel.immunizationStatusViewModel)
+        immunizationStatusView.imageViewWidthConstraint.constant = 32
+        immunizationStatusView.bottomBorder.isHidden = true
+        immunizationStatusView.bottomBorder.layoutMargins.bottom = .space_24
+        immunizationStatusView.isHidden = viewModel.immunizationStatusViewIsHidden
     }
 
     private func setupNavigationBar() {
         title = ""
-        navigationController?.navigationBar.backIndicatorImage = .arrowBack
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = .arrowBack
+        let backButton = UIBarButtonItem(image: .arrowBack,
+                                         style: .done,
+                                         target: self,
+                                         action: #selector(backButtonTapped))
+        backButton.accessibilityLabel = viewModel.accessibilityBackToStart
+        navigationItem.leftBarButtonItem = backButton
         navigationController?.navigationBar.tintColor = .onBackground100
-
         if viewModel.favoriteIcon != nil {
             let favoriteIcon = UIBarButtonItem(image: viewModel.favoriteIcon, style: .plain, target: self, action: #selector(toggleFavorite))
             favoriteIcon.tintColor = .onBackground100
@@ -91,10 +103,17 @@ class CertificateDetailViewController: UIViewController {
         }
     }
 
+    @objc
+    private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+
     private func setupHeadline() {
         nameHeadline.attributedText = viewModel.name.styledAs(.header_1).colored(.onBackground100)
+        nameHeadline.textableView.accessibilityTraits = .header
         nameHeadline.layoutMargins = .init(top: .zero, left: .space_24, bottom: .zero, right: .space_24)
-        stackView.setCustomSpacing(.space_24, after: nameHeadline)
+        nameHeadline.textableView.accessibilityTraits = .header
+        stackView.setCustomSpacing(.space_6, after: nameHeadline)
     }
 
     private func setupScanHintView() {
@@ -110,37 +129,70 @@ class CertificateDetailViewController: UIViewController {
     }
 
     private func setupImmunizationView() {
-        immunizationContainerView.layoutMargins.top = .space_24
-        immunizationContainerView.layoutMargins.bottom = .space_24
-        immunizationContainerView.backgroundColor = .neutralWhite
-        immunizationView.stackView.alignment = .top
+        immunizationContainerView.isHidden = viewModel.immunizationDetailsHidden
+        guard !viewModel.immunizationDetailsHidden else { return }
+        immunizationView.layoutMargins.left = .space_7
+        immunizationView.layoutMargins.top = .space_24
+        immunizationView.backgroundColor = .neutralWhite
+        immunizationView.horizontalContainerStackView.alignment = .top
         immunizationView.bottomBorder.isHidden = true
-        immunizationView.image = viewModel.immunizationIcon
-        immunizationView.attributedTitleText = viewModel.immunizationTitle.styledAs(.header_3)
-        immunizationView.attributedBodyText = viewModel.immunizationBody.styledAs(.body).colored(.onBackground70)
+        immunizationView.imageViewWidthConstraint.constant = 32
+        immunizationView.updateView(image: viewModel.immunizationIcon,
+                                    title: viewModel.immunizationTitle.styledAs(.header_3),
+                                    body: viewModel.immunizationBody.styledAs(.body).colored(.onBackground70))
         immunizationView.layoutMargins.bottom = .space_24
-
+        immunizationView.imageView.contentMode = .center
         immunizationButton.title = viewModel.immunizationButton
-
+        immunizationButton.isHidden = true
         immunizationButton.action = { [weak self] in
             self?.viewModel.immunizationButtonTapped()
         }
         stackView.setCustomSpacing(.space_24, after: immunizationButtonContainerView)
     }
-    
-    private func setupReissueHintView() {
-        reissueHintView.isHidden = !viewModel.showReissueNotification
-        reissueHintView.topRightLabel.text = viewModel.reissueNotificationHighlightText
-        reissueHintView.topRightLabel.isHidden = !viewModel.reissueNew
-        reissueHintView.containerView.backgroundColor = .neutralWhite
-        reissueHintView.containerView?.layer.borderColor = UIColor.neutralWhite.cgColor
-        reissueHintView.titleLabel.attributedText = viewModel.reissueNotificationTitle.styledAs(.header_3)
-        reissueHintView.bodyTextView.attributedText = viewModel.reissueNotificationBody.styledAs(.body)
-        reissueHintView.button.title = viewModel.reissueButtonTitle
-        reissueHintView.button.style = .alternative
-        reissueHintView.button.action = viewModel.triggerReissue
+
+    private func setupReissueStackView() {
+        reissueStackView.removeAllArrangedSubviews()
+        if viewModel.showBoosterReissueNotification {
+            let hintButton = createReissueHintButton()
+            hintButton.button.action = viewModel.triggerBoosterReissue
+            hintButton.titleLabel.attributedText = viewModel.boosterReissueNotificationTitle.styledAs(.header_3)
+            hintButton.bodyTextView.attributedText = viewModel.boosterReissueNotificationBody.styledAs(.body)
+            hintButton.button.title = viewModel.boosterReissueButtonTitle
+            reissueStackView.addArrangedSubview(hintButton)
+        } else if viewModel.showVaccinationExpiryReissueNotification {
+            let hintButton = createReissueHintButton()
+            hintButton.button.action = viewModel.triggerVaccinationExpiryReissue
+            hintButton.titleLabel.attributedText = viewModel.reissueVaccinationTitle.styledAs(.header_3)
+            hintButton.bodyTextView.attributedText = viewModel.vaccinationExpiryReissueNotificationBody.styledAs(.body)
+            hintButton.button.title = viewModel.vaccinationExpiryReissueButtonTitle
+            hintButton.hintButtonWrapper.isHidden = !viewModel.showVaccinationExpiryReissueButtonInNotification
+            reissueStackView.addArrangedSubview(hintButton)
+        }
+        for index in 0 ..< viewModel.recoveryExpiryReissueCandidatesCount {
+            let hintButton = createReissueHintButton()
+            hintButton.button.action = { [weak self] in
+                self?.viewModel.triggerRecoveryExpiryReissue(index: index)
+            }
+            hintButton.titleLabel.attributedText = viewModel.reissueRecoveryTitle(index: index).styledAs(.header_3)
+            hintButton.bodyTextView.attributedText = viewModel.recoveryExpiryReissueNotificationBody(index: index).styledAs(.body)
+            hintButton.button.title = viewModel.recoveryExpiryReissueButtonTitle
+            hintButton.hintButtonWrapper.isHidden = !viewModel.showRecoveryExpiryReissueButtonInNotification(index: index)
+            reissueStackView.addArrangedSubview(hintButton)
+        }
+        reissueStackView.isHidden = reissueStackView.arrangedSubviews.isEmpty
+        stackView.setCustomSpacing(20, after: reissueStackView)
     }
-    
+
+    private func createReissueHintButton() -> HintButton {
+        let reissueHintView = HintButton()
+        reissueHintView.bodyTextView.backgroundColor = .clear
+        reissueHintView.containerView.backgroundColor = .brandAccent20
+        reissueHintView.containerView?.layer.borderColor = UIColor.brandAccent40.cgColor
+        reissueHintView.button.style = .primary
+        reissueHintView.backgroundColor = .backgroundPrimary
+        return reissueHintView
+    }
+
     private func setupBoosterHintView() {
         boosterHintView.isHidden = !viewModel.showBoosterNotification
 
@@ -159,24 +211,31 @@ class CertificateDetailViewController: UIViewController {
 
     private func setupPersonalData() {
         stackView.setCustomSpacing(.space_12, after: personalDataHeadline)
-        personalDataHeadline.attributedText = "certificates_overview_personal_data_title".localized.styledAs(.header_2)
+        personalDataHeadline.attributedText = viewModel.title.styledAs(.header_2)
+        personalDataHeadline.textableView.accessibilityTraits = .header
         personalDataHeadline.layoutMargins = .init(top: .space_30, left: .space_24, bottom: .zero, right: .space_24)
+        personalDataHeadline.textableView.accessibilityTraits = .header
 
-        nameView.attributedTitleText = "certificates_overview_personal_data_name".localized.styledAs(.header_3)
-        nameView.attributedBodyText = viewModel.nameReversed.styledAs(.body)
+        nameView.updateView(title: viewModel.nameTitle.styledAs(.header_3),
+                            body: viewModel.nameReversed.styledAs(.body))
+        nameView.accessibilityLabelValue = viewModel.accessibilityName
         nameView.contentView?.layoutMargins = .init(top: .space_12, left: .space_24, bottom: .space_12, right: .space_24)
 
-        nameTransliteratedView.attributedTitleText = "vaccination_certificate_detail_view_data_name_standard".localized.styledAs(.header_3)
-        nameTransliteratedView.attributedBodyText = viewModel.nameTransliterated.styledAs(.body)
+        nameTransliteratedView.updateView(title: viewModel.nameTitleStandard.styledAs(.header_3),
+                                          body: viewModel.nameTransliterated.styledAs(.body))
+        nameTransliteratedView.accessibilityLabelValue = viewModel.accessibilityNameStandard
         nameTransliteratedView.contentView?.layoutMargins = .init(top: .space_12, left: .space_24, bottom: .space_12, right: .space_24)
 
-        birtdateView.attributedTitleText = "certificates_overview_personal_data_date_of_birth".localized.styledAs(.header_3)
-        birtdateView.attributedBodyText = viewModel.birthDate.styledAs(.body)
+        birtdateView.updateView(title: viewModel.dateOfBirth.styledAs(.header_3),
+                                body: viewModel.birthDate.styledAs(.body))
+        birtdateView.accessibilityLabelValue = viewModel.accessibilityDateOfBirth
         birtdateView.contentView?.layoutMargins = .init(top: .space_12, left: .space_24, bottom: .space_12, right: .space_24)
-        birtdateView.accessibilityLabel = "\(birtdateView.attributedTitleText?.string ?? "")\n \(DateUtils.audioDate(viewModel.birthDate) ?? viewModel.birthDate)"
+        birtdateView.accessibilityLabel = "\(viewModel.accessibilityDateOfBirth)\n \(DateUtils.audioDate(viewModel.birthDate) ?? viewModel.birthDate)"
 
-        allCertificatesHeadline.attributedText = "certificates_overview_all_certificates_title".localized.styledAs(.header_2)
+        allCertificatesHeadline.attributedText = viewModel.certificatesTitle.styledAs(.header_2)
+        allCertificatesHeadline.textableView.enableAccessibility(label: viewModel.accessibilityCertificatesTitle, traits: .header)
         allCertificatesHeadline.layoutMargins = .init(top: .space_30, left: .space_24, bottom: .space_16, right: .space_24)
+        allCertificatesHeadline.textableView.accessibilityTraits = .header
     }
 
     private func setupCertificates() {
@@ -201,5 +260,19 @@ extension CertificateDetailViewController: ViewModelDelegate {
 
     func viewModelUpdateDidFailWithError(_: Error) {
         // already handled in ViewModel
+    }
+}
+
+private extension ParagraphView {
+    func setup(with viewModel: CertificateHolderImmunizationStatusViewModelProtocol) {
+        layoutMargins.top = .space_24
+        layoutMargins.left = .space_7
+        updateView(image: viewModel.icon,
+                   title: viewModel.title.styledAs(.header_3),
+                   subtitle: viewModel.subtitle?.styledAs(.header_3).colored(.onBackground80),
+                   secondSubtitle: viewModel.federalStateText?.styledAs(.subheader_2).colored(.onBackground80),
+                   body: viewModel.description.styledAs(.body).colored(.onBackground80),
+                   footerButtonTitle: viewModel.selectFederalStateButtonTitle,
+                   contentMode: .center)
     }
 }

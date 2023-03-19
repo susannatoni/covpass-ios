@@ -1,16 +1,16 @@
 //
 //  CertificateRevocationRepositoryTests.swift
-//  
 //
-//  Created by Thomas Kuleßa on 21.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
-@testable import CovPassCommon
 import Compression
+@testable import CovPassCommon
 import XCTest
 
 class CertificateRevocationRepositoryTests: XCTestCase {
-    private var client: CertificateRevocationHTTPClientMock!
+    private var client: CertificateRevocationDataSourceMock!
     private var sut: CertificateRevocationRepository!
     private var userDefaults: UserDefaultsPersistence!
 
@@ -204,7 +204,7 @@ class CertificateRevocationRepositoryTests: XCTestCase {
         // Given
         let token = try ExtendedCBORWebToken.revokedVaccinationCertificate()
         let expectation = XCTestExpectation()
-        client.chunkListResponse = .init()
+        client.chunkListResponse = .init(hashes: [])
 
         // When
         sut.isRevoked(token)
@@ -313,7 +313,8 @@ private extension ExtendedCBORWebToken {
         let cborWebToken = try JSONDecoder().decode(CBORWebToken.self, from: messagePayload)
         let extendedCborWebToken = ExtendedCBORWebToken(
             vaccinationCertificate: cborWebToken,
-            vaccinationQRCodeData: revokedVaccinationCertificateQRCode)
+            vaccinationQRCodeData: revokedVaccinationCertificateQRCode
+        )
         return extendedCborWebToken
     }
 }

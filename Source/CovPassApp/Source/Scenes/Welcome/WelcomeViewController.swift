@@ -51,6 +51,12 @@ class WelcomeViewController: UIViewController {
         configureSubtitle()
         configureActionButton()
         configureSecureContentView()
+        configureAccessibilityRespondsToUserInteraction()
+    }
+
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        configureImageView()
     }
 
     // MARK: - Methods
@@ -66,18 +72,30 @@ class WelcomeViewController: UIViewController {
     private func configureImageView() {
         imageView.image = viewModel.image
         imageView.pinHeightToScaleAspectFit()
-        imageView.enableAccessibility(label: Constants.Accessibility.image.label)
+        imageView.isAccessibilityElement = false
+        imageView.isHidden = UIScreen.isLandscape
     }
 
     private func configureHeadline() {
         headline.attributedText = viewModel.title.styledAs(.display)
         headline.textableView.accessibilityTraits = .header
-        headline.layoutMargins = .init(top: .space_24, left: .space_24, bottom: .zero, right: .space_24)
+        headline.layoutMargins = .init(top: .space_24,
+                                       left: .space_24,
+                                       bottom: .zero,
+                                       right: .space_24)
+
+        headline.enableAccessibility(label: viewModel.title,
+                                     traits: .header)
     }
 
     private func configureSubtitle() {
         subtitle.attributedText = viewModel.info.styledAs(.subheader_1)
-        subtitle.layoutMargins = .init(top: .space_12, left: .space_24, bottom: .space_40, right: .space_24)
+        subtitle.layoutMargins = .init(top: .space_12,
+                                       left: .space_24,
+                                       bottom: .space_40,
+                                       right: .space_24)
+        subtitle.enableAccessibility(label: viewModel.info,
+                                     traits: .header)
     }
 
     private func configureActionButton() {
@@ -92,6 +110,20 @@ class WelcomeViewController: UIViewController {
         secureContentView.titleAttributedString = viewModel.secureTitle.styledAs(.header_3)
         secureContentView.bodyAttributedString = viewModel.secureText.styledAs(.body).colored(.onBackground70)
         secureContentView.contentView?.backgroundColor = .backgroundPrimary
-        secureContentView.layoutMargins = .init(top: .space_40, left: .space_24, bottom: .space_50, right: .space_24)
+        secureContentView.layoutMargins = .init(top: .space_40,
+                                                left: .space_24,
+                                                bottom: .space_50,
+                                                right: .space_24)
+        secureContentView.enableAccessibility(label: viewModel.secureTitle,
+                                              value: viewModel.secureText,
+                                              traits: .staticText)
+    }
+
+    private func configureAccessibilityRespondsToUserInteraction() {
+        if #available(iOS 13.0, *) {
+            headline.accessibilityRespondsToUserInteraction = true
+            subtitle.accessibilityRespondsToUserInteraction = true
+            secureContentView.accessibilityRespondsToUserInteraction = true
+        }
     }
 }

@@ -15,7 +15,6 @@ private enum Constants {
         static let close = VoiceOverOptions.Settings(label: "accessibility_certificate_add_dialog_camera_access_label_close".localized)
     }
 
-
     enum Layout {
         static let actionLineHeight: CGFloat = 17
     }
@@ -57,21 +56,39 @@ class HowToScanViewController: UIViewController {
         configureActionView()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.sceneOpeningAnnouncement)
+        UIAccessibility.post(notification: .layoutChanged, argument: headline.textLabel)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.sceneClosingAnnouncement)
+    }
+
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        configureImageView()
+    }
+
     // MARK: - Private
 
     private func configureImageView() {
         imageView.image = viewModel.image
-        imageView.enableAccessibility(label: Constants.Accessibility.image.label)
+        imageView.isHidden = UIScreen.isLandscape
+        imageView.isAccessibilityElement = false
         imageView.pinHeightToScaleAspectFit()
     }
 
     private func configureHeadline() {
         headline.attributedTitleText = viewModel.title.styledAs(.header_2)
+        headline.textLabel.accessibilityTraits = .header
         headline.action = { [weak self] in
             self?.viewModel.cancel()
         }
         headline.image = .close
-        headline.actionButton.enableAccessibility(label: Constants.Accessibility.close.label)
+        headline.actionButton.enableAccessibility(label: Constants.Accessibility.close.label, traits: .button)
         headline.layoutMargins.bottom = .space_24
     }
 
@@ -90,7 +107,7 @@ class HowToScanViewController: UIViewController {
     }
 
     private func configureDescriptionText() {
-        descriptionText.attributedBodyText = viewModel.info.styledAs(.body)
+        descriptionText.updateView(body: viewModel.info.styledAs(.body))
         descriptionText.layoutMargins.top = .space_24
         descriptionText.layoutMargins.bottom = .space_24
         descriptionText.bottomBorder.isHidden = true
@@ -100,6 +117,9 @@ class HowToScanViewController: UIViewController {
         toolbarView.state = .confirm(viewModel.startButtonTitle)
         toolbarView.layoutMargins.top = .space_24
         toolbarView.delegate = self
+        toolbarView.disableLeftButton()
+        toolbarView.disableRightButton()
+        toolbarView.setWhiteGradient()
     }
 }
 

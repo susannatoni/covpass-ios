@@ -8,15 +8,13 @@
 import CovPassUI
 import UIKit
 
-
 class ValidationFailedViewController: UIViewController {
-    
-    @IBOutlet weak var headerLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    @IBOutlet weak var hintView: HintView!
-    @IBOutlet weak var acceptButton: MainButton!
-    @IBOutlet weak var cancelButton: MainButton!
-    
+    @IBOutlet var headerLabel: UILabel!
+    @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var hintView: HintView!
+    @IBOutlet var acceptButton: MainButton!
+    @IBOutlet var cancelButton: MainButton!
+
     private let viewModel: ValidationFailedViewModelProtocol
 
     @available(*, unavailable)
@@ -29,7 +27,7 @@ class ValidationFailedViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         headerLabel.attributedText = viewModel.title.styledAs(.header_1)
         descriptionLabel.attributedText = viewModel.description.styledAs(.body)
         acceptButton.style = .primary
@@ -42,9 +40,7 @@ class ValidationFailedViewController: UIViewController {
         cancelButton.action = {
             self.viewModel.cancelProcess()
         }
-        hintView.containerView.backgroundColor = .brandAccent10
-        hintView.containerView?.layer.borderColor = UIColor.onBackground50.cgColor
-        hintView.iconView.image = .infoSignal
+        hintView.style = .info
         hintView.titleLabel.attributedText = viewModel.hintTitle.styledAs(.mainButton)
         hintView.bodyLabel.attributedText = viewModel.hintText
         hintView.setConstraintsToEdge()
@@ -64,5 +60,4 @@ class ValidationFailedViewController: UIViewController {
         super.viewWillDisappear(animated)
         UIAccessibility.post(notification: .announcement, argument: ValidationServiceViewModel.Accessibility.closeViewController.label)
     }
-
 }

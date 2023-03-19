@@ -12,19 +12,18 @@ import XCTest
 @testable import CovPassCommon
 
 class UserDefaultsPersistenceTests: XCTestCase {
-    
     var sut: UserDefaultsPersistence!
 
     override func setUp() {
         super.setUp()
         sut = UserDefaultsPersistence()
     }
-    
+
     override func tearDown() {
         sut = nil
         super.tearDown()
     }
-    
+
     func testUserDefaultsPersistence() {
         let randomKey = "\(Date().timeIntervalSince1970.rounded())"
         XCTAssertNil(try sut.fetch(randomKey))
@@ -33,34 +32,7 @@ class UserDefaultsPersistenceTests: XCTestCase {
         XCTAssertNoThrow(try sut.delete(randomKey))
         XCTAssertNil(try sut.fetch(randomKey))
     }
-    
-    func testSetLogicTypeEu() {
-        // GIVEN
-        sut.selectedLogicType = .eu
-        // WHEN
-        let selectedLogicType = sut.selectedLogicType
-        // THEN
-        XCTAssertEqual(selectedLogicType, .eu)
-    }
-    
-    func testSetLogicTypeDe() {
-        // GIVEN
-        sut.selectedLogicType = .de
-        // WHEN
-        let selectedLogicType = sut.selectedLogicType
-        // THEN
-        XCTAssertEqual(selectedLogicType, .de)
-    }
-    
-    func testSetLogicTypeBooster() {
-        // GIVEN
-        sut.selectedLogicType = .booster
-        // WHEN
-        let selectedLogicType = sut.selectedLogicType
-        // THEN
-        XCTAssertEqual(selectedLogicType, .booster)
-    }
-    
+
     func testSetRevocationExpertMode_True() {
         // GIVEN
         sut.revocationExpertMode = true
@@ -69,7 +41,7 @@ class UserDefaultsPersistenceTests: XCTestCase {
         // THEN
         XCTAssertEqual(revocationExpertMode, true)
     }
-    
+
     func testSetRevocationExpertMode_False() {
         // GIVEN
         sut.revocationExpertMode = false
@@ -78,7 +50,7 @@ class UserDefaultsPersistenceTests: XCTestCase {
         // THEN
         XCTAssertEqual(revocationExpertMode, false)
     }
-        
+
     func testSetRevocationExpertMode_Nil() throws {
         // GIVEN
         try sut.delete(UserDefaults.keyRevocationExpertMode)
@@ -86,5 +58,34 @@ class UserDefaultsPersistenceTests: XCTestCase {
         let revocationExpertMode = sut.revocationExpertMode
         // THEN
         XCTAssertEqual(revocationExpertMode, false)
+    }
+
+    func testLastUpdateDomesticRules_Nil() throws {
+        // GIVEN
+        try sut.delete(UserDefaults.keyLastUpdateDomesticRuless)
+        // WHEN
+        let lastUpdateDomesticRules = sut.lastUpdateDomesticRules
+        // THEN
+        XCTAssertNil(lastUpdateDomesticRules)
+    }
+
+    func testLastUpdateDomesticRules_Date_over_store() throws {
+        // GIVEN
+        let date = Date()
+        try sut.store(UserDefaults.keyLastUpdateDomesticRuless, value: date)
+        // WHEN
+        let lastUpdateDomesticRules = sut.lastUpdateDomesticRules
+        // THEN
+        XCTAssertEqual(date, lastUpdateDomesticRules)
+    }
+
+    func testLastUpdateDomesticRules_Date() throws {
+        // GIVEN
+        let date = Date()
+        sut.lastUpdateDomesticRules = date
+        // WHEN
+        let lastUpdateDomesticRules = sut.lastUpdateDomesticRules
+        // THEN
+        XCTAssertEqual(date, lastUpdateDomesticRules)
     }
 }

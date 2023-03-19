@@ -78,7 +78,7 @@ public final class SVGPDFExporter: SVGPDFExportProtocol {
             // test result
             svg = svg.replacingOccurrences(of: "$tr", with: test.trDisplayName.sanitizedXMLString)
             // testing center
-            svg = svg.replacingOccurrences(of: "$tc", with: test.tc.sanitizedXMLString)
+            svg = svg.replacingOccurrences(of: "$tc", with: test.tc?.sanitizedXMLString ?? .placeholder)
             // country
             svg = svg.replacingOccurrences(of: "$co", with: test.co.sanitizedXMLString)
             // certificate issue
@@ -107,7 +107,7 @@ public final class SVGPDFExporter: SVGPDFExportProtocol {
         }
 
         #if DEBUG
-        let pattern = String(cString: #"\>\$\w+\<"#, encoding: .utf8)!
+            let pattern = #"\>\$\w+\<"#
             let regex = try! NSRegularExpression(pattern: pattern)
             let range = NSRange(location: 0, length: svg.utf16.count)
             if let match = regex.firstMatch(in: svg, options: [], range: range) {

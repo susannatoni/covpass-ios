@@ -1,13 +1,13 @@
 //
 //  RevocationPDFExportData.swift
-//  
 //
-//  Created by Thomas Kuleßa on 09.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
+import CovPassCommon
 import Foundation
 import PDFKit
-import CovPassCommon
 
 struct RevocationPDFExportData: RevocationPDFExportDataProtocol {
     let fileURL: URL
@@ -31,6 +31,6 @@ struct RevocationPDFExportData: RevocationPDFExportDataProtocol {
     }
 
     func delete() throws {
-        try fileManager.removeItem(at: self.fileURL)
+        try fileManager.removeItem(at: fileURL)
     }
 }

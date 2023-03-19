@@ -17,12 +17,20 @@
 
 "cancel" = "Abbrechen";
 
+"next" = "Weiter";
+
+"back" = "Zurück";
+
+"on" = "An";
+
+"off" = "Aus";
+
 
 /********** onboarding **********/
 
 "start_onboarding_title" = "Willkommen in der CovPassCheck-App";
 
-"start_onboarding_message" = "Finden Sie in wenigen Sekunden heraus, ob die geprüfte Person ein gültiges COVID-Zertifikat besitzt.";
+"start_onboarding_message" = "Finden Sie in wenigen Sekunden heraus, ob die geprüfte Person ein gültiges COVID-Zertifikat der EU besitzt.";
 
 "start_onboarding_secure_title" = "Sicher und datensparsam";
 
@@ -79,6 +87,8 @@
 
 "dialog_start_screen_button_update" = "Aktualisieren";
 
+"dialog_update_info_notification_action_button" = "OK";
+
 "accessibility_update_info_announce" = "Die Ansicht \"Neue Funktionen\" wurde geöffnet";
 
 "accessibility_check_context_onboarding_announce_open" = "Die Ansicht “Wann nutzen Sie die CovPassCheck-App?” wurde geöffnet.";
@@ -104,11 +114,32 @@
 "check_context_onboarding_button" = "OK";
 
 
+/********** what is new: popup **********/
+
+"whats_new_screen_title" = "Neue Funktionen";
+
+"whats_new_screen_update_notifications_checkbox_headline" = "Diese Art von Benachrichtigungen nicht mehr anzeigen";
+
+"whats_new_screen_update_notifications_checkbox_copy" = "Sie können diese Entscheidung jederzeit in den Einstellungen ändern.";
+
+
 /********** start screen **********/
 
-"accessibility_validation_start_screen_label_information" = "Mehr Informationen";
+"accessibility_validation_start_screen_label_information" = "Einstellungen";
 
-"validation_start_screen_title" = "Übersicht";
+"validation_start_screen_title" = "CovPass-Check";
+
+"start_screen_toggle_mask" = "Maskenpflicht";
+
+"start_screen_toggle_vaccination" = "Impfschutz";
+
+"start_screen_vaccination_status_title" = "Impfschutz nach IfSG § 22a";
+
+"accessibility_start_screen_vaccination_status_title" = "Impfschutz nach Infektionsschutzgesetz Paragraph 22a";
+
+"start_screen_vaccination_status_copy" = "Einen gültigen Impfschutz hat, wer mindestens drei Impfungen oder zwei Impfungen und eine Genesung nachweisen kann.";
+
+"start_screen_vaccination_status_hint" = "Bitte scannen Sie immer die aktuellsten Nachweise zuerst.";
 
 "validation_start_screen_scan_title" = "3G prüfen";
 
@@ -118,7 +149,9 @@
 
 "validation_start_screen_scan_message_2G" = "Scannen Sie nacheinander die notwendigen Nachweise für 2G+.";
 
-"validation_start_screen_scan_message_2G_toggle" = "Bei Auffrischungsimpfungen ist kein Test nötig";
+"start_screen_authority_function_hint" = "Die Behördenfunktion ist nur im 3G-Modus verfügbar!";
+
+"validation_start_screen_scan_message_2G_toggle" = "Bei Auffrischimpfungen ist kein Test nötig";
 
 "validation_start_screen_scan_sync_message_title" = "Datum und Uhrzeit prüfen";
 
@@ -156,6 +189,20 @@
 
 "validation_start_screen_offline_modus_button" = "Aktualisieren";
 
+"start_offline_title" = "Offline prüfen";
+
+"start_offline_status_available" = "Verfügbar";
+
+"start_offline_status_unavailable" = "Aktualisierung notwendig";
+
+"start_offline_copy" = "Um ohne Internetverbindung zuverlässig prüfen zu können, sollten die Prüfregeln vor weniger als 24 Stunden aktualisiert worden sein.";
+
+"start_offline_link_title" = "Prüfregeln aktualisieren";
+
+"start_offline_link_subtitle_available" = "Letzte Aktualisierung vor weniger als 24 Stunden";
+
+"start_offline_subtitle_unavailable" = "Letzte Aktualisierung älter als 24 Stunden";
+
 
 /********** popup: Check vaccination **********/
 
@@ -169,8 +216,6 @@
 
 "accessibility_scan_dialog_camera_access_label_close" = "Schließen";
 
-"accessibility_scan_camera_announce" = "Kamera-Ansicht wurde geöffnet";
-
 "accessibility_scan_camera_closing_announce" = "Kamera-Ansicht wurde geschlossen";
 
 "error_camera_access_title" = "Die CovPassCheck-App möchte auf Ihre Kamera zugreifen.";
@@ -181,11 +226,27 @@
 
 "error_camera_access_button_allow" = "Erlauben";
 
-"accessibility_scan_camera_torch_on" = "Taschenlampe anschalten";
-
 "accessibility_scan_camera_torch_off" = "Taschenlampe ausschalten";
 
-"validation_check_popup_valid_vaccination_recovery_title" = "Zertifikat gültig*";
+"accessibility_scan_camera_announce" = "Kamera-Ansicht wurde geöffnet. Der QR-Code wird automatisch gescannt.";
+
+"accessibility_scan_camera_torch_turn_on" = "Taschenlampe anschalten";
+
+"accessibility_scan_camera_torch_on" = "Taschenlampe wurde angeschaltet";
+
+"accessibility_scan_camera_torch_turn_off" = "Taschenlampe wurde ausgeschaltet";
+
+"dialog_second_scan_title" = "Zertifikat wurde bereits gescannt";
+
+"dialog_second_scan_message" = "Sie haben dieses Zertifikat bereits gescannt. Scannen Sie bitte einen anderen Nachweis.";
+
+"dialog_second_scan_button_repeat" = "Neuer Scan";
+
+"dialog_second_scan_button_update" = "Abbrechen";
+
+"validation_check_popup_valid_vaccination_recovery_title" = "Vollständiger Impfschutz vorhanden";
+
+"validation_check_popup_valid_vaccination_recovery_subtitle" = "nach IfSG § 22a";
 
 "validation_check_popup_valid_vaccination_recovery_message" = "Gleichen Sie jetzt folgende Daten mit einem Ausweisdokument der geprüften Person ab.";
 
@@ -201,31 +262,63 @@
 
 "technical_validation_check_popup_unsuccessful_certificate_signature_subheading" = "Ungültige Signatur";
 
-"technical_validation_check_popup_unsuccessful_certificate_signature_subline" = "Das Zertifikat wurde nicht von einer autorisierten Stelle ausgestellt oder gehört nicht zu einem Digitalen COVID-Zertifikat der EU.";
+"technical_validation_check_popup_unsuccessful_certificate_signature_subline" = "Das Zertifikat ist kein digitales COVID-Zertifikat der EU oder wurde nicht von einer autorisierten Stelle ausgestellt.";
 
 "technical_validation_check_popup_unsuccessful_certificate_qrreadibility_subheading" = "QR-Code nicht lesbar";
 
 "technical_validation_check_popup_unsuccessful_certificate_qrreadibility_subline" = "Der QR-Code ist nicht lesbar. Bitte aktualisieren Sie die CovPassCheck-App, wenn dieses Problem häufiger auftritt.";
 
-"technical_validation_check_popup_valid_vaccination_button_title" = "Weiteres Zertifikat scannen";
+"technical_validation_check_popup_valid_vaccination_button_1_title" = "Neue Prüfung";
 
-"functional_validation_check_popup_unsuccessful_certificate_title" = "Zertifikat erfüllt nicht alle Bedingungen";
+"technical_validation_check_popup_retry" = "Letzten Scan wiederholen";
 
-"functional_validation_check_popup_unsuccessful_certificate_subline" = "Die geprüfte Person kann den Grund z. B. in der CovPass-App einsehen. Die häufigsten Gründe:";
+"technical_validation_invalid_expired_title" = "Zertifikat abgelaufen";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_expiration" = "Abgelaufener Test";
+"technical_validation_invalid_expired_subtitle" = "Das technische Ablaufdatum des Zertifikats wurde überschritten. Scannen Sie ein neu ausgestelltes Zertifikat ein.";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_expiration_text" = "Ein negativer Schnelltest ist für maximal 48 Stunden gültig. Ein negativer PCR-Test ist für maximal 72 Stunden gültig.";
+"technical_validation_check_popup_valid_vaccination_button_3_title" = "Abbrechen";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_protection" = "Noch nicht gültiger Schutz";
+"functional_validation_check_popup_unsuccessful_certificate_title" = "Unvollständiger Impfschutz";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_protection_text" = "Erst 14 Tage nach der Zweitimpfung gilt der Impfschutz als vollständig. Die Genesung von einer Corona-Infektion muss mindestens 28 Tage alt sein.";
+"functional_validation_check_popup_unsuccessful_certificate_subtitle" = "nach IfSG § 22a";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_uncompleted" = "Unvollständige Impfserie";
+"functional_validation_check_popup_unsuccessful_certificate_copy" = "Die erbrachten Nachweise ergeben keinen vollständigen Impfschutz. Mögliche Gründe:";
 
-"functional_validation_check_popup_unsuccessful_certificate_subheadline_uncompleted_text" = "Je nach Impfstoff sind für die Erlangung des vollständigen Impfschutzes mehrere Impfdosen erforderlich.";
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_expiration" = "Impfserie unvollständig";
 
-"technical_validation_check_popup_valid_vaccination_button_further" = "Weiteres Zertifikat scannen";
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_expiration_text" = "Für einen vollständigen Impfschutz muss eine Reihe von mindestens drei Immun-Ereignissen (Impfungen oder Genesungen) nachgewiesen werden, davon mindestens zwei Impfungen.";
+
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_protection" = "Falsche Zertifikate gescannt";
+
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_protection_text" = "Bitte scannen Sie immer die aktuellsten Nachweise zuerst.";
+
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_uncompleted" = "Nicht zugelassener Impfstoff";
+
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_uncompleted_text" = "Bei Impfserien mit nicht in Deutschland zugelassenen Impfstoffen muss mindestens eine Impfung mit einem mRNA-Impfstoff nachgewiesen werden.";
+
+"validation_faq_link" = "#Zu den häufigen Fragen::https://www.digitaler-impfnachweis-app.de/faq/#wer-gilt-in-deutschland-als-vollst-ndig-geimpft-#";
+
+"functional_validation_check_popup_unsuccessful_certificate_subheadline_uncompleted_button" = "Neue Prüfung";
+
+"functional_validation_check_popup_second_scan_title" = "Impfschutz-Prüfung";
+
+"functional_validation_check_popup_second_scan_subtitle" = "nach IfSG § 22a";
+
+"functional_validation_check_popup_second_scan_blue_card_1_title" = "1. Zertifikat";
+
+"functional_validation_check_popup_second_scan_blue_card_1_subtitle" = "Nicht ausreichend";
+
+"functional_validation_check_popup_second_scan_blue_card_2_title" = "2. Zertifikat";
+
+"functional_validation_check_popup_second_scan_blue_card_2_subtitle" = "Scannen Sie einen weiteren Nachweis";
+
+"functional_validation_check_popup_second_scan_blue_card_3_title" = "3. Zertifikat";
+
+"functional_validation_check_popup_second_scan_blue_card_3_subtitle" = "Scannen Sie einen weiteren Nachweis";
+
+"functional_validation_check_popup_second_scan_hint_title" = "Hinweis";
+
+"functional_validation_check_popup_second_scan_hint_copy" = "Für den Nachweis eines vollständigen Impfschutzes sind mehrere Nachweise notwendig.";
 
 "validation_check_popup_valid_vaccination_button_title" = "Weiteres Zertifikat scannen";
 
@@ -282,7 +375,7 @@
 
 "result_2G_close" = "Schließen";
 
-"result_2G_footnote" = "* Grundimmunisierung, Auffrischungsimpfung oder Genesung";
+"result_2G_footnote" = "* Grundimmunisierung, Auffrischimpfung oder Genesung";
 
 "result_2G_button_scan_test" = "Testzertifikat scannen";
 
@@ -296,7 +389,7 @@
 
 "result_2G_gproof_valid" = "2G-Nachweis gültig*";
 
-"result_2G_booster_valid" = "Auffrischungsimpfung gültig";
+"result_2G_booster_valid" = "Auffrischimpfung gültig";
 
 "result_2G_gproof_invalid" = "2G-Nachweis ungültig*";
 
@@ -314,7 +407,7 @@
 
 "result_2G_2nd_basic_valid" = "Grundimmunisierung";
 
-"result_2G_2nd_booster_valid" = "Auffrischungsimpfung";
+"result_2G_2nd_booster_valid" = "Auffrischimpfung";
 
 "result_2G_2nd_rapidtest_valid" = "Negativer Schnelltest";
 
@@ -334,7 +427,7 @@
 
 "result_2G_3rd_vacc_recov_empty" = "Impfung* oder Genesung";
 
-"result_2G__3rd_footnote" = "* Erwartet Grundimmunisierung oder Auffrischungsimpfung";
+"result_2G__3rd_footnote" = "* Erwartet Grundimmunisierung oder Auffrischimpfung";
 
 "result_2G__3rd_button" = "Zweites Zertifikat scannen";
 
@@ -364,12 +457,20 @@
 
 "error_2G_unexpected_type_title" = "Falscher Zertifikatstyp";
 
-"error_2G_unexpected_type_copy" = "Das gescannte Zertifikat entspricht nicht dem erwarteten Zertifikatstyp. Für 2G+ müssen Sie einen 2G-Nachweis (Genesenen- oder Impfzertifikat) und ein Testzertifikat scannen.";
+"error_2G_unexpected_type_copy" = "Das gescannte Zertifikat entspricht nicht dem erwarteten Zertifikatstyp. Kombinieren Sie entweder ein zweites Impfzertifikat mit einem Genesenenzertifikat oder scannen Sie ein gültiges Testzertifikat.";
 
 "error_2G_unexpected_type_button" = "OK";
 
+"error_2G_unexpected_type_old_recovery_title" = "Falscher Zertifikatstyp";
 
-/********** app information **********/
+"error_2G_unexpected_type_old_recovery_copy" = "Um 2G+ mit einem Genesenenzertifikat, das älter als 90 Tage ist, zu erfüllen, müssen Sie als zweiten Nachweis eine Grundimmunisierung scannen.";
+
+"error_2G_unexpected_type_old_recovery_button" = "OK";
+
+"result_countdown" = "Diese Ansicht schließt sich in %d Sekunden.";
+
+
+/********** Settings **********/
 
 "accessibility_app_information_label_back" = "Zurück zum Startbildschirm";
 
@@ -381,7 +482,9 @@
 
 "accessibility_app_information_title_contact_announce" = "Die Ansicht \"Kontakt\" wurde geöffnet";
 
-"app_information_message_contact_support" = "Kontakt bei technischen Fragen zur CovPassCheck-App";
+"accessibility_app_information_title_contact_closing_announce" = "Die Ansicht \"Kontakt\" wurde geschlossen";
+
+"app_information_message_contact_support" = "Kontakt bei Fragen zur CovPassCheck-App";
 
 "app_information_message_contact_support_phone" = "Telefon: #0800–4747–002::tel:0800–4747–002#";
 
@@ -413,6 +516,8 @@
 
 "app_information_title_open_source" = "Open-Source-Lizenzen";
 
+"accessibility_app_information_title_open_source_closing_announce" = "Die Ansicht \"Open-Source-Lizenzen\" wurde geschlossen";
+
 "app_information_title_accessibility_statement" = "Barrierefreiheitserklärung";
 
 "app_information_title_accessibility_statement_linked" = "#Barrierefreiheitserklärung::$0#";
@@ -425,11 +530,39 @@
 
 "app_information_message_open_source" = "Die App verwendet die folgenden Open-Source-Bibliotheken:";
 
+"accessibility_app_information_title_informationt_closing_announce" = "Die Ansicht \"Informationen\" wurde geschlossen";
+
 "accessibility_app_information_open_source_label_back" = "Zurück";
 
-"app_information_title_update" = "Prüfregeln aktualisieren";
+"app_information_title_update" = "Prüfregeln";
 
-"app_information_message_update" = "Zur Überprüfung eingescannter Zertifikate benötigt die App aktuelle Listen der vertrauenswürdigen Zertifikatsaussteller und der momentan in Deutschland geltenden Corona-Regeln.\n\nDiese Listen aktualisieren sich täglich automatisch. Sie können hier auch jederzeit eine manuelle Aktualisierung vornehmen.";
+"settings_rules_list_title" = "Prüfregeln";
+
+"settings_rules_list_status_updated" = "Aktualisiert";
+
+"settings_rules_list_status_outofdate" = "Aktualisierung notwendig";
+
+"settings_rules_list_entry" = "Einreiseregeln";
+
+"settings_rules_list_domestic" = "Inlandsregeln";
+
+"settings_rules_list_features" = "Regelmerkmale";
+
+"settings_rules_list_issuer" = "Zertifikatsaussteller";
+
+"settings_rules_list_countries" = "Länderlisten";
+
+"settings_rules_list_authorities" = "Behördenlisten";
+
+"settings_rules_list_loading_title" = "Listen werden aktualisiert…";
+
+"settings_rules_list_loading_size" = "%d / %d MB";
+
+"settings_rules_list_loading_cancel" = "Abbrechen";
+
+"app_information_message_update" = "Legen Sie fest, nach welchen Regeln COVID-Zertifikate geprüft werden sollen. Aktualisieren Sie gegebenenfalls die Prüfregeln (siehe unten).";
+
+"app_information_rules_list_title" = "Regelwerk";
 
 "app_information_message_update_note" = "Letztes Update";
 
@@ -443,17 +576,43 @@
 
 "accessibility_app_information_update_back" = "Zurück";
 
+"accessibility_app_information_checking_rules_open" = "Die Ansicht \"Prüfregeln\" wurde geöffnet";
+
+"accessibility_app_information_checking_rules_close" = "Die Ansicht \"Prüfregeln\" wurde geschlossen";
+
+"app_information_title_checkrules" = "Prüfregeln";
+
+"app_information_offline_revocation_copy_1" = "Hier können Sie die Regeln aktualisieren, nach denen Zertifikate geprüft werden. Sollte Ihr Smartphone üblicherweise mit dem Internet verbunden sein, passiert das automatisch.";
+
+"app_information_offline_revocation_title" = "Gesperrte Zertifikate offline prüfen";
+
+"app_information_offline_revocation_copy_2" = "Aktivieren Sie diese Einstellung, erkennt die App von den Behörden gesperrte Zertifikate auch, wenn Sie nicht mit dem Internet verbunden sind. Diese Funktion verbraucht mehr Datenvolumen.";
+
+"app_information_offline_revocation_hint_title" = "Hinweis";
+
+"app_information_offline_revocation_hint_copy" = "Wenn die Funktion deaktiviert wird, werden die lokalen App-Daten von Ihrem Gerät gelöscht. Zertifikate können dann nur noch im Online-Modus geprüft werden.";
+
+"app_information_offline_revocation_hint_button_active" = "OK";
+
+"app_information_offline_revocation_hint_button_inactive" = "Abbrechen";
+
 "accessibility_app_information_title_update" = "Die Ansicht \"Prüfregeln aktualisieren\" wurde geöffnet";
 
 "accessibility_app_information_title_local_rules" = "Die Ansicht \"Prüfsituation\" wurde geöffnet";
 
-"app_information_title_local_rules" = "Prüfsituation";
+"app_information_title_local_rules" = "Regelwerk";
 
 "app_information_title_local_rules_button" = "Übernehmen";
 
 "app_information_title_local_rules_status_DE" = "Innerhalb DE";
 
 "app_information_title_local_rules_status_EU" = "Einreise";
+
+"accessibility_settings_beep_announce_open" = "Die Ansicht \"Signalton beim Scannen\" wurde geöffnet";
+
+"accessibility_settings_beep_announce_close" = "Die Ansicht \"Signalton beim Scannen\" wurde geschlossen";
+
+"accessibility_settings_beep_backlabel" = "Zurück";
 
 "app_information_beep_when_checking_title" = "Signalton beim Scannen";
 
@@ -470,6 +629,25 @@
 "app_information_authorities_function_state_off" = "Aus";
 
 "app_information_version_label" = "Version %@";
+
+
+/********** what is new: settings **********/
+
+"accessibility_app_information_title_update_notifications_announce" = "Die Ansicht \"Update-Benachrichtigungen\" wurde geöffnet";
+
+"accessibility_app_information_title_update_notifications_closing_announce" = "Die Ansicht \"Update-Benachrichtigungen\" wurde geschlossen";
+
+"app_information_title_update_notifications" = "Update-Benachrichtigungen";
+
+"app_information_copy_update_notifications" = "Sie können ab jetzt die Update-Benachrichtigungen deaktivieren. Mit dem Regler können Sie jederzeit die Updates deaktivieren oder wieder aktivieren. Wenn sie den Update-Benachrichtigungen deaktivieren, bekommen Sie keine Updates mehr über die neuesten Software-Entwicklungen in der App.";
+
+"app_information_update_notifications_toggle" = "Update-Benachrichtigungen anzeigen";
+
+"app_information_update_notifications_new_version_copy" = "Neue Funktionen (Version %@)";
+
+"settings_list_status_on" = "An";
+
+"settings_list_status_off" = "Aus";
 
 
 /********** error handling **********/
@@ -503,7 +681,7 @@
 
 "revocation_headline" = "Behördenfunktion";
 
-"revocation_copy" = "Diese Funktion richtet sich ausschließlich an die Polizeibehörden und ermöglicht diesen, die Sperrkennung eines Zertifikats im Rahmen von Ermittlungen auszulesen. Im normalen Gebrauch soll diese Funktion deaktiviert bleiben. Der Versuch ein Zertifikat unberechtigt durch die Behördenfunktion sperren zu lassen ist strafbar und kann erhebliche Folgen nach sich ziehen.\n\nSollten Sie den Verdacht haben, dass ein gefälschtes oder inhaltlich unrichtiges Zertifikat vorliegt, informieren Sie bitte die nächste Polizeibehörde.";
+"revocation_copy" = "Diese Funktion richtet sich ausschließlich an die Polizeibehörden und ermöglicht diesen, die Sperrkennung eines Zertifikats im Rahmen von Ermittlungen auszulesen. Im normalen Gebrauch soll diese Funktion deaktiviert bleiben. Der Versuch, ein Zertifikat unberechtigt durch die Behördenfunktion sperren zu lassen, ist strafbar und kann erhebliche Folgen nach sich ziehen.\n\nSollten Sie den Verdacht haben, dass ein gefälschtes oder inhaltlich unrichtiges Zertifikat vorliegt, informieren Sie bitte die nächste Polizeibehörde.";
 
 "revocation_toggle_text" = "Behördenfunktion aktivieren";
 
@@ -513,7 +691,7 @@
 
 "revocation_detail_page_title" = "Technische Details zum Zertifikat";
 
-"revocation_detail_page_button_text" = "PDF erstellen";
+"revocation_detail_page_button_text" = "EU-Ausdruck erstellen";
 
 "revocation_detail_page_transaction_number" = "Transaktionsnummer";
 
@@ -532,6 +710,149 @@
 "certificate_share_pdf_shareitem_android_covpasscheck" = "PDF speichern";
 
 "accessibility_revocation_settings_page_announce" = "Einstellungen zur Behördenfunktion wurden geöffnet";
+
+"infschg_settings_title" = "Prüfregeln";
+
+"infschg_settings_copy_1" = "Hier können Sie die Regeln aktualisieren, nach denen Zertifikate geprüft werden. Sollte Ihr Smartphone üblicherweise mit dem Internet verbunden sein, passiert das automatisch.";
+
+"infschg_result_mask_optional_title" = "Keine Maskenpflicht";
+
+"infschg_result_mask_optional_subtitle" = "in %@*";
+
+"infschg_result_mask_optional_copy" = "Gleichen Sie jetzt folgende Daten mit einem Ausweisdokument der geprüften Person ab.";
+
+"infschg_result_mask_optional_copy_notification" = "Diese Ansicht schließt sich nach 2 Min. von selbst.";
+
+"accessibility_popup_new_rules_announce" = "Die Ansicht \"Neue gesetzliche Regelungen\" wurde geöffnet";
+
+"accessibility_popup_new_rules_closing_announce" = "Die Ansicht \"Neue gesetzliche Regelungen\" wurde geschlossen";
+
+"infschg_info_title" = "Neue gesetzliche Regelungen";
+
+"infschg_info_copy_1" = "In Deutschland tritt eine Änderung des Infektionsschutzgesetzes in Kraft. Deshalb ändert sich Ihre CovPassCheck-App ab heute auch.";
+
+"infschg_info_copy_2" = "Befreiung von einer bundeslandspezifischen Maskenpflicht";
+
+"infschg_info_copy_3" = "Sie können jetzt mit dieser App prüfen, ob die Nachweise einer Person für die Befreiung von einer bundeslandspezifischen Maskenpflicht ausreichen. Wählen Sie dazu einfach Ihr Bundesland vor der Prüfung aus.\n\nEin negativer Schnell- oder PCR-Test befreit 24 Stunden von dieser Maskenpflicht. In manchen Bundesländern können auch Impfungen und Genesungen von dieser Maskenpflicht befreien.";
+
+"infschg_info_button" = "OK";
+
+"infschg_accessibility_start_screen_label_information" = "Mehr Informationen";
+
+"infschg_validation_start_screen_title" = "Maskenpflicht prüfen";
+
+"infschg_start_screen_dropdown_title" = "Bundesland";
+
+"infschg_result_mask_optional_infobox_title" = "Behördenfunktion";
+
+"infschg_result_mask_optional_infobox_copy" = "Diese Funktion richtet sich ausschließlich an die Polizeibehörden. Der Versuch, ein Zertifikat unberechtigt sperren zu lassen, ist strafbar und kann erhebliche Folgen nach sich ziehen.";
+
+"infschg_result_mask_optional_infobox_link" = "Informationen zur Sperrung anzeigen";
+
+"infschg_result_mask_mandatory_title" = "Maskenpflicht";
+
+"infschg_result_mask_mandatory_copy" = "Das gescannte Zertifikat befreit nicht von der Maskenpflicht. Mögliche Gründe:";
+
+"infschg_result_mask_mandatory_reason_1_title" = "Zertifikat nicht im Gültigkeitszeitraum";
+
+"infschg_result_mask_mandatory_reason_1_copy" = "Eventuell sind noch nicht 28 Tage nach dem positiven Test vergangen oder die letzte Impfung/Genesung liegt über 90 Tage zurück.";
+
+"infschg_result_mask_mandatory_reason_2_title" = "Falscher Zertifikatstyp";
+
+"infschg_result_mask_mandatory_reason_2_copy" = "Für die Befreiung von der Maskenpflicht ist in Ihrem Bundesland ein anderer Zertifikatstyp notwendig.";
+
+"infschg_result_mask_mandatory_reason_3_title" = "Unvollständige Impfserie";
+
+"infschg_result_mask_mandatory_reason_3_copy" = "Für die Erlangung eines vollständigen Impfschutzes sind drei Impfstoffdosen oder zwei Impfstoffdosen plus eine Genesung erforderlich.";
+
+"infschg_result_mask_mandatory_reason_4_title" = "Ungültige Signatur";
+
+"infschg_result_mask_mandatory_reason_4_copy" = "Das Zertifikat ist kein Digitales COVID-Zertifikat der EU oder wurde nicht von einer autorisierten Stelle ausgestellt.";
+
+"infschg_result_mask_mandatory_reason_5_title" = "QR-Code nicht lesbar";
+
+"infschg_result_mask_mandatory_reason_5_copy" = "Der QR-Code ist nicht lesbar. Bitte aktualisieren Sie die CovPassCheck-App, wenn dieses Problem häufiger auftritt.";
+
+"infschg_result_mask_mandatory_second_scan_infobox_title" = "Zwei Nachweise notwendig?";
+
+"infschg_result_mask_mandatory_second_scan_infobox_copy" = "Es kann sein, dass Ihr Bundesland eine Befreiung von der Maskenpflicht bei einer Kombination aus zwei Impfungen plus einer Genesung ermöglicht. Scannen Sie in diesem Fall ein weiteres Zertifikat der Person.";
+
+"infschg_result_mask_mandatory_second_scan_infobox_button" = "Zweites Zertifikat scannen";
+
+"infschg_result_mask_mandatory_deviating_data_title" = "Abweichende Daten";
+
+"infschg_result_mask_mandatory_deviating_data_copy" = "Die persönlichen Daten der beiden gescannten Nachweise stimmen nicht überein:";
+
+"infschg_result_mask_mandatory_deviating_data_subtitle_1" = "1. Zertifikat";
+
+"infschg_result_mask_mandatory_deviating_data_subtitle_2" = "2. Zertifikat";
+
+"infschg_result_mask_mandatory_deviating_data_subtitle_3" = "Kein Fehler?";
+
+"infschg_result_mask_mandatory_deviating_data_copy_2" = "Sollte es sich Ihrer Ansicht nach zum Beispiel um einen Tippfehler handeln, können Sie diese Abweichung ignorieren und die Prüfung fortsetzen.";
+
+"infschg_result_mask_mandatory_deviating_data_link" = "Abweichung ignorieren";
+
+"infschg_result_no_mask_rules_title" = "Keine zusätzlichen Regeln";
+
+"infschg_result_no_mask_rules_subtitle" = "in %@";
+
+"infschg_result_no_mask_rules_copy_1_bold" = "Für dieses Bundesland liegen dem RKI aktuell keine bundeslandspezifischen Regeln vor. Es gelten daher nur die bundeseinheitlichen Regeln zur Maskenpflicht.";
+
+"infschg_result_no_mask_rules_copy_2" = "Sofern das Bundesland, in dem Sie sich aufhalten, eine Maskenpflicht angeordnet hat, befreit ein negativer Schnell- oder PCR-Test bei Freizeit-, Kultur- und Sportveranstaltungen sowie in gastronomischen Einrichtungen für 24 Stunden von dieser Maskenpflicht. Ein unbeaufsichtigter durchgeführter Selbsttest genügt nicht. Ihr Bundesland kann regeln, dass auch vollständige Impfungen oder Genesungen (wenn diese höchstens drei Monate zurückliegen) von der Maskenpflicht befreien.\n\nEine Befreiung von der Maskenpflicht gilt nicht im öffentlichen Personenfernverkehr, in Krankenhäusern, Pflegeeinrichtungen und in Arztpraxen.";
+
+"infschg_start_screen_white_box_copy_2" = "Letzte Aktualisierung vor weniger als 24 Stunden";
+
+"accessibility_checkapp_popup_choose_federal_state_announce" = "Die Ansicht \"Bundesland wählen\" wurde geöffnet";
+
+"accessibility_checkapp_popup_choose_federal_state_announce_when_chosen" = "Bundesland %@ wurde ausgewählt";
+
+"accessibility_checkapp_popup_choose_federal_state_closing_announce" = "Die Ansicht \"Bundesland wählen\" wurde geschlossen";
+
+"infschg_module_choose_federal_state_title" = "Bundesland wählen";
+
+"infschg_name_matching_error_title" = "Abweichende Daten";
+
+"infschg_name_matching_error_copy" = "Die persönlichen Daten der beiden gescannten Nachweise stimmen nicht überein. Scannen Sie bitte einen anderen Nachweis.";
+
+"infschg_name_matching_error_retry" = "Nochmal versuchen";
+
+"infschg_name_matching_error_cancel" = "Prüfung abbrechen";
+
+
+/********** federal state names **********/
+
+"DE_BY" = "Bayern";
+
+"DE_BB" = "Brandenburg";
+
+"DE_BE" = "Berlin";
+
+"DE_BW" = "Baden-Württemberg";
+
+"DE_HB" = "Bremen";
+
+"DE_HH" = "Hamburg";
+
+"DE_HE" = "Hessen";
+
+"DE_MV" = "Mecklenburg-Vorpommern";
+
+"DE_NI" = "Niedersachsen";
+
+"DE_NW" = "Nordrhein-Westfalen";
+
+"DE_RP" = "Rheinland-Pfalz";
+
+"DE_SN" = "Sachsen";
+
+"DE_ST" = "Sachsen-Anhalt";
+
+"DE_SL" = "Saarland";
+
+"DE_SH" = "Schleswig-Holstein";
+
+"DE_TH" = "Thüringen";
 
 
 /********** country list names **********/
@@ -717,3 +1038,75 @@
 "AR" = "Argentinien";
 
 "MX" = "Mexiko";
+
+
+/********** ruleset date **********/
+
+"state_ruleset_date_available_long" = "Es gelten die bundeslandspezifischen Regeln vom %@ (Gültigkeitsbeginn).";
+
+"state_ruleset_date_available_short" = "*Regeln vom %@ (Gültigkeitsbeginn)";
+
+"state_ruleset_date_unavailable" = "Für dieses Bundesland liegen dem RKI aktuell keine bundeslandspezifischen Regeln vor. Es gelten die Regeln des Bundes.";
+
+
+/********** Entry Check: Settings **********/
+
+"settings_rules_context_title" = "Prüfkontext";
+
+"settings_rules_context_subtitle" = "Auf dieser Basis wird der Impfschutz angezeigt.";
+
+"settings_rules_context_germany_title" = "Ich prüfe innerhalb Deutschlands";
+
+"settings_rules_context_germany_subtitle" = "Auf Basis des Infektionsschutzgesetz § 22a";
+
+"settings_rules_context_entry_title" = "Ich prüfe bei Einreisen";
+
+"settings_rules_context_entry_subtitle" = "Auf Basis der Coronavirus-Einreiseverordnung";
+
+"accessibility_option_selected" = "Ausgewählt";
+
+"accessibility_option_unselected" = "Nicht ausgewählt";
+
+
+/********** Entry Check: Start View **********/
+
+"start_vaccination_status_entry_title" = "Impfschutz nach Coronavirus-Einreiseverordnung";
+
+"start_vaccination_status_entry_subtitle" = "Derzeit gibt es keine Beschränkungen für die Einreise nach Deutschland. Um den Impfschutz innerhalb Deutschlands nach Infektionsschutzgesetz § 22a zu prüfen, ändern Sie den Prüfkontext in den #Einstellungen.::$0#";
+
+
+/********** Entry Check: Initial setup **********/
+
+"accessibility_rules_context_initial_setup_open" = "Die Ansicht \"Prüfkontext bestimmen\" wurde geöffnet.";
+
+"accessibility_rules_context_initial_setup_close" = "Die Ansicht \"Prüfkontext bestimmen\" wurde geschlossen.";
+
+"rules_context_initial_setup_title" = "Wann nutzen Sie die CovPassCheck-App?";
+
+"rules_context_initial_setup_subtitle" = "Wählen Sie, auf welcher Grundlage der Impfschutz bestimmt werden soll:";
+
+"rules_context_initial_setup_hint" = "Sie können die Angabe jederzeit in den Einstellungen ändern.";
+
+"rules_context_initial_setup_button" = "Übernehmen";
+
+
+/********** Entry Check: No rules dialog **********/
+
+"dialog_no_entry_rules_available_title" = "Keine Einreiseregeln";
+
+"dialog_no_entry_rules_available_subtitle" = "Aktuell bestehen keine Einreiseregeln nach Deutschland. Wollen Sie den Scanvorgang trotzdem weiterführen?";
+
+"dialog_no_entry_rules_available_button1" = "Weiter";
+
+"dialog_no_entry_rules_available_button2" = "Abbrechen";
+
+
+/********** Entry Check: Result Views **********/
+
+"entry_check_success_title" = "Keine Einschränkung";
+
+"entry_check_success_subtitle" = "nach Coronavirus-Einreiseverordnung";
+
+"entry_check_success_copy" = "Gleichen Sie jetzt folgende Daten mit einem Ausweisdokument der geprüften Person ab.";
+
+"entry_check_link" = "#Mehr zur Coronavirus-Einreiseverordnung::https://www.bundesgesundheitsministerium.de/service/gesetze-und-verordnungen/guv-19-lp/coronaeinreisev.html#";

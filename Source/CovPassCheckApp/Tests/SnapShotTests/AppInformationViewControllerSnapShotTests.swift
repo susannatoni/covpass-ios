@@ -7,30 +7,37 @@
 
 @testable import CovPassCheckApp
 @testable import CovPassUI
-import CovPassCommon
-import Foundation
 
 class AppInformationViewControllerSnapShotTests: BaseSnapShotTests {
-    func testDefault() {
-        let vm = EnglishAppInformationViewModel(
+    private var persistence: MockPersistence!
+    private var sut: AppInformationViewController!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        persistence = .init()
+        let viewModel = EnglishAppInformationViewModel(
             router: AppInformationRouterMock(),
-            userDefaults: UserDefaultsPersistence()
+            persistence: persistence
         )
-        UserDefaults.standard.set(nil, forKey: UserDefaults.keySelectedLogicType)
-        UserDefaults.standard.set(nil, forKey: UserDefaults.keyRevocationExpertMode)
-        let vc = AppInformationViewController(viewModel: vm)
-        verifyView(vc: vc)
+        sut = .init(viewModel: viewModel)
     }
-    
+
+    override func tearDownWithError() throws {
+        persistence = nil
+        sut = nil
+        try super.tearDownWithError()
+    }
+
+    func testDefault() {
+        verifyView(view: sut.view)
+    }
+
     func testDefaultAlternative() {
-        var persistence = UserDefaultsPersistence()
-        let vm = EnglishAppInformationViewModel(
-            router: AppInformationRouterMock(),
-            userDefaults: persistence
-        )
-        persistence.selectedLogicType = .eu
+        // Given
         persistence.revocationExpertMode = true
-        let vc = AppInformationViewController(viewModel: vm)
-        verifyView(vc: vc)
+        persistence.enableAcousticFeedback = true
+
+        // Then
+        verifyView(view: sut.view)
     }
 }

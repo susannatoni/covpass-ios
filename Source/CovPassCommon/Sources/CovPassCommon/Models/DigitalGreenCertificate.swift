@@ -39,7 +39,7 @@ public struct DigitalGreenCertificate: Codable {
     }
 
     public var uvciLocation: String? {
-        let pattern = String(cString: #"[a-zA-Z]{2}\/.+?(?=\/)"#, encoding: .utf8)!
+        let pattern = #"[a-zA-Z]{2}\/.+?(?=\/)"#
         let regex = try! NSRegularExpression(pattern: pattern, options: NSRegularExpression.Options.caseInsensitive)
         let range = NSMakeRange(0, uvci.count)
         guard let match = regex.firstMatch(in: uvci, options: .withTransparentBounds, range: range),
@@ -59,7 +59,7 @@ public struct DigitalGreenCertificate: Codable {
     }
 
     public var revocationUCICountryHash: [UInt8] {
-        (uvci + countryCode).bytes.sha256()
+        (countryCode + uvci).bytes.sha256()
     }
 
     public var countryCode: String {
@@ -68,7 +68,7 @@ public struct DigitalGreenCertificate: Codable {
 
     /// Returns `true` if certificate is a booster vaccination
     public var isVaccinationBoosted: Bool {
-        guard let result = v?.filter({ $0.isBoosted }) else { return false }
+        guard let result = v?.filter({ $0.isBoosted() }) else { return false }
         return !result.isEmpty
     }
 
@@ -96,7 +96,7 @@ public struct DigitalGreenCertificate: Codable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         nam = try values.decode(Name.self, forKey: .nam)
         if let dobDateString = try? values.decodeTrimmedString(forKey: .dob) {
-            dob = DateUtils.parseDate(dobDateString)
+            dob = DateUtils.parse(dateOfBirth: dobDateString)
         }
         dobString = try? values.decodeTrimmedString(forKey: .dobString)
         if dobString == nil {

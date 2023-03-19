@@ -18,6 +18,7 @@ public enum HCertError: Error, ErrorCode {
     case illegalKeyUsage
     case failedSignature
     case privateKeyLoadError
+    case expiredCertificate
 
     public var errorCode: Int {
         switch self {
@@ -31,6 +32,8 @@ public enum HCertError: Error, ErrorCode {
             return 414
         case .privateKeyLoadError:
             return 415
+        case .expiredCertificate:
+            return 416
         }
     }
 }
@@ -49,9 +52,21 @@ enum HCert {
         "1.3.6.1.4.1.0.1847.2021.1.3"
     ]
 
-    static func verify(message: CoseSign1Message, trustList: TrustList) throws -> TrustCertificate {
-        for cert in trustList.certificates {
-            if let publicKey = try? cert.loadPublicKey(), let valid = try? verify(message: message, publicKey: publicKey, skipConvertSignature: cert.rawData.isEmpty), valid {
+    static func verify(message: CoseSign1Message, trustList: TrustList, checkSealCertificate: Bool) throws -> TrustCertificate {
+        // first filter all DSCs with given KID
+        var filteredCertificates = trustList.certificates.filter { $0.kid == message.keyIdentifier.toBase64() }
+        if filteredCertificates.isEmpty {
+            // fallback when we there are no matching DSCs
+            filteredCertificates = trustList.certificates
+        }
+
+        // then check if there is a matching DSC that is able to verify the signature
+        for cert in filteredCertificates {
+            if let publicKey = try? cert.loadPublicKey(),
+               let valid = try? verify(message: message, publicKey: publicKey, skipConvertSignature: cert.rawData.isEmpty),
+               valid,
+               checkSealCertificate ? (try? Self.checkSealCertificate(trustCertificate: cert)) ?? false : true
+            {
                 return cert
             }
         }
@@ -91,6 +106,19 @@ enum HCert {
             // no match, certificate got signed with key for different purpose
             throw HCertError.illegalKeyUsage
         }
+    }
+
+    // Check if seal certificate is expired
+    public static func checkSealCertificate(trustCertificate: TrustCertificate) throws -> Bool {
+        let pemString = "-----BEGIN CERTIFICATE-----\n\(trustCertificate.rawData)\n-----END CERTIFICATE-----"
+        guard let pem = pemString.data(using: .utf8) else {
+            throw HCertError.expiredCertificate
+        }
+        let x509 = try X509Certificate(pem: pem)
+        if !x509.checkValidity(Date()) {
+            throw HCertError.expiredCertificate
+        }
+        return true
     }
 
     private static func extendedKeyUsageForCertificate(_ certificate: CBORWebToken) -> [String] {

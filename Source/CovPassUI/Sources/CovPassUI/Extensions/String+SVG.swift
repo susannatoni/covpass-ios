@@ -1,8 +1,8 @@
 //
 //  String+SVG.swift
-//  
 //
-//  Created by Thomas Kuleßa on 14.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 extension String {
@@ -22,5 +22,4 @@ extension String {
     private func tspan(y: Int) -> Self {
         String(format: "<tspan x=\"0\" y=\"\(y)\">\(self)</tspan>", y, self)
     }
-
 }

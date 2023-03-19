@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -12,6 +12,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CertificateItemDetailViewController" customModule="CovPassApp" customModuleProvider="target">
             <connections>
                 <outlet property="buttonStackView" destination="ir9-gh-Ice" id="bbk-mc-XPF"/>
+                <outlet property="expirationHintView" destination="EBh-Kl-BhA" id="kkC-GH-Svn"/>
                 <outlet property="hintView" destination="3cl-7D-PNO" id="hH0-Ap-bOD"/>
                 <outlet property="infoLabel1" destination="8lP-8f-hEk" id="EAH-kB-R5h"/>
                 <outlet property="infoLabel2" destination="fHs-Y7-col" id="zEg-pU-UzJ"/>
@@ -20,7 +21,6 @@
                 <outlet property="qrCodeButton" destination="F9o-pz-Rvg" id="bR3-ph-Go2"/>
                 <outlet property="scrollView" destination="YDs-Va-mXX" id="rkd-dK-EbI"/>
                 <outlet property="stackView" destination="4ka-qw-LRS" id="bvG-dB-nlQ"/>
-                <outlet property="subtitleLabel" destination="cYD-X5-OTC" id="VnC-5f-Wvh"/>
                 <outlet property="titleLabel" destination="eZz-97-0Z9" id="xC2-Yv-zP7"/>
                 <outlet property="view" destination="Dyt-0F-2nE" id="ak4-cW-x29"/>
             </connections>
@@ -39,10 +39,10 @@
                                 <view contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="50" translatesAutoresizingMaskIntoConstraints="NO" id="eZz-97-0Z9" userLabel="Headline" customClass="PlainLabel" customModule="CovPassUI">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="50"/>
                                 </view>
-                                <view contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="50" translatesAutoresizingMaskIntoConstraints="NO" id="cYD-X5-OTC" userLabel="Headline" customClass="PlainLabel" customModule="CovPassUI">
+                                <view contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="50" translatesAutoresizingMaskIntoConstraints="NO" id="3cl-7D-PNO" userLabel="Headline" customClass="HintView" customModule="CovPassUI">
                                     <rect key="frame" x="0.0" y="50" width="414" height="50"/>
                                 </view>
-                                <view contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="50" translatesAutoresizingMaskIntoConstraints="NO" id="3cl-7D-PNO" userLabel="Headline" customClass="HintView" customModule="CovPassUI">
+                                <view contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="50" translatesAutoresizingMaskIntoConstraints="NO" id="EBh-Kl-BhA" userLabel="Headline" customClass="HintButton" customModule="CovPassUI">
                                     <rect key="frame" x="0.0" y="100" width="414" height="50"/>
                                 </view>
                                 <stackView opaque="NO" contentMode="scaleToFill" placeholderIntrinsicWidth="414" placeholderIntrinsicHeight="200" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="rhc-O6-hd2" userLabel="Item StackView">
@@ -105,11 +105,11 @@
         <designable name="8lP-8f-hEk">
             <size key="intrinsicContentSize" width="414" height="128"/>
         </designable>
+        <designable name="EBh-Kl-BhA">
+            <size key="intrinsicContentSize" width="414" height="50"/>
+        </designable>
         <designable name="F9o-pz-Rvg">
             <size key="intrinsicContentSize" width="366" height="50"/>
-        </designable>
-        <designable name="cYD-X5-OTC">
-            <size key="intrinsicContentSize" width="414" height="50"/>
         </designable>
         <designable name="eZz-97-0Z9">
             <size key="intrinsicContentSize" width="414" height="50"/>

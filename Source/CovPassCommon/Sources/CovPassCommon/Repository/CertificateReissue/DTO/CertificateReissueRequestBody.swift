@@ -1,8 +1,8 @@
 //
 //  CertificateReissueRequestBody.swift
-//  
 //
-//  Created by Thomas Kuleßa on 17.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 /// HTTP request body for the remote certificate reissue API. The body contains a list of valid Digital Green
@@ -17,6 +17,7 @@ struct CertificateReissueRequestBody: Codable {
 
     enum Action: String, Codable {
         case renew
+        case extend
         case combine
     }
 }

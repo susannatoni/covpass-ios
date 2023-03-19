@@ -6,32 +6,59 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
+import CertLogic
 import CovPassCommon
 import CovPassUI
 import Foundation
+import Kronos
 import PromiseKit
 import UIKit
-import Kronos
 
 private enum Constants {
     enum Keys {
-        static let syncTitle = "validation_start_screen_scan_sync_message_title".localized
-        static let syncMessage = "validation_start_screen_scan_sync_message_text".localized
-        static let updateTitle = "validation_start_screen_offline_modus_note_update".localized
-        enum ScanType {
-            static let validation_start_screen_scan_title = "validation_start_screen_scan_title".localized
-            static let validation_start_screen_scan_title_2G = "validation_start_screen_scan_title_2G".localized
-            static let validation_start_screen_scan_message = "validation_start_screen_scan_message".localized
-            static let validation_start_screen_scan_message_2G = "validation_start_screen_scan_message_2G".localized
+        static let title = "validation_start_screen_title".localized
+        enum TimeHint {
+            static let syncTitle = "validation_start_screen_scan_sync_message_title".localized
+            static let syncMessage = "validation_start_screen_scan_sync_message_text".localized
         }
+
+        enum ScanCard {
+            static let actionTitle = "validation_start_screen_scan_action_button_title".localized
+            static let dropDownTitle = "infschg_start_screen_dropdown_title".localized
+        }
+
+        enum OfflineInformation {
+            static let title = "start_offline_title".localized
+            static let status_unavailable = "start_offline_status_unavailable".localized
+            static let status_available = "start_offline_status_available".localized
+            static let copy = "start_offline_copy".localized
+            static let link_title = "start_offline_link_title".localized
+            static let subtitle_unavailable = "start_offline_subtitle_unavailable".localized
+            static let link_subtitle_available = "start_offline_link_subtitle_available".localized
+        }
+
+        enum ImmunityScanCard {
+            enum WithinGermany {
+                static let immunityCheckTitle = "start_screen_vaccination_status_title".localized
+                static let immunityCheckTitleAccessibility = "accessibility_start_screen_vaccination_status_title".localized
+                static let immunityCheckDescription = "start_screen_vaccination_status_copy".localized
+                static let immunityCheckActionTitle = "validation_start_screen_scan_action_button_title".localized
+                static let immunityCheckInfoText = "start_screen_vaccination_status_hint".localized
+            }
+
+            enum EnterginGermany {
+                static let immunityCheckTitle = "start_vaccination_status_entry_title".localized
+                static let immunityCheckDescription = "start_vaccination_status_entry_subtitle".localized
+                static let immunityCheckActionTitle = "validation_start_screen_scan_action_button_title".localized
+            }
+        }
+
         enum CheckSituation {
-            static let deText = "🇩🇪 " + "startscreen_rules_tag_local".localized
-            static let euText = "🇪🇺 " + "startscreen_rules_tag_europe".localized
-        }
-        enum Toggle {
-            static let validation_start_screen_scan_message_2G_toggle = "validation_start_screen_scan_message_2G_toggle".localized
+            static let withinGermanyTitle = "startscreen_rules_tag_local".localized
+            static let enteringGermanyTitle = "startscreen_rules_tag_europe".localized
         }
     }
+
     enum Config {
         static let twoHoursAsSeconds = 7200.0
         static let ntpOffsetInit = 0.0
@@ -41,142 +68,176 @@ private enum Constants {
 
 class ValidatorOverviewViewModel {
     // MARK: - Properties
-    
-    private let vaccinationRepository: VaccinationRepositoryProtocol
-    private let revocationRepository: CertificateRevocationRepositoryProtocol
-    private let router: ValidatorOverviewRouterProtocol
-    private let certLogic: DCCCertLogicProtocol
-    private var userDefaults: Persistence
-    
+
+    private var currentDataPrivacyHash: String
+
+    let vaccinationRepository: VaccinationRepositoryProtocol
+    let revocationRepository: CertificateRevocationRepositoryProtocol
+    let certificateHolderStatus: CertificateHolderStatusModelProtocol
+    let router: ValidatorOverviewRouterProtocol
+    let certLogic: DCCCertLogicProtocol
+    let audioPlayer: AudioPlayerProtocol
+    let title = Constants.Keys.title
+    let scanActionTitle = Constants.Keys.ScanCard.actionTitle
+    let scanDropDownTitle = Constants.Keys.ScanCard.dropDownTitle
+    let offlineInformationDescription = Constants.Keys.OfflineInformation.copy
+    let offlineInformationUpdateCellTitle = Constants.Keys.OfflineInformation.link_title
+    let offlineInformationCellIcon = UIImage.chevronRight
+    let timeHintTitle = Constants.Keys.TimeHint.syncTitle
+
     var delegate: ViewModelDelegate?
-    
-    var title: String { "validation_start_screen_title".localized }
-    
-    var offlineAvailable: Bool {
-        !vaccinationRepository.trustListShouldBeUpdated() || !certLogic.rulesShouldBeUpdated()
-    }
-    
-    var offlineIcon: UIImage {
-        offlineAvailable ? .validationCheckmark : .warning
-    }
-    
-    var offlineTitle: String {
-        offlineAvailable ? "validation_start_screen_offline_modus_note_latest_version".localized : "validation_start_screen_offline_modus_note_old_version".localized
-    }
-    
-    var offlineMessageCertificates: String? {
-        guard let date = userDefaults.lastUpdatedTrustList else { return nil }
-        return String(format: "validation_start_screen_offline_modus_certificates".localized, DateUtils.displayDateTimeFormatter.string(from: date))
-    }
-    
-    var offlineMessageRules: String? {
-        guard let date = userDefaults.lastUpdatedDCCRules else { return nil }
-        return String(format: "validation_start_screen_offline_modus_rules".localized, DateUtils.displayDateTimeFormatter.string(from: date))
-    }
-    
-    var timeHintTitle: String {
-        Constants.Keys.syncTitle
-    }
-    
-    var timeHintSubTitle: String {
-        String(format: Constants.Keys.syncMessage, ntpDateFormatted)
-    }
-    
-    var ntpDateFormatted: String {
-        DateUtils.displayDateTimeFormatter.string(from: ntpDate)
-    }
-    
-    var timeHintIcon: UIImage {
-        .warning
-    }
-    
-    var ntpDate: Date = Date() {
-        didSet {
-            self.delegate?.viewModelDidUpdate()
-        }
-    }
-    
-    var ntpOffset: TimeInterval = Constants.Config.ntpOffsetInit
-    
-    var schedulerIntervall: TimeInterval
-    
-    var timeHintIsHidden: Bool {
-        get {
-            return abs(ntpOffset) < Constants.Config.twoHoursAsSeconds
-        }
-    }
-    
-    var segment3GTitle: String {
-        Constants.Keys.ScanType.validation_start_screen_scan_title
-    }
-    
-    var segment3GMessage: String {
-        Constants.Keys.ScanType.validation_start_screen_scan_message
-    }
-    
-    var segment2GTitle: String {
-        Constants.Keys.ScanType.validation_start_screen_scan_title_2G
-    }
-    
-    var segment2GMessage: String {
-        Constants.Keys.ScanType.validation_start_screen_scan_message_2G
-    }
-    
-    var checkSituationText: String {
-        switch userDefaults.selectedLogicType {
-        case .eu: return Constants.Keys.CheckSituation.euText
-        case .de: return Constants.Keys.CheckSituation.deText
-        case .booster: return ""
-        }
-    }
-    
-    var switchText: String {
-        Constants.Keys.Toggle.validation_start_screen_scan_message_2G_toggle
-    }
+    var userDefaults: Persistence
+    var shouldSomethingBeUpdated: Bool { certLogic.rulesShouldBeUpdated || certLogic.valueSetsShouldBeUpdated || vaccinationRepository.trustListShouldBeUpdated() }
 
-    var updateTitle: String {
-        showUpdateTitle ? Constants.Keys.updateTitle : ""
-    }  
-
-    private var showUpdateTitle: Bool {
-        offlineMessageCertificates != nil || offlineMessageRules != nil
-    }
-    
-    var boosterAsTest = false
-
-    private(set) var isLoadingScan = false {
+    var isLoadingScan = false {
         didSet {
             delegate?.viewModelDidUpdate()
         }
     }
 
+    var scanDropDownValue: String { "DE_\(userDefaults.stateSelection)".localized }
+
+    var timeHintSubTitle: String {
+        String(format: Constants.Keys.TimeHint.syncMessage, ntpDateFormatted)
+    }
+
+    var ntpDateFormatted: String {
+        DateUtils.displayDateTimeFormatter.string(from: ntpDate)
+    }
+
+    var timeHintIcon = UIImage.warning
+    var ntpDate: Date = .init() {
+        didSet {
+            delegate?.viewModelDidUpdate()
+        }
+    }
+
+    var ntpOffset = Constants.Config.ntpOffsetInit
+    var schedulerIntervall: TimeInterval
+    var timeHintIsHidden: Bool {
+        abs(ntpOffset) < Constants.Config.twoHoursAsSeconds
+    }
+
+    var offlineInformationTitle: String = Constants.Keys.OfflineInformation.title
+    var offlineInformationStateIcon: UIImage { shouldSomethingBeUpdated ? .warning : .check }
+    var offlineInformationStateTextColor: UIColor { shouldSomethingBeUpdated ? .neutralBlack : .neutralWhite }
+    var offlineInformationStateBackgroundColor: UIColor { shouldSomethingBeUpdated ? .warningAlternative : .resultGreen }
+    var offlineInformationStateText: String { shouldSomethingBeUpdated ? Constants.Keys.OfflineInformation.status_unavailable : Constants.Keys.OfflineInformation.status_available }
+    var offlineInformationUpdateCellSubtitle: String { shouldSomethingBeUpdated ? Constants.Keys.OfflineInformation.subtitle_unavailable : Constants.Keys.OfflineInformation.link_subtitle_available }
+    var immunityCheckTitle: String {
+        withinGermanyIsSelected ?
+            Constants.Keys.ImmunityScanCard.WithinGermany.immunityCheckTitle :
+            Constants.Keys.ImmunityScanCard.EnterginGermany.immunityCheckTitle
+    }
+
+    var immunityCheckTitleAccessibility: String {
+        withinGermanyIsSelected ?
+            Constants.Keys.ImmunityScanCard.WithinGermany.immunityCheckTitleAccessibility : Constants.Keys.ImmunityScanCard.EnterginGermany.immunityCheckTitle
+    }
+
+    var immunityCheckDescription: String {
+        withinGermanyIsSelected ?
+            Constants.Keys.ImmunityScanCard.WithinGermany.immunityCheckDescription :
+            Constants.Keys.ImmunityScanCard.EnterginGermany.immunityCheckDescription
+    }
+
+    var immunityCheckInfoText: String? {
+        withinGermanyIsSelected ?
+            Constants.Keys.ImmunityScanCard.WithinGermany.immunityCheckInfoText : nil
+    }
+
+    var immunityCheckActionTitle: String {
+        withinGermanyIsSelected ?
+            Constants.Keys.ImmunityScanCard.EnterginGermany.immunityCheckActionTitle :
+            Constants.Keys.ImmunityScanCard.WithinGermany.immunityCheckActionTitle
+    }
+
+    var checkSituation: CheckSituationType { .init(rawValue: userDefaults.checkSituation) ?? .withinGermany }
+    var checkSituationTitle: String {
+        withinGermanyIsSelected ? Constants.Keys.CheckSituation.withinGermanyTitle : Constants.Keys.CheckSituation.enteringGermanyTitle
+    }
+
+    var checkSituationImage: UIImage {
+        withinGermanyIsSelected ? .flagDE : .flagWorld
+    }
+
+    var withinGermanyIsSelected: Bool { checkSituation == .withinGermany }
+
+    private var isFreshInstallation: Bool
+    var tokensToCheck: [ExtendedCBORWebToken] = []
+    var doNotRemoveLastToken: Bool = false
+    var isFirstScan: Bool { tokensToCheck.count < 1 }
+    var shouldDropLastTokenOnError: Bool = false
+
     // MARK: - Lifecycle
-    
+
     init(router: ValidatorOverviewRouterProtocol,
          repository: VaccinationRepositoryProtocol,
          revocationRepository: CertificateRevocationRepositoryProtocol,
+         certificateHolderStatus: CertificateHolderStatusModelProtocol,
          certLogic: DCCCertLogicProtocol,
          userDefaults: Persistence,
-         schedulerIntervall: TimeInterval = Constants.Config.schedulerIntervall) {
+         privacyFile: String,
+         schedulerIntervall: TimeInterval = Constants.Config.schedulerIntervall,
+         audioPlayer: AudioPlayerProtocol) {
+        self.audioPlayer = audioPlayer
         self.router = router
-        self.vaccinationRepository = repository
+        vaccinationRepository = repository
         self.revocationRepository = revocationRepository
+        self.certificateHolderStatus = certificateHolderStatus
         self.certLogic = certLogic
         self.userDefaults = userDefaults
         self.schedulerIntervall = schedulerIntervall
-        self.setupTimer()
+        isFreshInstallation = userDefaults.privacyHash == nil
+        currentDataPrivacyHash = privacyFile.sha256()
+        setupTimer()
     }
-    
+
+    // MARK: - Methods
+
+    private func showDataPrivacyIfNeeded() -> Guarantee<Void> {
+        guard let privacyHash = userDefaults.privacyHash else {
+            userDefaults.privacyHash = currentDataPrivacyHash
+            return .value
+        }
+        guard privacyHash != currentDataPrivacyHash else {
+            userDefaults.privacyHash = currentDataPrivacyHash
+            return .value
+        }
+        userDefaults.privacyHash = currentDataPrivacyHash
+        return router.showDataPrivacy().recover { _ in }
+    }
+
+    private func showAnnouncementIfNeeded() -> Promise<Void> {
+        let bundleVersion = Bundle.main.shortVersionString ?? ""
+        let isUpdate: Bool = !isFreshInstallation
+        guard isUpdate else {
+            userDefaults.announcementVersion = bundleVersion
+            return Promise.value
+        }
+        guard let announcementVersion = userDefaults.announcementVersion else {
+            userDefaults.announcementVersion = bundleVersion
+            return router.showAnnouncement()
+        }
+        if userDefaults.disableWhatsNew || announcementVersion == bundleVersion {
+            return Promise.value
+        }
+        userDefaults.announcementVersion = bundleVersion
+        return router.showAnnouncement()
+    }
+
+    private func routeToChooseCheckSituation() -> PMKFinalizer {
+        router.routeToChooseCheckSituation().cauterize()
+    }
+
     private func setupTimer() {
-        self.tick()
+        tick()
         Timer.scheduledTimer(withTimeInterval: schedulerIntervall,
                              repeats: true) { [weak self] _ in
             self?.tick()
         }
     }
-    
-    // MARK: - Methods
-    
+
     func updateTrustList() {
         vaccinationRepository
             .updateTrustListIfNeeded()
@@ -189,7 +250,7 @@ class ValidatorOverviewViewModel {
                 }
             }
     }
-    
+
     func updateDCCRules() {
         certLogic
             .updateRulesIfNeeded()
@@ -198,65 +259,21 @@ class ValidatorOverviewViewModel {
             }
             .cauterize()
     }
-    
+
     func updateValueSets() {
         certLogic.updateValueSetsIfNeeded().cauterize()
     }
-    
-    func startQRCodeValidation(for scanType: ScanType) {
-        if scanType == ._2G {
-            self.router.showGproof(repository: self.vaccinationRepository,
-                                   revocationRepository: self.revocationRepository,
-                                   certLogic: self.certLogic,
-                                   userDefaults: self.userDefaults,
-                                   boosterAsTest: self.boosterAsTest)
-        } else {
-            var tmpToken: ExtendedCBORWebToken?
-            isLoadingScan = true
-            firstly {
-                router.scanQRCode()
-            }
-            .then {
-                ParseCertificateUseCase(scanResult: $0,
-                                        vaccinationRepository: self.vaccinationRepository).execute()
-            }
-            .then { token -> Promise<ExtendedCBORWebToken> in
-                tmpToken = token
-                return ValidateCertificateUseCase(token: token,
-                                                  revocationRepository: self.revocationRepository,
-                                                  certLogic: DCCCertLogic.create(),
-                                                  persistence: self.userDefaults).execute()
-            }
-            .done {
-                self.router.showCertificate($0,
-                                            _2GContext: false,
-                                            userDefaults: self.userDefaults)
-                
-            }
-            .ensure {
-                self.isLoadingScan = false
-            }
-            .catch { error in
-                self.errorHandling(error: error, token: tmpToken, scanType: scanType)
-            }
-        }
-    }
-    
-    func errorHandling(error: Error, token: ExtendedCBORWebToken?, scanType: ScanType) {
-        self.router.showError(token,
-                              error: error,
-                              _2GContext: scanType == ._2G,
-                              userDefaults: self.userDefaults).cauterize()
-    }
-    
+
     func showAppInformation() {
         router.showAppInformation(userDefaults: userDefaults)
     }
-    
-    
+
     func showNotificationsIfNeeded() {
         firstly {
-            showCheckSituationIfNeeded()
+            showDataPrivacyIfNeeded()
+        }
+        .then {
+            self.showAnnouncementIfNeeded()
         }
         .done {
             self.delegate?.viewModelDidUpdate()
@@ -265,24 +282,30 @@ class ValidatorOverviewViewModel {
             print(error.localizedDescription)
         }
     }
-    
-    private func showCheckSituationIfNeeded() -> Promise<Void> {
-        if userDefaults.onboardingSelectedLogicTypeAlreadySeen ?? false {
-            return .value
-        }
-        userDefaults.onboardingSelectedLogicTypeAlreadySeen = true
-        return router.showCheckSituation(userDefaults: userDefaults)
+
+    func chooseAction() {
+        router.routeToStateSelection()
+            .done {
+                self.delegate?.viewModelDidUpdate()
+            }
+            .cauterize()
     }
-    
+
+    func routeToRulesUpdate() {
+        router.routeToRulesUpdate(userDefaults: userDefaults)
+            .done { self.delegate?.viewModelDidUpdate() }
+            .cauterize()
+    }
+
     // MARK: Kronos Usage
-    
-    @objc func tick(completion: (()->Void)? = nil) {
+
+    @objc func tick(completion: (() -> Void)? = nil) {
         let complete: ((Date?, TimeInterval?) -> Void) = { [weak self] date, offset in
             guard let self = self,
                   let date = date,
                   let offset = offset else {
-                      return
-                  }
+                return
+            }
             self.ntpDate = date
             self.ntpOffset = offset
             completion?()

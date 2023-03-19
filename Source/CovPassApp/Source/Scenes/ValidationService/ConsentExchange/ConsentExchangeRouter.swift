@@ -5,9 +5,9 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import Foundation
 import CovPassCommon
 import CovPassUI
+import Foundation
 import PromiseKit
 import UIKit
 
@@ -33,16 +33,20 @@ struct ConsentExchangeRouter: ConsentExchangeRoutable {
         showDialog(title: "",
                    message: Constants.Text.Alert.message,
                    actions: [
-                    DialogAction(title: Constants.Text.Alert.ok, style: UIAlertAction.Style.default, isEnabled: true, completion: nil),
-                    DialogAction(title: Constants.Text.Alert.cancel, style: UIAlertAction.Style.destructive, isEnabled: true, completion: { _ in
-                        sceneCoordinator.dimiss(animated: true)
-                    })],
+                       DialogAction(title: Constants.Text.Alert.ok, style: UIAlertAction.Style.default, isEnabled: true, completion: nil),
+                       DialogAction(title: Constants.Text.Alert.cancel, style: UIAlertAction.Style.destructive, isEnabled: true, completion: { _ in
+                           sceneCoordinator.dismiss(animated: true)
+                       })
+                   ],
                    style: .alert)
     }
 
     func routeToPrivacyStatement(url: URL) {
-        let webViewScene = WebviewSceneFactory(title: "app_information_title_datenschutz".localized,
-                                               url: url, isToolbarShown: true)
-        sceneCoordinator.push(webViewScene)
+        let scene = WebviewSceneFactory(title: "app_information_title_datenschutz".localized,
+                                        url: url,
+                                        isToolbarShown: true,
+                                        openingAnnounce: "accessibility_app_information_datenschutz_announce".localized,
+                                        closingAnnounce: "accessibility_app_information_datenschutz_closing_announce".localized)
+        sceneCoordinator.push(scene)
     }
 }

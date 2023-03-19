@@ -5,25 +5,28 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import UIKit
 import CovPassCommon
+import UIKit
 
 private enum Constants {
     enum Accessibility {
-        static let close = VoiceOverOptions.Settings(label: "accessibility_popup_label_close".localized)
+        static let close = VoiceOverOptions.Settings(label: "accessibility_popup_label_close".localized(bundle: .main))
     }
 }
 
 public class RevocationInfoViewController: UIViewController {
     // MARK: - IBOutlet
+
     @IBOutlet public var headerView: InfoHeaderView!
     @IBOutlet public var exportButton: MainButton!
     @IBOutlet public var stackView: UIStackView!
 
     // MARK: - Properties
+
     private var viewModel: RevocationInfoViewModelProtocol
 
     // MARK: - Lifecycle
+
     @available(*, unavailable)
     public required init?(coder _: NSCoder) { nil }
 
@@ -33,7 +36,7 @@ public class RevocationInfoViewController: UIViewController {
         self.viewModel.delegate = self
     }
 
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         configureHeadline()
         configureList()
@@ -80,7 +83,7 @@ extension RevocationInfoViewController: ViewModelDelegate {
         refresh()
     }
 
-    public func viewModelUpdateDidFailWithError(_ error: Error) {
+    public func viewModelUpdateDidFailWithError(_: Error) {
         refresh()
     }
 }
@@ -88,8 +91,8 @@ extension RevocationInfoViewController: ViewModelDelegate {
 private extension ParagraphView {
     static func from(_ item: ListContentItem) -> ParagraphView {
         let view = ParagraphView()
-        view.attributedTitleText = item.label.styledAs(.header_3)
-        view.attributedBodyText = item.value.styledAs(.body)
+        view.updateView(title: item.label.styledAs(.header_3),
+                        body: item.value.styledAs(.body))
         view.accessibilityLabel = item.accessibilityLabel
         view.accessibilityIdentifier = item.accessibilityIdentifier
         view.layoutMargins.top = .space_12

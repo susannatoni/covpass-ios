@@ -8,28 +8,49 @@
 @testable import CovPassApp
 @testable import CovPassCommon
 @testable import CovPassUI
-import XCTest
-import PromiseKit
 import JWTDecode
+import PromiseKit
+import XCTest
 
 class ValidationServiceViewControllerSnapShotTests: BaseSnapShotTests {
-    func testConsentScreen() {
-        let vm = ValidationServiceViewModel(router: ValidationServiceRouterMock(), initialisationData: ValidationServiceInitialisation.mock)
-        let vc = ValidationServiceViewController(viewModel: vm)
-        
-        verifyView(view: vc.view, height: 1350)
+    private var sut: CertificateItemDetailViewController!
+
+    private func configureSut(result: VAASValidationResultStatus,
+                              verifyingService: String,
+                              token: ExtendedCBORWebToken = CBORWebToken.mockVaccinationCertificate.extended(),
+                              tokens: [ExtendedCBORWebToken] = []) {
+        var vaasValidationResultToken = VAASValidaitonResultToken.mock
+        vaasValidationResultToken.result = result
+        vaasValidationResultToken.provider = "Lufthansa"
+        vaasValidationResultToken.verifyingService = verifyingService
+        let viewModel = CertificateItemDetailViewModel(router: CertificateItemDetailRouterMock(),
+                                                       repository: VaccinationRepositoryMock(),
+                                                       certificate: token,
+                                                       certificates: tokens,
+                                                       resolvable: nil,
+                                                       vaasResultToken: vaasValidationResultToken)
+        sut = CertificateItemDetailViewController(viewModel: viewModel)
     }
-    
+
+    func testConsentScreen() {
+        let viewModel = ValidationServiceViewModel(router: ValidationServiceRouterMock(), initialisationData: ValidationServiceInitialisation.mock)
+        let sut = ValidationServiceViewController(viewModel: viewModel)
+        verifyView(view: sut.view, height: 1350)
+    }
+
     func testWebViewScreen() {
         let vm = WebviewViewModel(title: "app_information_title_datenschutz".localized(bundle: Bundle.uiBundle),
                                   url: ValidationServiceInitialisation.mock.privacyUrl,
                                   closeButtonShown: false,
-                                  isToolbarShown: true)
+                                  isToolbarShown: true,
+                                  enableDynamicFonts: false,
+                                  openingAnnounce: "",
+                                  closingAnnounce: "")
         let vc = WebviewViewController(viewModel: vm)
-        
+
         verifyView(view: vc.view)
     }
-    
+
     func testValidationConsentScreen() {
         let vm = ConsentExchangeViewModel(router: ValidationServiceRouterMock(), vaasRepository: VAASRepositoryMock(step: .downloadAccessToken),
                                           initialisationData: ValidationServiceInitialisation.mock,
@@ -37,54 +58,38 @@ class ValidationServiceViewControllerSnapShotTests: BaseSnapShotTests {
         let vc = ConsentExchangeViewController(viewModel: vm)
         verifyView(view: vc.view, height: 1850)
     }
-    
+
     func test_validation_result_passed() {
-        var vaasValidationResultToken = VAASValidaitonResultToken.mock
-        vaasValidationResultToken.result = .passed
-        vaasValidationResultToken.provider = "Lufthansa"
-        vaasValidationResultToken.verifyingService = "Booking Demo Validation Service TSI"
-        let vm = CertificateItemDetailViewModel(router: CertificateItemDetailRouterMock(), repository: VaccinationRepositoryMock(), certificate: try! ExtendedCBORWebToken.mock(), resolvable: nil, vaasResultToken: vaasValidationResultToken)
-        let vc = CertificateItemDetailViewController(viewModel: vm)
-        verifyView(view: vc.view, height: 2200)
+        configureSut(result: .passed, verifyingService: "Booking Demo Validation Service TSI")
+        verifyView(view: sut.view, height: 2200)
     }
-    
+
     func test_validation_result_cross_check() {
-        var vaasValidationResultToken = VAASValidaitonResultToken.mock
-        vaasValidationResultToken.result = .crossCheck
-        vaasValidationResultToken.provider = "Lufthansa"
-        vaasValidationResultToken.verifyingService = "Betreiber_Validationservice"
-        let vm = CertificateItemDetailViewModel(router: CertificateItemDetailRouterMock(), repository: VaccinationRepositoryMock(), certificate: try! ExtendedCBORWebToken.mock(), resolvable: nil, vaasResultToken: vaasValidationResultToken)
-        let vc = CertificateItemDetailViewController(viewModel: vm)
-        verifyView(view: vc.view, height: 2200)
+        configureSut(result: .crossCheck, verifyingService: "Betreiber_Validationservice")
+        verifyView(view: sut.view, height: 2200)
     }
-    
+
     func test_validation_result_fail() {
-        var vaasValidationResultToken = VAASValidaitonResultToken.mock
-        vaasValidationResultToken.result = .fail
-        vaasValidationResultToken.provider = "Lufthansa"
-        vaasValidationResultToken.verifyingService = "Betreiber_Validationservice"
-        let vm = CertificateItemDetailViewModel(router: CertificateItemDetailRouterMock(), repository: VaccinationRepositoryMock(), certificate: try! ExtendedCBORWebToken.mock(), resolvable: nil, vaasResultToken: vaasValidationResultToken)
-        let vc = CertificateItemDetailViewController(viewModel: vm)
-        verifyView(view: vc.view, height: 2200)
+        configureSut(result: .fail, verifyingService: "Betreiber_Validationservice")
+        verifyView(view: sut.view, height: 2200)
     }
 }
 
 extension ValidationServiceInitialisation {
-    
     static var mock: ValidationServiceInitialisation {
         let data =
-        """
-        {
-          "protocol": "DCCVALIDATION",
-          "protocolVersion": "1.0.0",
-          "serviceIdentity": "https://dgca-booking-demo-eu-test.cfapps.eu10.hana.ondemand.com/api/identity",
-          "privacyUrl": "https://validation-decorator.example",
-          "token": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiUzhEMi9XejV0WT0iLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RnY2EtYm9va2luZy1kZW1vLWV1LXRlc3QuY2ZhcHBzLmV1MTAuaGFuYS5vbmRlbWFuZC5jb20vYXBpL2lkZW50aXR5IiwiZXhwIjoxNjM1MDczMTg5LCJzdWIiOiI2YTJhYjU5MS1jMzgzLTRlOWEtYjMwOS0zNjBjNThkYWQ5M2YifQ.vo_YxeSM02knOLASRNs74qTErKWCNo9Zq8-7TVIc1HvaGkVf_r5USnUBcyDykSsmj8Ckle5lGnHAvU1krfpk3A",
-          "consent": "Please confirm to start the DCC Exchange flow. If you not confirm, the flow is aborted.",
-          "subject": "6a2ab591-c383-4e9a-b309-360c58dad93f",
-          "serviceProvider": "Booking Demo"
-        }
-        """.data(using: .utf8)!
+            """
+            {
+              "protocol": "DCCVALIDATION",
+              "protocolVersion": "1.0.0",
+              "serviceIdentity": "https://dgca-booking-demo-eu-test.cfapps.eu10.hana.ondemand.com/api/identity",
+              "privacyUrl": "https://validation-decorator.example",
+              "token": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiUzhEMi9XejV0WT0iLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RnY2EtYm9va2luZy1kZW1vLWV1LXRlc3QuY2ZhcHBzLmV1MTAuaGFuYS5vbmRlbWFuZC5jb20vYXBpL2lkZW50aXR5IiwiZXhwIjoxNjM1MDczMTg5LCJzdWIiOiI2YTJhYjU5MS1jMzgzLTRlOWEtYjMwOS0zNjBjNThkYWQ5M2YifQ.vo_YxeSM02knOLASRNs74qTErKWCNo9Zq8-7TVIc1HvaGkVf_r5USnUBcyDykSsmj8Ckle5lGnHAvU1krfpk3A",
+              "consent": "Please confirm to start the DCC Exchange flow. If you not confirm, the flow is aborted.",
+              "subject": "6a2ab591-c383-4e9a-b309-360c58dad93f",
+              "serviceProvider": "Booking Demo"
+            }
+            """.data(using: .utf8)!
         return try! JSONDecoder().decode(ValidationServiceInitialisation.self, from: data)
     }
 }

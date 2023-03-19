@@ -11,17 +11,19 @@ import PromiseKit
 import XCTest
 
 struct ValidationResultRouterMock: ValidationResultRouterProtocol {
-
+    var showStartExpectation = XCTestExpectation(description: "showStartExpectation")
     var showRevocationExpectation = XCTestExpectation()
     var sceneCoordinator: SceneCoordinator = SceneCoordinatorMock()
 
-    func showStart() {}
-
-    func scanQRCode() -> Promise<ScanResult> {
-        .value(.success(""))
+    func showStart() {
+        showStartExpectation.fulfill()
     }
-    
-    func showRevocation(token: ExtendedCBORWebToken, keyFilename: String) -> Promise<Void> {
+
+    func scanQRCode() -> Promise<QRCodeImportResult> {
+        .value(.scanResult(.success("")))
+    }
+
+    func showRevocation(token _: ExtendedCBORWebToken, keyFilename _: String) -> Promise<Void> {
         showRevocationExpectation.fulfill()
         return .init(error: NSError(domain: "TEST", code: 0, userInfo: nil))
     }

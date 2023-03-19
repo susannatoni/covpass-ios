@@ -14,7 +14,6 @@ import PromiseKit
 import UIKit
 
 class MockCertificateViewModel: CertificatesOverviewViewModelProtocol {
-
     // MARK: - Test Variables
 
     var refreshedCalled = false
@@ -22,21 +21,24 @@ class MockCertificateViewModel: CertificatesOverviewViewModelProtocol {
     var configureCalled = false
     var selectedCertificateIndex: Int?
     var isLoading: Bool = false
-    
+
     // MARK: - CertificateViewModel
 
     weak var delegate: CertificatesOverviewViewModelDelegate?
-
     var addButtonImage: UIImage? = UIImage()
-
     var hasCertificates: Bool = false
+    var accessibilityAddCertificate = "addCertificate"
+    var accessibilityMoreInformation = "moreInformation"
+    var openingAnnouncment = "announcement"
+    var closingAnnouncment: String = "closingannouncement"
+    var showMultipleCertificateHolder = true
 
-    var certificateViewModels: [CardViewModel] = []
-
-    func updateBoosterRules() {
-        
+    func handleOpen(url _: URL) -> Bool {
+        true
     }
-    
+
+    func updateBoosterRules() {}
+
     func refresh() -> Promise<Void> {
         refreshedCalled = true
         return .value
@@ -45,13 +47,13 @@ class MockCertificateViewModel: CertificatesOverviewViewModelProtocol {
     func process(payload _: String, completion _: ((Error) -> Void)?) {
         processCalled = true
     }
-    
+
     func updateTrustList() {}
-    
+
     func updateValueSets() {}
-    
-    func reuseIdentifier(for indexPath: IndexPath) -> String {
-        certificateViewModels[indexPath.row].reuseIdentifier
+
+    func reuseIdentifier(for _: IndexPath) -> String {
+        "reuseIdentifier"
     }
 
     var headlineTitle: String {
@@ -62,20 +64,18 @@ class MockCertificateViewModel: CertificatesOverviewViewModelProtocol {
         nil
     }
 
-    func loadCertificates() {
-        certificateViewModels = [MockCardViewModel()]
-    }
+    func loadCertificates() {}
 
     func process(payload _: String) -> Promise<ExtendedCBORWebToken> {
-        return Promise(error: ApplicationError.unknownError)
+        Promise(error: ApplicationError.unknownError)
     }
 
     func detailViewModel(_: ExtendedCBORWebToken) -> CertificateDetailViewModel? {
-        return nil
+        nil
     }
 
     func detailViewModel(_: IndexPath) -> CertificateDetailViewModel? {
-        return nil
+        nil
     }
 
     func showCertificate(at _: IndexPath) {
@@ -101,4 +101,14 @@ class MockCertificateViewModel: CertificatesOverviewViewModelProtocol {
     func showRuleCheck() {}
 
     func showNotificationsIfNeeded() {}
+
+    func viewModel(for _: Int) -> CardViewModel {
+        NoCertificateCardViewModel()
+    }
+
+    func countOfCells() -> Int {
+        0
+    }
+
+    func revokeIfNeeded() {}
 }

@@ -6,17 +6,17 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import UIKit
 import CovPassCommon
+import UIKit
 
 public struct Paragraph {
     var icon: UIImage?
     var title: String
     var subtitle: String
-    
-    public init (icon: UIImage?,
-                 title: String,
-                 subtitle: String) {
+
+    public init(icon: UIImage?,
+                title: String,
+                subtitle: String) {
         self.icon = icon
         self.title = title
         self.subtitle = subtitle
@@ -24,11 +24,6 @@ public struct Paragraph {
 }
 
 public typealias ValidationResultViewModel = ValidationViewModelProtocol & CancellableViewModelProtocol
-
-public protocol ResultViewModelDelegate: AnyObject {
-    func viewModelDidUpdate()
-    func viewModelDidChange(_ newViewModel: ValidationResultViewModel)
-}
 
 private enum Constants {
     static let confirmButtonLabel = "validation_check_popup_valid_vaccination_button_title".localized
@@ -41,7 +36,7 @@ private enum Constants {
 
 public class ValidationResultViewController: UIViewController {
     // MARK: - IBOutlet
-    
+
     @IBOutlet var stackView: UIStackView!
     @IBOutlet var toolbarView: CustomToolbarView!
     @IBOutlet var headline: InfoHeaderView!
@@ -50,37 +45,38 @@ public class ValidationResultViewController: UIViewController {
     @IBOutlet var resultView: ParagraphView!
     @IBOutlet var paragraphStackView: UIStackView!
     @IBOutlet var infoView: PlainLabel!
-    @IBOutlet weak var revocationInfoView: HintView!
-    @IBOutlet weak var revocationInfoContainerView: UIView!
-    
+    @IBOutlet var revocationInfoView: HintView!
+    @IBOutlet var revocationInfoContainerView: UIView!
+    @IBOutlet var counterLabel: UILabel!
+
     // MARK: - Properties
-    
+
     private(set) var viewModel: ValidationResultViewModel
-    
+
     // MARK: - Lifecycle
-    
+
     @available(*, unavailable)
     required init?(coder _: NSCoder) { fatalError("init?(coder: NSCoder) not implemented yet") }
-    
+
     public init(viewModel: ValidationResultViewModel) {
         self.viewModel = viewModel
         super.init(nibName: String(describing: Self.self), bundle: .uiBundle)
         self.viewModel.delegate = self
     }
-    
-    public override func viewDidLoad() {
+
+    override public func viewDidLoad() {
         super.viewDidLoad()
         configureView()
         updateViews()
     }
-    
+
     // MARK: - Private
-    
+
     @objc
     private func reissueButtonTapped(_: Any) {
         viewModel.revocationButtonTapped()
     }
-    
+
     private func configureRevocationInfoView() {
         revocationInfoView.style = .info
         revocationInfoContainerView.isHidden = viewModel.revocationInfoHidden
@@ -96,14 +92,15 @@ public class ValidationResultViewController: UIViewController {
         revocationInfoView.titleLabel.attributedText = viewModel.revocationHeadline
             .styledAs(.mainButton)
     }
-    
+
     private func configureView() {
         configureRevocationInfoView()
         configureHeadline()
         configureToolbarView()
         configureAccessibility()
+        configureCounter()
     }
-    
+
     private func configureHeadline() {
         headline.attributedTitleText = "".styledAs(.header_3)
         headline.action = viewModel.cancel
@@ -111,16 +108,18 @@ public class ValidationResultViewController: UIViewController {
         headline.actionButton.enableAccessibility(label: Constants.Accessibility.close.label)
         stackView.setCustomSpacing(.space_24, after: headline)
     }
-    
+
     private func configureToolbarView() {
         toolbarView.state = viewModel.toolbarState
         toolbarView.delegate = self
+        toolbarView.disableLeftButton()
+        toolbarView.disableRightButton()
     }
-    
+
     private func configureAccessibility() {
         headline.actionButton.enableAccessibility(label: Constants.Accessibility.close.label)
     }
-    
+
     private func setScanButtonLoadingState() {
         if viewModel.isLoadingScan {
             toolbarView.primaryButton.startAnimating()
@@ -128,7 +127,7 @@ public class ValidationResultViewController: UIViewController {
             toolbarView.primaryButton.stopAnimating()
         }
     }
-    
+
     private func updateViews() {
         setScanButtonLoadingState()
         toolbarView.primaryButton.isHidden = viewModel.buttonHidden
@@ -136,8 +135,8 @@ public class ValidationResultViewController: UIViewController {
         stackView.setCustomSpacing(.space_24, after: resultView)
         imageView.image = viewModel.icon
         imageView.enableAccessibility(label: Constants.Accessibility.image.label)
-        resultView.attributedTitleText = viewModel.resultTitle.styledAs(.header_1)
-        resultView.attributedBodyText = viewModel.resultBody.styledAs(.body)
+        resultView.updateView(title: viewModel.resultTitle.styledAs(.header_1),
+                              body: viewModel.resultBody.styledAs(.body))
         resultView.bottomBorder.isHidden = true
         infoView.attributedText = viewModel.info?.styledAs(.body).colored(.onBackground40)
         infoView.layoutMargins = .init(top: .zero, left: .space_24, bottom: .zero, right: .space_24)
@@ -147,15 +146,39 @@ public class ValidationResultViewController: UIViewController {
         }
         viewModel.paragraphs.forEach {
             let p = ParagraphView()
-            p.attributedTitleText = $0.title.styledAs(.header_3)
-            p.attributedBodyText = $0.subtitle.styledAs(.body)
-            p.image = $0.icon
+            p.updateView(image: $0.icon,
+                         title: $0.title.styledAs(.header_3),
+                         body: $0.subtitle.styledAs(.body))
             p.imageView.tintColor = .brandAccent
             p.bottomBorder.isHidden = true
             p.layoutMargins.bottom = .space_20
             self.paragraphStackView.addArrangedSubview(p)
         }
-        UIAccessibility.post(notification: .layoutChanged, argument: resultView.titleLabel)
+        updateAccessibility()
+    }
+
+    private func updateAccessibility() {
+        let speakableParagraphs = viewModel
+            .paragraphs
+            .map { $0.title + "\n" + $0.subtitle }
+        let speakableText = (
+            [viewModel.resultTitle, viewModel.resultBody] +
+                speakableParagraphs +
+                [viewModel.info]
+        ).compactMap { $0 }.joined(separator: "\n")
+        UIAccessibility.post(notification: .screenChanged, argument: speakableText)
+    }
+
+    private func configureCounter() {
+        counterLabel.isHidden = viewModel.countdownTimerModel?.hideCountdown ?? true
+        guard let countdownTimerModel = viewModel.countdownTimerModel else {
+            return
+        }
+        let counterInfo = NSMutableAttributedString(
+            attributedString: countdownTimerModel.counterInfo.styledAs(.body)
+        )
+        counterLabel.attributedText = counterInfo
+        counterLabel.textAlignment = .center
     }
 }
 
@@ -164,8 +187,9 @@ public class ValidationResultViewController: UIViewController {
 extension ValidationResultViewController: ResultViewModelDelegate {
     public func viewModelDidUpdate() {
         updateViews()
+        configureCounter()
     }
-    
+
     public func viewModelDidChange(_ newViewModel: ValidationResultViewModel) {
         viewModel = newViewModel
         viewModel.delegate = self
@@ -192,7 +216,7 @@ extension ValidationResultViewController: ModalInteractiveDismissibleProtocol {
     public func canDismissModalViewController() -> Bool {
         viewModel.isCancellable()
     }
-    
+
     public func modalViewControllerDidDismiss() {
         viewModel.cancel()
     }

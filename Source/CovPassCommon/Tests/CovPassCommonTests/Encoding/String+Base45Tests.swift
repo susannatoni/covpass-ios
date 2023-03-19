@@ -1,8 +1,8 @@
 //
 //  String+Base45Tests.swift
-//  
 //
-//  Created by Thomas Kuleßa on 21.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassCommon
@@ -16,7 +16,7 @@ class StringBase45Tests: XCTestCase {
 
         // When
         sut.decodedBase45
-            .done { data in
+            .done { _ in
                 expectation.fulfill()
             }
             .catch { error in
@@ -34,10 +34,10 @@ class StringBase45Tests: XCTestCase {
 
         // When
         sut.decodedBase45
-            .done { data in
+            .done { _ in
                 XCTFail("Must fail with error.")
             }
-            .catch { error in
+            .catch { _ in
                 expectation.fulfill()
             }
 

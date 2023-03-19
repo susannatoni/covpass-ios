@@ -42,27 +42,27 @@
 
 "vaccination_second_onboarding_page_title" = "Step two: open the QR code in the CovPass app";
 
-"vaccination_second_onboarding_page_message" = "Using the QR code, you can show evidence of a Covid-19 vaccination or recovery from a Covid-19 infection. The QR code is displayed directly in the CovPass app after scanning it. Please be aware that a vaccination only becomes sufficiently effective about 14 days after the final dose. For this reason, the QR code for full vaccination only becomes valid after 14 days have passed.";
+"vaccination_second_onboarding_page_message" = "You can use the QR code to track Corona vaccinations and recoveries from Corona infection. Likewise, the app shows whether or not you need to wear a mask on public transportation in certain states and in indoor spaces open to the public, such as restaurants or recreational events.";
 
 "vaccination_third_onboarding_page_title" = "Step three: show your QR code when needed";
 
-"vaccination_third_onboarding_page_message" = "You can show your QR code from the CovPass app when you need it. The person checking the QR code will then scan it. You will also need to have an ID document at hand for this. Your QR code is stored only on your smartphone, so you can display it at any time even without an internet connection.";
+"vaccination_third_onboarding_page_message" = "You can show your QR code from the CovPass app when you need it. The person checking the QR code then scans it with the CovPassCheck app. You will also need to have an ID document at hand for this. Your QR code is stored only on your smartphone, so you can display it at any time even without an internet connection.";
 
 "vaccination_fourth_onboarding_page_title" = "Data protection and security";
 
 "vaccination_fourth_onboarding_page_first_list_item" = "Using the CovPass app is voluntary. You can also use the digital COVID Certificates in paper form.";
 
-"vaccination_fourth_onboarding_page_second_list_item" = "To protect against forged certificates or manipulation, the digital COVID Certificates are electronically signed by the RKI. For this purpose, the necessary data is transmitted once in encrypted form to the RKI. Once the digital COVID Certificate has been created, the RKI will immediately and permanently delete the data. The QR code contains the information from the digital COVID Certificate, and the RKI’s electronic signature, in encoded form.";
+"vaccination_fourth_onboarding_page_second_list_item" = "To protect against forged certificates or manipulation, the digital COVID Certificates are electronically signed by the RKI when they are created. For this purpose, the necessary data is transmitted once in encrypted form to the RKI. Once the digital COVID Certificate has been created, the RKI will immediately and permanently delete the data. The QR code contains the information from the digital COVID Certificate, and the RKI’s electronic signature, in encoded form.";
 
-"vaccination_fourth_onboarding_page_third_list_item" = "When you present the QR code of a certificate in the app for verification, others will be able to find out whether you have tested negative, are fully vaccinated, or have proof that you have recovered from a coronavirus infection. During verification, the official verification app will also display the name and date of birth. In the case of test certificates, the date of sampling will also be displayed.";
+"vaccination_fourth_onboarding_page_third_list_item" = "When you present the QR code of a digital COVID certificate in the app for verification, the checking person will be shown the name and date of birth of the certificate holder and, if applicable, whether there is an exemption from the requirement to wear a mask. If necessary, an identity document must also be presented at the time of the examination.";
 
 "vaccination_fourth_onboarding_page_fourth_list_item" = "The digital COVID Certificates are only stored on your smartphone. You have the possibility to delete the digital COVID Certificates at any time.";
 
-"vaccination_fourth_onboarding_page_message" = "Detailed information about this data processing is available in the privacy notice:";
+"vaccination_fourth_onboarding_page_message" = "Detailed information about this data processing is available in the privacy notice.";
 
 "vaccination_fourth_onboarding_page_message_for_us_citizens_title" = "Terms of Use for US citizens";
 
-"vaccination_fourth_onboarding_page_message_for_us_citizens_copy" = "If you are a US citizen, these Terms of Use apply to the App:";
+"vaccination_fourth_onboarding_page_message_for_us_citizens_copy" = "If you are a US citizen, these Terms of Use apply to the App.";
 
 "vaccination_fourth_onboarding_page_button_title" = "OK";
 
@@ -78,7 +78,7 @@
 
 "dialog_start_screen_button_update" = "Update";
 
-"dialog_booster_vaccination_notification_title" = "There are news about your certificates";
+"dialog_booster_vaccination_notification_title" = "There is news about your certificates";
 
 "dialog_booster_vaccination_notification_message" = "Please check the status of your EU Digital COVID Certificates.";
 
@@ -109,6 +109,8 @@
 
 "accessibility_start_screen_info_announce" = "The start screen has been opened";
 
+"accessibility_start_screen_info_closing_announce" = "The start screen will be closed";
+
 "vaccination_start_screen_title" = "EU Digital COVID Certificates";
 
 "accessibility_vaccination_start_screen_title" = "EU Digital COVID Certificates. Sensible health data will follow. Please take care that nobody listens to or reads on your smartphone.";
@@ -129,7 +131,16 @@
 
 "vaccination_start_screen_qrcode_booster_vaccination_note_subtitle" = "Check status";
 
+"vaccination_start_screen_qrcode_renewal_note_subtitle" = "Renew certificate";
+
 "certificates_start_screen_qr_code_app_reference_text" = "This QR code can be reliably verified with the CovPassCheck app.";
+
+
+/********** modal_view **********/
+
+"modal_subline" = "%d certificate(s) currently in use";
+
+"modal_button" = "Manage certificates";
 
 
 /********** popup: Remark within the app towards the CovPassCheck app **********/
@@ -146,18 +157,34 @@
 
 "certificates_start_screen_pop_up_app_reference_button" = "OK";
 
+"certificate_type_partial" = "Not fully vaccinated";
+
+"certificate_type_recovery" = "Recovery";
+
+"certificate_type_basic_immunisation" = "Basic immunisation";
+
+"certificate_type_booster" = "Booster vaccination";
+
+"certificate_type_rapidtest" = "Antigen rapid test";
+
+"certificate_type_pcrtest" = "PCR test";
+
+"certificate_timestamp_hours" = "%d hour(s) ago";
+
+"certificate_timestamp_days" = "%d day(s) ago";
+
+"certificate_timestamp_months" = "%d month(s) ago";
+
 "accessibility_certificates_start_screen_pop_up_app_reference_label" = "Close Pop-up";
 
 "accessibility_certificate_popup_checkapp_announce" = "The view \"Please scan!\" has been opened";
+
+"accessibility_certificate_popup_checkapp_closing_announce" = "The view \"Please scan!\" has been closed";
 
 
 /********** popup: add certification **********/
 
 "accessibility_certificate_add_popup_label_close" = "Close";
-
-"accessibility_scan_camera_torch_on" = "Switch on torch";
-
-"accessibility_scan_camera_torch_off" = "Switch off torch";
 
 "accessibility_certificate_add_popup_announce" = "The view \"Scan QR code\" has been opened";
 
@@ -193,19 +220,19 @@
 
 "accessibility_certificate_add_popup_image" = "Image: Person holds smartphone over three different certificates with QR code";
 
-"certificate_add_popup_title" = "Scan QR code";
+"certificate_add_popup_title" = "Add a certificate";
 
 "certificate_add_popup_note_title" = "Your smartphone is not protected by a code";
 
 "certificate_add_popup_note_message" = "The CovPass app saves sensitive data to your smartphone. To protect your data against access by strangers, we recommend that you set up an unlock code for your smartphone.";
 
-"certificate_add_popup_message" = "Scan the QR code on an EU Digital COVID Certificate. The certificate is transferred directly to the CovPass app.\n\nFor booking purposes (e.g. flight and hotel), you can submit your added COVID certificate to the provider online. To do so, scan the QR code displayed during the booking process.";
+"certificate_add_popup_message" = "In the following step, scan the QR code from an EU COVID digital certificate or upload it as a photo or PDF file. The certificate will then be loaded directly into the CovPass app.";
 
-"certificate_add_popup_action_title" = "Which QR code can I scan and save to my smartphone?";
+"certificate_add_popup_action_title" = "More information in the FAQ";
 
-"certificate_add_popup_action_title_linked" = "#Which QR code can I scan and save to my smartphone?::$0#";
+"certificate_add_popup_action_title_linked" = "#More information in the FAQ::$0#";
 
-"certificate_add_popup_scan_button_title" = "Scan QR code";
+"certificate_add_popup_scan_button_title" = "Add certificate";
 
 "certificate_add_dialog_camera_access_title" = "Camera access needed";
 
@@ -238,27 +265,71 @@
 "error_test_certificate_not_valid_button_title" = "OK";
 
 
-/********** popup: import qr code from photo library **********/
+/********** file import **********/
+
+"accessibility_scan_camera_torch_turn_on" = "Switch on torch";
+
+"accessibility_scan_camera_torch_on" = "Torch has been switched on";
+
+"accessibility_scan_camera_torch_turn_off" = "Switch off torch";
+
+"accessibility_scan_camera_torch_off" = "Torch has been switched off";
 
 "accessibility_scan_camera_select_file" = "Select file";
 
-"error_scan_code_not_recognized_title" = "QR code was not recognized";
+"accessibility_scan_camera_file_selected" = "File has been selected";
 
-"error_scan_code_not_recognized_message" = "No QR code was found in the selected file. Please select a file or photo with a QR code.";
+"file_import_menu_title" = "Open file";
 
-"error_scan_code_not_recognized_action_button" = "OK";
+"file_import_menu_photo" = "Select photo";
 
-"error_scan_file_could_not_be_read_title" = "The file could not be read";
+"file_import_menu_document" = "Select document";
 
-"error_scan_file_could_not_be_read_message" = "The selected file may be corrupted, or password protected. Please select another file.";
+"file_import_menu_cancel" = "Cancel";
 
-"error_scan_file_could_not_be_read_action_button" = "OK";
+"file_import_prominent_disclosure_title" = "Access to photos required";
 
-"error_scan_code_not_suitable_title" = "QR code is not suitable";
+"file_import_prominent_disclosure_copy" = "The CovPass app must be able to access your photo gallery temporarily in order for you to import a photo.\n\nAccess to your photos is only granted during the import process and only with your permission. You have the option to change the permission at any time in the settings of your smartphone.";
 
-"error_scan_code_not_suitable_message" = "The QR code cannot be transferred to the CovPass app because it is, for example, it does not have a valid signature. The QR code may also not be readable because there are multiple QR codes in the file. Please select a file with a valid QR code.";
+"file_import_prominent_disclosure_button" = "Allow access";
 
-"error_scan_code_not_suitable_action_button" = "OK";
+"file_import_result_null_title" = "No valid certificate was found";
+
+"file_import_result_null_button" = "OK";
+
+"file_import_result_info_title" = "If a certificate is missing:";
+
+"file_import_result_info_bullet1" = "Check whether there is a QR code in the selected file.";
+
+"file_import_result_info_bullet2" = "Note that certificates cannot be imported if they are revoked, invalid or already stored in the app.";
+
+"file_import_result_info_bullet3" = "Take a screenshot of the QR code in question and import it again as a photo.";
+
+"file_import_result_title" = "Select certificates";
+
+"file_import_result_bulge_select" = "%d of %d certificate(s) selected";
+
+"file_import_result_bulge_select_accessibility_hint" = "Click to select or deselect all certificates.";
+
+"file_import_result_button" = "Import %d certificate(s)";
+
+"file_import_success_title" = "Import successful";
+
+"file_import_success_copy" = "You can now continue to use your certificate(s) as usual.";
+
+"file_import_success_button" = "OK";
+
+"file_import_error_maximum_title" = "Too many people";
+
+"file_import_error_maximum_copy" = "You can store certificates of up to 20 people in the app. The import exceeds this maximum number of people. Please adjust the selected file or delete certificates already imported into the app that are no longer needed.";
+
+"file_import_error_maximum_button" = "OK";
+
+"file_import_error_access_title" = "The file could not be read";
+
+"file_import_error_access_copy" = "The selected file may be corrupted, or password protected. Please select another file.";
+
+"file_import_error_access_button" = "OK";
 
 
 /********** start Screen: favorite immunization certificate **********/
@@ -277,6 +348,10 @@
 "accessibility_certificate_check_validity_label_results" = "Results of the EU certificate examination";
 
 "accessibility_certificate_check_validity_label_display_certificate" = "Display certificate";
+
+"accessibility_popup_check_validity_choose_country" = "Destination %@. Choose a country";
+
+"accessibility_popup_check_validity_choose_date" = "Date chosen %@. Choose a departure date.";
 
 "accessibility_certificate_check_validity_announce" = "The view \"Check validity\" has been opened";
 
@@ -513,7 +588,9 @@
 
 "MX" = "Mexico";
 
-"certificate_check_validity_selection_country_note" = "Is your destination not listed? More countries are progressively being added in stages. \n\nYou can find more information in the frequently asked questions and at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_selection_country_note" = "Is your destination not listed? More countries are progressively being added in stages. \n\nYou can find more information in the frequently asked questions and on the #website Re-Open EU.::https://reopen.europa.eu/en#";
+
+"Reopen_EU_external_link" = "#Go to website Re-Open EU::https://reopen.europa.eu/en#";
 
 "certificate_check_validity_selection_country_action_button" = "Select";
 
@@ -563,7 +640,7 @@
 
 "certificate_check_validity_result_not_testable" = "Not possible to validate";
 
-"certificate_check_validity_note" = "Please be aware that travel regulations can change. You should check your certificates at least 48 hours before you travel. Different regulations or restrictions might apply in some regions or when you return. You might also need additional documents to travel to a different country. \n\nYou can find more information in the frequently asked questions and at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_note" = "Please be aware that travel regulations can change. You should check your certificates at least 48 hours before you travel. Different regulations or restrictions might apply in some regions or when you return. You might also need additional documents to travel to a different country. \n\nYou can find more information in the frequently asked questions and on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "certificate_check_validity_detail_view_vaccination_result_title" = "EU Digital COVID Certificate of Vaccination";
 
@@ -573,9 +650,9 @@
 
 "certificate_check_validity_detail_view_vaccination_result_button" = "Display QR code";
 
-"certificate_check_validity_detail_view_vaccination_result_note_de" = "Das Impfzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_vaccination_result_note_de" = "Das Impfzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"certificate_check_validity_detail_view_vaccination_result_note_en" = "A certificate of vaccination is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_vaccination_result_note_en" = "A certificate of vaccination is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "certificate_check_validity_detail_view_test_result_title" = "EU Digital COVID Test Certificate";
 
@@ -587,9 +664,9 @@
 
 "certificate_check_validity_detail_view_test_result_button_disabled" = "You can only download German certificates as PDF documents";
 
-"certificate_check_validity_detail_view_test_result_note_de" = "Das Testzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_test_result_note_de" = "Das Testzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"certificate_check_validity_detail_view_test_result_note_en" = "A test certificate is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_test_result_note_en" = "A test certificate is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "certificate_check_validity_detail_view_recovery_result_title" = "EU Digital COVID Certificate of Recovery";
 
@@ -599,13 +676,13 @@
 
 "certificate_check_validity_detail_view_recovery_result_button" = "Display QR code";
 
-"certificate_check_validity_detail_view_recovery_result_note_de" = "Das Genesenenzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_recovery_result_note_de" = "Das Genesenenzertifikat gilt innerhalb der EU als gültiger Nachweis für Reisen. Die Mitgliedsländer haben unterschiedliche Einreisebedingungen. Mehr Informationen finden Sie in den Häufigen Fragen. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"certificate_check_validity_detail_view_recovery_result_note_en" = "A certificate of recovery is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"certificate_check_validity_detail_view_recovery_result_note_en" = "A certificate of recovery is valid proof for travel within the EU. The EU’s member countries have different travel restrictions. You can find more information in the Frequently Asked Questions. Before travelling, please check the applicable public health measures and related restrictions applied at the point of destination.\n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "certificate_check_validity_detail_view_result_no_rules_title" = "Certificate cannot be validated";
 
-"certificate_check_validity_detail_view_result_no_rules_message" = "For the selected country and date, there are currently no entry rules available to check for in the App. \n\nPlease check at #https://reopen.europa.eu::https://reopen.europa.eu# whether the certificate is valid for entry into the selected country.";
+"certificate_check_validity_detail_view_result_no_rules_message" = "For the selected country and date, there are currently no entry rules available to check for in the App. \n\nPlease check on the #website Re-Open EU::https://reopen.europa.eu/en# whether the certificate is valid for entry into the selected country.";
 
 "certificate_check_validity_detail_view_result_valid_title" = "This certificate is valid on your travel date";
 
@@ -660,27 +737,29 @@
 
 "accessibility_overview_certificates_label_favourites_button_not_active" = "Always display this person's certificates in first place: not active";
 
-"accessibility_overview_certificates_label_display_certificate" = "Display certificate";
+"accessibility_overview_certificates_label_display_certificate" = "Show certificate";
 
-"booster_vaccination_certificate_overview_action_button_title" = "Display current QR Code";
+"booster_vaccination_certificate_overview_action_button_title" = "Show certificates";
 
 "vaccination_certificate_overview_incomplete_title" = "Not fully vaccinated";
 
-"vaccination_certificate_overview_incomplete_message" = "You are not fully vaccinated. To use this QR code as proof of completed vaccination, you will need to add another vaccine dose.";
+"vaccination_certificate_overview_incomplete_message" = "Show this QR code when needed. Be ready to show your ID when your QR code is checked.";
 
-"vaccination_certificate_detail_view_incomplete_action_button_title" = "Display current QR Code";
+"vaccination_certificate_detail_view_incomplete_action_button_title" = "Show certificates";
 
-"vaccination_certificate_overview_complete_from_title" = "Fully vaccinated as of %@";
+"vaccination_certificate_overview_complete_from_title" = "Basic immunisation";
 
-"vaccination_certificate_overview_complete_from_message" = "You are not yet considered fully vaccinated. Full vaccination takes effect 14 days after the final dose.";
+"vaccination_certificate_overview_complete_from_message" = "Show this QR code when needed. Be ready to show your ID when your QR code is checked.";
 
-"vaccination_certificate_overview_complete_title" = "Fully vaccinated";
+"vaccination_certificate_overview_complete_title" = "Basic immunisation";
 
 "certificates_overview_qr_scan_hint" = "This QR code can be reliably verified with the CovPassCheck app.";
 
 "vaccination_certificate_overview_complete_message" = "Show this QR code when needed. Be ready to show ID when your QR code is checked.";
 
-"vaccination_certificate_overview_complete_action_button_title" = "Display current QR Code";
+"vaccination_certificate_overview_complete_action_button_title" = "Show certificates";
+
+"accessibility_certificate_overview_complete_action_button" = "New regulations";
 
 "vaccination_certificate_overview_booster_vaccination_notification_icon_new" = "New";
 
@@ -690,35 +769,37 @@
 
 "vaccination_certificate_overview_faqlink" = "Please find more information in our #Frequently Asked Questions::https://www.digitaler-impfnachweis-app.de/en/faq#.";
 
-"test_certificate_overview_title" = "Negative rapid antigen test from %@";
+"test_certificate_overview_title" = "Negative rapid antigen test";
 
 "test_certificate_overview_message" = "Show this QR code when needed. Be ready to show ID when your QR code is checked.";
 
-"test_certificate_overview_action_button_title" = "Display current QR Code";
+"test_certificate_overview_action_button_title" = "Show certificates";
 
-"pcr_test_certificate_overview_title" = "Negative PCR test from %@";
+"pcr_test_certificate_overview_title" = "Negative PCR test";
 
 "pcr_test_certificate_overview_message" = "Show this QR code when needed. Be ready to show ID when your QR code is checked.";
 
-"pcr_test_certificate_overview_action_button_title" = "Display current QR Code";
+"pcr_test_certificate_overview_action_button_title" = "Show certificates";
 
-"recovery_certificate_overview_valid_until_title" = "Recovery at most valid until %@";
+"recovery_certificate_overview_valid_until_title" = "Recovery";
 
-"recovery_certificate_overview_valid_from_title" = "Recovery valid from %@";
+"recovery_certificate_overview_valid_from_title" = "From %@";
 
 "recovery_certificate_overview_message" = "Show this QR code when needed. Be ready to show ID when your QR code is checked.";
 
-"recovery_certificate_overview_action_button_title" = "Display current QR Code";
+"recovery_certificate_overview_action_button_title" = "Show certificates";
 
 "certificates_overview_expired_title" = "Certificate expired";
 
-"certificates_overview_expired_message" = "The expiry date of your certificates has passed. Please make every effort to have a new digital certificate issued.";
+"certificates_overview_expired_message" = "The expiry date of your latest certificate has passed. You can conveniently renew this certificate in the CovPass app. Previous certificates will not be renewed. To do so, use the renewal function in the overview of your certificates or scan a newly issued certificate.";
+
+"certificates_overview_expired_or_soon_expiring_nonDE" = "Your latest certificate was not issued in Germany and therefore cannot be renewed in the app. Please contact the issuer of the certificate.";
 
 "certificates_overview_expired_action_button_title" = "Add new certificate";
 
 "certificates_overview_soon_expiring_title" = "Current certificate expires on %@ at %@";
 
-"certificates_overview_soon_expiring_subtitle" = "Please make every effort to have a new digital certificate issued.";
+"certificates_overview_soon_expiring_subtitle" = "You can easily renew your latest certificate in the CovPass app. Previous certificates will not be renewed. To do so, use the renewal function in the overview of your certificates or scan a newly issued certificate.";
 
 "certificates_overview_invalid_title" = "Certificate invalid";
 
@@ -770,6 +851,8 @@
 
 "certificates_overview_recovery_certificate_valid_until_date" = "Maximum valid until %@";
 
+"certificates_overview_recovery_certificate_sample_date" = "Positive test from %@";
+
 "certificates_overview_recovery_certificate_valid_from_date" = "Valid from %@";
 
 "certificates_overview_test_certificate_title" = "Test certificate";
@@ -784,9 +867,9 @@
 
 "certificates_overview_pcr_test_certificate_date" = "Sample taken on %@";
 
-"certificates_overview_all_certificates_app_reference_title" = "Please scan!";
+"certificates_overview_all_certificates_app_reference_title" = "Notice:";
 
-"certificates_overview_all_certificates_app_reference_text" = "Do not show this sensitive data to other people in restaurants, at events or in similar situations. Always have your QR code checked with the CovPassCheck app.";
+"certificates_overview_all_certificates_app_reference_text" = "Do not show this sensitive data. In testing situations, only let the QR code be scanned with the CovPassCheck app.";
 
 
 /********** detail view: delete certificate **********/
@@ -866,15 +949,15 @@
 
 "vaccination_certificate_detail_view_data_expiry_date_message" = "Valid until %@";
 
-"vaccination_certificate_detail_view_data_expiry_date_note" = "Please make every effort to have a new digital certificate issued in good time.";
+"vaccination_certificate_detail_view_data_expiry_date_note" = "You will be notified in the app if you can renew the certificate.";
 
-"vaccination_certificate_detail_view_data_vaccine_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"vaccination_certificate_detail_view_data_vaccine_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"vaccination_certificate_detail_view_data_vaccine_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"vaccination_certificate_detail_view_data_vaccine_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "vaccination_certificate_detail_view_qrcode_action_button_title" = "Display QR code";
 
-"vaccination_certificate_detail_view_pdf_action_button_title" = "Create EU printout";
+"vaccination_certificate_detail_view_pdf_action_button_title" = "Create PDF";
 
 "vaccination_certificate_detail_view_pdf_action_button_note" = "You can only download German certificates as PDF files.";
 
@@ -936,7 +1019,7 @@
 
 "accessibility_test_certificate_detail_view_data_test_country" = "Country performing test";
 
-"test_certificate_detail_view_data_test_issuer" = "Zertifikataussteller / Certificate issuer";
+"test_certificate_detail_view_data_test_issuer" = "Zertifikatsaussteller / Certificate issuer";
 
 "accessibility_test_certificate_detail_view_data_test_issuer" = "Certificate issuer";
 
@@ -950,11 +1033,11 @@
 
 "test_certificate_detail_view_data_expiry_date_message" = "Valid until %@";
 
-"test_certificate_detail_view_data_expiry_date_note" = "Please make every effort to have a new digital certificate issued in good time.";
+"test_certificate_detail_view_data_expiry_date_note" = "You will be notified in the app if you can renew the certificate.";
 
-"test_certificate_detail_view_data_test_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"test_certificate_detail_view_data_test_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"test_certificate_detail_view_data_test_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"test_certificate_detail_view_data_test_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "test_certificate_detail_view_qrcode_action_button_title" = "Display QR code";
 
@@ -996,7 +1079,7 @@
 
 "accessibility_recovery_certificate_detail_view_data_country" = "Country performing test";
 
-"recovery_certificate_detail_view_data_issuer" = "Zertifikataussteller / Certificate issuer";
+"recovery_certificate_detail_view_data_issuer" = "Zertifikatsaussteller / Certificate issuer";
 
 "accessibility_recovery_certificate_detail_view_data_issuer" = "Certificate issuer";
 
@@ -1018,15 +1101,15 @@
 
 "recovery_certificate_detail_view_data_expiry_date_message" = "Valid until %@";
 
-"recovery_certificate_detail_view_data_expiry_date_note" = "Please make every effort to have a new digital certificate issued in good time.";
+"recovery_certificate_detail_view_data_expiry_date_note" = "You will be notified in the app if you can renew the certificate.";
 
-"recovery_certificate_detail_view_data_test_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie unter #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"recovery_certificate_detail_view_data_test_note_de" = "Diese Bescheinigung ist kein Reisedokument. Die wissenschaftlichen Erkenntnisse zu COVID-19 in den Bereichen Impfung, Testung und Genesung entwickeln sich fortlaufend weiter, auch im Hinblick auf neue besorgniserregende Virusvarianten. Bitte informieren Sie sich vor Reiseantritt über die am Zielort geltenden Gesundheitsmaßnahmen und entsprechenden Beschränkungen.\n\nInformationen über die in den jeweiligen EU-Ländern geltenden Einreisebestimmungen finden Sie auf der #Website Re-Open EU.::https://reopen.europa.eu/de#";
 
-"recovery_certificate_detail_view_data_test_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country at #https://reopen.europa.eu::https://reopen.europa.eu#.";
+"recovery_certificate_detail_view_data_test_note_en" = "This certificate is not a travel document. The scientific findings about Covid-19 and vaccination, testing and recovery are continuing to evolve, which includes findings about new, concerning virus variants. \n\nPlease inform yourself about the public-health measures and corresponding restrictions at your travel destination before you travel. You can find information about the travel restrictions applicable in each EU country on the #website Re-Open EU.::https://reopen.europa.eu/en#";
 
 "recovery_certificate_detail_view_qrcode_action_button_title" = "Display QR code";
 
-"recovery_certificate_detail_view_create_pdf_action_button_title" = "Create EU printout";
+"recovery_certificate_detail_view_create_pdf_action_button_title" = "Create PDF";
 
 "recovery_certificate_detail_view_pdf_action_button_note" = "You can only download German vaccination and recovery certificates as PDF files.";
 
@@ -1040,7 +1123,9 @@
 
 "certificate_expires_detail_view_note_title" = "Certificate expires on %@ at %@";
 
-"certificate_expires_detail_view_note_message" = "Please make every effort to have a new digital certificate issued in good time.";
+"certificate_expires_detail_view_note_message" = "The technical validity of your certificate will expire soon. However, you do not need to renew it as it is no longer relevant for proving your immune protection.";
+
+"certificate_expires_detail_view_note_nonDE" = "This certificate was not issued in Germany and therefore cannot be renewed in the app. Please contact the issuer of the certificate.";
 
 "certificate_invalid_detail_view_note_title" = "Certificate invalid";
 
@@ -1048,16 +1133,16 @@
 
 "certificate_expired_detail_view_note_title" = "Certificate expired";
 
-"certificate_expired_detail_view_note_message" = "The expiry date has been exceeded. Please make every effort to have a new digital certificate issued.";
+"certificate_expired_detail_view_note_message" = "The technical validity of your certificate expired on %@ at %@. However, you do not need to renew it as it is no longer relevant for proving your immune protection.";
 
 
 /********** print certificate **********/
 
-"accessibility_vaccination_certificate_detail_view_pdf_announce" = "The view \"Create EU printout\" has been opened";
+"accessibility_vaccination_certificate_detail_view_pdf_announce" = "The view \"Create PDF\" has been opened";
 
 "accessibility_certificate_create_pdf_label_close" = "Close";
 
-"certificate_create_pdf_headline" = "Create EU printout";
+"certificate_create_pdf_headline" = "Create PDF";
 
 "certificate_create_pdf_first_list_item" = "You can save the certificate as a PDF document. Saving is voluntary. Initially, only you have access to the PDF document.";
 
@@ -1123,7 +1208,7 @@
 
 "error_validity_check_certificates_title" = "Check the validity of your certificates";
 
-"error_validity_check_certificates_message" = "The validity of your certificates is about to expire or has already expired. Please make every effort to have a new digital certificate issued.";
+"error_validity_check_certificates_message" = "If you can renew this certificate in the app, you will receive a notification. You can find more information about replacing expired certificates in our FAQs.";
 
 "error_validity_check_certificates_button_title" = "OK";
 
@@ -1139,9 +1224,29 @@
 
 /********** app information **********/
 
-"accessibility_app_information_title_update" = "The view \"Update rules of entry\" has been opened";
+"accessibility_app_information_title_accessibility_statement_announce" = "The view \"Accessibility statement\" has been opened";
 
-"accessibility_app_information_title_update_closing_announce" = "The view \"Update travel rules\" has been closed";
+"accessibility_app_information_title_accessibility_statement_announce_closing" = "The view \"Accessibility statement\" has been closed";
+
+"accessibility_app_information_title_legal_information_announce" = "The view \"Legal information\" has been opened";
+
+"accessibility_app_information_title_legal_information_announce_closing" = "The view \"Legal information\" has been closed";
+
+"accessibility_app_information_title_simple_language_announce" = "The view \"Simple language\" has been opened";
+
+"accessibility_app_information_title_simple_language_announce_closing" = "The view \"Simple language\" has been closed";
+
+"accessibility_app_information_title_faq_announce" = "The view \"Frequently asked questions\" has been opened";
+
+"accessibility_app_information_title_faq_announce_closing" = "The view \"Frequently asked questions\" has been closed";
+
+"accessibility_app_information_title_us_terms_announce" = "The view \"Terms of use for US citizens\" has been opened";
+
+"accessibility_app_information_title_us_terms_announce_closing" = "The view \"Terms of use for US citizens\" has been closed";
+
+"accessibility_app_information_title_update" = "The view \"Update checking rules\" has been opened";
+
+"accessibility_app_information_title_update_closing_announce" = "The view \"Update checking rules\" has been closed";
 
 "accessibility_app_information_datenschutz_announce" = "Privacy notice has been opened";
 
@@ -1149,13 +1254,45 @@
 
 "accessibility_app_information_title_contact_announce" = "Contact has been opened";
 
+"accessibility_app_information_title_contact_closing_announce" = "Contact has been closed";
+
 "accessibility_app_information_title_open_source_announce" = "The view \"Open-source licences\" has been opened";
+
+"accessibility_app_information_title_open_source_announce_closing" = "The view \"Open-source licences\" has been closed";
+
+"accessibility_app_information_update_notifications_announce_open" = "The view \"update notifications\" has been opened";
+
+"accessibility_app_information_update_notifications_announce_close" = "The view \"update notifications\" has been closed";
 
 "accessibility_app_information_label_back" = "Back to the start screen";
 
-"accessibility_app_information_title_informationt_announce" = "Information has been opened";
+"accessibility_app_information_title_information_announce" = "Information has been opened";
+
+"accessibility_app_information_title_information_closing_announce" = "Information has been closed";
+
+"accessibility_app_information_title_checking_rules_announce" = "Update Checking Rules has been opened";
+
+"accessibility_app_information_title_checking_rules_closing_announce" = "Update checking rules has been closed";
+
+"accessibility_app_information_title_update_notifications_announce" = "Update notifications has been opened";
+
+"accessibility_app_information_title_update_notifications_closing_announce" = "Update notifications has been closed";
+
+"accessibility_app_information_title_federal_state_rules_announce" = "Federal state rules has been opened";
+
+"accessibility_app_information_title_federal_state_rules_icon" = "Select federal state";
+
+"accessibility_popup_valid_certificate_germany_announce" = "Validity of certificates in Germany has been opened";
+
+"accessibility_popup_valid_certificate_germany_closing_announce" = "Validity of certificates in Germany has been closed";
+
+"accessibility_app_information_title_federal_state_rules_closing_announce" = "Federal state rules has been closed";
 
 "accessibility_app_information_version_number_delimiter" = "point";
+
+"settings_list_status_on" = "On";
+
+"settings_list_status_off" = "Off";
 
 "app_information_title" = "Information";
 
@@ -1163,7 +1300,7 @@
 
 "app_information_title_contact" = "Contact";
 
-"app_information_message_contact_support" = "Contact for technical questions about the CovPass app";
+"app_information_message_contact_support" = "Contact for questions about the CovPass app";
 
 "app_information_message_contact_support_phone" = "Telephone: #0800–4747–001::tel:0800–4747–001#";
 
@@ -1199,9 +1336,45 @@
 
 "app_information_title_accessibility_statement_linked" = "#Accessibility statement::$0#";
 
-"app_information_title_update" = "Update rules of entry";
+"app_information_title_update" = "Update checking rules";
 
 "app_information_message_update" = "To check the validity of certificates, the app requires up-to-date lists of trusted certificate issuers as well as the current Covid-19 rules in the relevant travel countries.\n\nThese lists are updated automatically on a daily basis. You can also manually update them here at any time.";
+
+"app_information_list_update_notifications" = "Update notifications";
+
+"app_information_title_update_notifications" = "Update notifications";
+
+"app_information_copy_update_notifications" = "You can now disable the update notifications. You can use the toggle to disable or re-enable the updates at any time. If you disable the update screen, you will no longer receive updates about the latest software developments in the app.";
+
+"app_information_update_notifications_toggle" = "Show update notifications";
+
+"app_information_update_notifications_new_version_copy" = "New functions (Version %@)";
+
+"whats_new_screen_update_notifications_checkbox_headline" = "Do not show this type of notifications anymore";
+
+"whats_new_screen_update_notifications_checkbox_copy" = "You can change this option anytime in the settings.";
+
+"settings_rules_list_title" = "Checking rules";
+
+"settings_rules_list_status_updated" = "Updated";
+
+"settings_rules_list_status_outofdate" = "Update required";
+
+"settings_rules_list_entry" = "Entry rules";
+
+"settings_rules_list_domestic" = "Domestic rules";
+
+"settings_rules_list_features" = "Rule features";
+
+"settings_rules_list_issuer" = "Certificate issuer";
+
+"settings_rules_list_countries" = "Country lists";
+
+"settings_rules_list_loading_title" = "Lists are being updated…";
+
+"settings_rules_list_loading_size" = "%d / %d MB";
+
+"settings_rules_list_loading_cancel" = "Cancel";
 
 "app_information_message_update_note" = "Most recent update";
 
@@ -1227,6 +1400,8 @@
 "accessibility_qr_code" = "QR code";
 
 "accessibility_button" = "Button";
+
+"whats_new_screen_title" = "New features";
 
 
 /********** popup: share certification **********/
@@ -1317,6 +1492,8 @@
 "share_certificate_transmission_title" = "Submitting your certificate for verification";
 
 "share_certificate_transmission_details_provider" = "Provider";
+
+"share_certificate_transmission_details_partner" = "Verification Partner";
 
 "share_certificate_transmission_details_booking" = "Booking";
 
@@ -1443,15 +1620,23 @@
 
 /********** dcc renewal **********/
 
+"accessibility_popup_renew_certificate_announce" = "Changes to your certificates has been opened";
+
+"accessibility_popup_renew_certificate_closing_announce" = "Changes to your certificates has been closed";
+
 "certificate_renewal_startpage_headline" = "Changes to your certificates";
 
 "certificate_renewal_startpage_copy" = "The EU specifications for certain vaccination certificates have been changed. This certificate does not correspond to the current numbering. It is still valid. However, if it is a certificate for a booster vaccination, it will not be recognized as such when checked.\n\nTherefore we recommend requesting a new certificate with the number 2/1 directly free of charge via the app.";
 
-"certificate_renewal_startpage_copy_box" = "The process is uncomplicated and takes only a few minutes. You can trigger the renewal also later in the detail view of your certificates.";
+"certificate_renewal_startpage_copy_box" = "The process is uncomplicated and takes only a few minutes. You can trigger the renewal also later in the detailed view of your certificates.";
 
 "certificate_renewal_startpage_main_button" = "Renew now";
 
 "certificate_renewal_startpage_secondary_button" = "Renew later";
+
+"accessibility_renew_certificate_concent_announce" = "Consent to transmitting your certificates has been opened";
+
+"accessibility_renew_certificate_concent_closing_announce" = "Consent to transmitting your certificates has been closed";
 
 "certificate_renewal_consent_page_transfer_certificates_headline" = "Consent to transmitting your certificates to the RKI";
 
@@ -1465,7 +1650,7 @@
 
 "certificate_renewal_consent_page_transfer_certificates_consent_box_copy_list_item_2" = "The RKI checks/verifies the certificate, issues an updated certificate and transmits it to the app.";
 
-"certificate_renewal_consent_page_transfer_certificates_consent_box_copy_list_item_3" = "To ensure that certificates can only be updated once, the identifier of the old certificate is documented by the RKI.";
+"certificate_renewal_consent_page_transfer_certificates_consent_box_copy_list_item_3" = "To ensure that certificates can only be updated to a limited extent, the identifier of the old certificate is documented by the RKI.";
 
 "certificate_renewal_consent_page_transfer_certificates_copy" = "The renewal of the certificate is voluntary and free of charge.";
 
@@ -1493,11 +1678,70 @@
 
 "certificate_renewal_error_title" = "Reissue failed";
 
-"certificate_renewal_error_copy" = "Unfortunately, there was a problem reissuing your certificate. Please check your Internet connection and note that the same certificate can be reissued a maximum of three times a year. If the error persists, please refer to the Frequently Asked Questions for more information using the error code below.\n\nError code: %@";
+"certificate_renewal_error_copy" = "Unfortunately, there was a problem reissuing your certificate. Please check your internet connection. Also note that a certificate can be renewed a maximum of three times. If you have already renewed your certificate in the Corona-Warn-App or on another device, scan the renewed certificate with the CovPass app.\n\nError code: %@";
 
 "certificate_renewal_error_button_primary" = "OK";
 
-"certificate_renewal_error_button_secondary" = "More information";
+"certificate_renewal_error_button_secondary" = "Go to the FAQ";
+
+
+/********** DCC renewal when expiring **********/
+
+"renewal_expiry_notification_title" = "Renewal needed";
+
+"renewal_bluebox_title_expiring_soon_vaccination" = "Vaccination certificate expires soon";
+
+"renewal_bluebox_title_expiring_soon_recovery" = "Recovery certificate expires soon";
+
+"renewal_bluebox_title_expired_vaccination" = "Vaccination certificate expired";
+
+"renewal_bluebox_title_expired_recovery" = "Recovery certificate expired";
+
+"renewal_bluebox_copy_expiring_soon" = "The technical validity of your certificate expires on %@ at %@. Renew the certificate to continue using it.";
+
+"renewal_bluebox_copy_expired" = "The technical validity of your certificate expired on %@ at %@. Renew your certificate now to continue using it.";
+
+"renewal_bluebox_copy_expiry_not_available" = "The technical validity of your certificate has expired on %@ at %@. If you still need the certificate, please visit a pharmacy to have a new certificate issued.";
+
+"renewal_bluebox_copy_expiring_soon_not_available" = "The technical validity of your certificate expires on %@ at %@. If you still need the certificate, please visit a pharmacy to have a new certificate issued.";
+
+"renewal_bluebox_copy_expiry_not_german" = "The technical validity of at least one of your certificates has expired. As your certificate was not issued in Germany, it cannot be renewed in the CovPass app. Please check the requirements of the country of issuance.";
+
+"renewal_bluebox_copy_expiring_soon_not_german" = "The technical validity of your certificate expires on %@ at %@. As your certificate was not issued in Germany, it cannot be renewed in the CovPass app. Please check the requirements of the country of issuance.";
+
+"renewal_expiry_notification_copy_vaccination" = "The technical validity of your certificate is about to expire or has already expired. Renew the certificate to continue using it.";
+
+"renewal_expiry_notification_button_vaccination" = "Renew vaccination certificate";
+
+"renewal_expiry_notification_copy_recovery" = "The technical validity of your recovery certificate is about to expire or has already expired. Renew the certificate to continue using it.";
+
+"renewal_expiry_notification_button_recovery" = "Renew recovery certificate";
+
+"renewal_expiry_notification_button" = "Renew now";
+
+"renewal_expiry_consent_box_item_1" = "The app transmits the aforementioned certificates to the RKI for verification.";
+
+"renewal_expiry_consent_box_item_2" = "The RKI checks the certificates, issues a renewed certificate and transmits it to your app.";
+
+"renewal_expiry_consent_list_item_1" = "The renewal of certificates is voluntary and free of charge.";
+
+"renewal_expiry_consent_list_item_2" = "To ensure that certificates can only be updated to a limited extent, the identifier of the old certificate is documented by the RKI. The other data on your certificates will be deleted by the RKI immediately after renewal.";
+
+"renewal_expiry_consent_list_item_3" = "When renewing certificates of family members, please ensure that the person concerned agrees.";
+
+"renewal_expiry_consent_list_item_4" = "In certain cases, additional certificates are sent in addition to the certificate to be renewed. This is necessary in order to be able to include the previous sequence of vaccinations and recoveries in the new certificate.";
+
+"renewal_expiry_success_copy" = "You can now continue to use your certificate as usual.\n\nPlease note that your paper certificate will also expire soon or has already expired. If desired, you can download your new certificate as a PDF file and print it out.";
+
+"renewal_expiry_success_button" = "OK";
+
+"renewal_expiry_modal_not_available_title" = "Renew your certificate";
+
+"renewal_expiry_modal_not_available_copy" = "The technical validity of at least one of your certificates is about to expire. As your certificate was not issued in Germany, it cannot be renewed in the CovPass app. Please check the requirements of the country of issuance.";
+
+"renewal_expiry_modal_not_available_title_1" = "OK";
+
+"renewal_expiry_success_download_button" = "Create PDF";
 
 
 /********** DCC revocation **********/
@@ -1519,3 +1763,218 @@
 "revocation_detail_single_notDE" = "The certificate was revoked by the certificate issuer due to an official decision.";
 
 "revocation_detail_locationID" = "The RKI has revoked the certificate due to an official decree. Please make every effort to have a new digital certificate issued.";
+
+
+/********** infschg **********/
+
+"infschg_info_accessibility_announce_open" = "The view \"New legal regulations\" has been opened.";
+
+"infschg_info_accessibility_announce_close" = "The view \"New legal regulations\" has been closed.";
+
+"infschg_info_accessibility_close" = "Close";
+
+"infschg_info_title" = "New legal regulations";
+
+"infschg_info_copy_1" = "In Germany, an amendment to the Infection Protection Act comes into force. From October 1, 2022, the German federal states will be able to make masks compulsory in indoor areas accessible to the public.";
+
+"infschg_info_copy_2" = "Exemption from the mask obligation";
+
+"infschg_info_copy_3" = "In case the federal state in which you are staying has ordered a mask obligation, a negative rapid or PCR test exempts you from this mask obligation for 24 hours at leisure, cultural and sporting events as well as in catering establishments. An unsupervised self-test is not sufficient. Your state may regulate that you are also exempt from the mask requirement through vaccinations or recovery (if these occurred no more than three months ago).* As soon as the first states mandate a mask requirement, the CovPass app will display your state-specific mask requirement status after a further update.\n\nIf your COVID certificates stored in the CovPass app are sufficient to exempt you from the mask requirement in your state, your certificate will turn green. Your exemption from the mask requirement in your state can be verified by scanning your QR code on the home screen or from the details view using the CovPassCheck app.\n\n*An exemption from the mask requirement does not apply to long-distance public transportation, hospitals, nursing facilities, and patients in doctors' offices.";
+
+"infschg_info_button" = "OK";
+
+"infschg_start_mask_mandatory" = "Mask obligation";
+
+"infschg_start_mask_optional" = "No mask obligation";
+
+"infschg_start_immune_complete" = "Complete vaccination protection";
+
+"infschg_start_immune_incomplete" = "Incomplete vaccination protection";
+
+"infschg_start_notification" = "Check status";
+
+"infschg_start_expired_revoked" = "No valid certificate";
+
+"infschg_cert_overview_title" = "Your current certificate";
+
+"infschg_cert_overview_mask_time_until" = "Exempt until %@";
+
+"infschg_cert_overview_mask_time_from" = "Exempt from %@";
+
+"infschg_cert_overview_mask_hint_optional" = "You are exempt from the mask requirement in some situations in this state; however, a mask is still recommended.";
+
+"infschg_cert_overview_mask_hint_mandatory" = "You can be exempted from the mask requirement for up to 24 hours in your state. Note that different regulations may apply in your federal state. Also remember that the exemption does not apply to places where a special mask requirement applies: e.g. doctors' offices, hospitals or long-distance passenger transport.";
+
+"infschg_cert_overview_immunisation_time_since" = "Since %@";
+
+"infschg_cert_overview_immunisation_time_from" = "Complete from %@";
+
+"infschg_cert_overview_immunisation_incomplete_A" = "You have not yet received all currently recommended vaccinations. Your vaccination protection is not yet complete. Please note that the vaccination status displayed in the app is determined in accordance with the Infection Protection Act. For children under 12 and all other persons, there are currently no restrictions under federal law that are linked to the \"fully vaccinated\" vaccination status that can be viewed in the app. Please note, on the one hand, the recommendations of the Permanent Vaccination Commission and, on the other hand, possibly deviating rules in your federal state.";
+
+"infschg_cert_overview_immunisation_complete_B2" = "You have received all currently recommended vaccinations. Your vaccination protection is complete.";
+
+"infschg_cert_overview_immunisation_third_vacc_C2" = "You have received all vaccinations for a complete vaccination protection. Your vaccination protection is effective. However, please also inform yourself about recommended booster vaccinations.";
+
+"infschg_cert_overview_immunisation_E2" = "You are considered fully vaccinated based on your vaccination and the infection you have had. However, please also inform yourself about recommended booster vaccinations.";
+
+"infschg_cert_overview_immunisation_E22" = "You are considered fully vaccinated based on your vaccination and the infection you have had. However, your immune protection is only effective in %d days. Please bear in mind that you can still be contagious, but also inform yourself about recommended booster vaccinations";
+
+"infschg_cert_overview_immunisation_invalid" = "Add a valid certificate or renew your latest certificate to get information about your vaccination status.";
+
+"infschg_more_info_link" = "#Go to the FAQ::https://www.digitaler-impfnachweis-app.de/en/faq/#current-most-frequently-asked-questions#";
+
+"infschg_popup_choose_federal_state_title" = "Choose your federal state";
+
+"accessibility_popup_choose_federal_state_announce" = "Choose federal state has been opened";
+
+"accessibility_popup_choose_federal_state_closing_announce" = "Choose federal state has been opened";
+
+"accessibility_start_screen_arrow_card" = "Open all certificates of this person";
+
+"infschg_popup_choose_federal_state_copy_1" = "Beginning October 1, 2022, states may mandate a mask requirement in indoor spaces open to the public. Select your state to see your current mask status.*";
+
+"infschg_popup_choose_federal_state_tag" = "Federal state";
+
+"infschg_popup_choose_federal_state_box_content" = "%@";
+
+"infschg_popup_choose_federal_state_copy_2" = "*You can change the state in the settings at any time. For more information about the mask requirement, see the #frequently asked questions::$0#.";
+
+"infschg_popup_choose_federal_state_copy_3" = "Rules from %@ (start of validity)";
+
+"accessibility_infschg_modal_view_announce" = "An overview of all certificates has been opened";
+
+"accessibility_infschg_modal_view_announce_closing" = "The overview of all certificates has been closed";
+
+"infschg_start_screen_status_green" = "No mask required";
+
+"infschg_start_screen_status_blue" = "Mask mandatory";
+
+"infschg_start_screen_status_grey" = "No valid certificate";
+
+"infschg_start_screen_status_grey_2" = "No additional rules";
+
+"infschg_detail_view_status_not_applicable_title" = "No check possible";
+
+"infschg_detail_view_status_not_applicable_copy" = "To check the federal state-specific mask requirement, you must have a technically valid certificate. Please check whether you can renew the certificate.";
+
+"infschg_start_screen_status_federal_state" = "in %@";
+
+"infschg_settings_federal_state_title" = "Federal state";
+
+"infschg_settings_federal_state_page_title" = "Federal state";
+
+"infschg_settings_federal_state_page_copy_1" = "Select the federal state according to whose rules you want your mask status to be displayed.";
+
+"infschg_settings_federal_state_page_copy_2" = "Rules from %@ (start of validity)";
+
+"infschg_settings_federal_state_page_tag" = "Federal state";
+
+"infschg_detail_page_no_mask_mandatory_title" = "No mask required";
+
+"infschg_detail_page_no_mask_mandatory_subtitle" = "Exempt until %@";
+
+"infschg_detail_page_no_mask_mandatory_federal_state" = "in %@*";
+
+"infschg_detail_page_no_mask_mandatory_copy_1" = "You are exempt from the mask requirement in some situations in this state; however, a mask is still recommended.\n\n *Rules from %@ (start of validity)";
+
+"infschg_detail_page_no_mask_mandatory_link" = "#Go to the FAQ::https://www.digitaler-impfnachweis-app.de/en/faq/#current-most-frequently-asked-questions#";
+
+"infschg_detail_page_no_mask_mandatory_subtitle_2" = "More information about the mask requirement";
+
+"infschg_detail_page_no_mask_mandatory_copy_2" = "If the federal state in which you are staying has decreed that masks are compulsory, a negative rapid or PCR test will exempt you from this mask requirement for 24 hours at leisure, cultural and sporting events and in catering establishments. An unsupervised self-test is not sufficient. Your state may regulate that you are also exempt from the mask requirement due to vaccinations or recovery (if these occurred no more than three months ago). An exemption from the mask requirement does not apply to long-distance public transport, hospitals, care facilities, and patients in doctors' offices.\n\nShould your COVID certificates stored in the app be sufficient to exempt you from the mask requirement in your federal state, your certificate will turn green. Your exemption from the mask requirement in your state can be verified by scanning your QR code using the CovPassCheck app.";
+
+"infschg_detail_page_no_mask_mandatory_button" = "Change federal state";
+
+"infschg_detail_page_mask_mandatory_title" = "Mask mandatory";
+
+"infschg_detail_page_mask_mandatory_subtitle" = "Exempt from %@";
+
+"infschg_detail_page_mask_mandatory_federal_state" = "in %@*";
+
+"infschg_detail_page_mask_mandatory_copy_1" = "You are not exempt from the mask requirement in this state.\n\n *Rules from %@ (start of validity)";
+
+"infschg_detail_page_mask_mandatory_link" = "#Go to the FAQ::https://www.digitaler-impfnachweis-app.de/en/faq/#current-most-frequently-asked-questions#";
+
+"infschg_detail_page_mask_mandatory_subtitle_2" = "More information about the mask requirement";
+
+"infschg_detail_page_mask_mandatory_copy_2" = "If the federal state in which you are staying has decreed that masks are compulsory, a negative rapid or PCR test will exempt you from this mask requirement for 24 hours at leisure, cultural and sporting events and in catering establishments. An unsupervised self-test is not sufficient. Your state may regulate that you are also exempt from the mask requirement due to vaccinations or recovery (if these occurred no more than three months ago). An exemption from the mask requirement does not apply to long-distance public transport, hospitals, care facilities, and patients in doctors' offices.\n\nShould your COVID certificates stored in the app be sufficient to exempt you from the mask requirement in your federal state, your certificate will turn green. Your exemption from the mask requirement in your state can be verified by scanning your QR code using the CovPassCheck app.";
+
+"infschg_detail_page_mask_mandatory_button" = "Change federal state";
+
+"infschg_detail_page_mask_status_uncertain_title" = "Mask mandatory";
+
+"infschg_detail_page_mask_status_uncertain_federal_state" = "in %@";
+
+"infschg_detail_page_mask_status_uncertain_copy_1" = "For this federal state the RKI has not received federal state-specifc rules. Therefore, only the uniform federal rules on mandatory masks apply.";
+
+"infschg_detail_page_mask_status_uncertain_link" = "#Go to the FAQ::https://www.digitaler-impfnachweis-app.de/en/faq/#current-most-frequently-asked-questions#";
+
+"infschg_detail_page_mask_status_uncertain_subtitle_2" = "More information about the mask requirement";
+
+"infschg_detail_page_mask_status_uncertain_copy_2" = "If the federal state in which you are staying has decreed that masks are compulsory, a negative rapid or PCR test will exempt you from this mask requirement for 24 hours at leisure, cultural and sporting events and in catering establishments. An unsupervised self-test is not sufficient. Your state may regulate that you are also exempt from the mask requirement due to vaccinations or recovery (if these occurred no more than three months ago). An exemption from the mask requirement does not apply to long-distance public transport, hospitals, care facilities, and patients in doctors' offices.\n\nShould your COVID certificates stored in the app be sufficient to exempt you from the mask requirement in your federal state, your certificate will turn green. Your exemption from the mask requirement in your state can be verified by scanning your QR code using the CovPassCheck app.";
+
+"infschg_detail_page_mask_status_uncertain_button" = "Change federal state";
+
+"infschg_detail_page_no_valid_certificate_title" = "No valid certificate";
+
+"infschg_detail_page_no_valid_certificate_copy" = "In your state, you can be exempt from the mask requirement for up to 24h. Note that different regulations may apply in your state. Also remember that the exemption does not apply to places where a special mask requirement applies: e.g. doctors' offices, hospitals or long-distance passenger transport.";
+
+"infschg_detail_page_no_valid_certificate_link" = "#Go to the FAQ::https://www.digitaler-impfnachweis-app.de/en/faq/#current-most-frequently-asked-questions#";
+
+"accessibility_app_popup_choose_federal_state_announce" = "Choose federal state has been opened";
+
+"accessibility_app_popup_choose_federal_state_announce_when_chosen" = "Federal state %@ was selected";
+
+"accessibility_app_popup_choose_federal_state_closing_announce" = "Choose federal state has been closed";
+
+"infschg_module_choose_federal_state_title" = "Choose federal state";
+
+
+/********** federal state names **********/
+
+"DE_BY" = "Bavaria";
+
+"DE_BB" = "Brandenburg";
+
+"DE_BE" = "Berlin";
+
+"DE_BW" = "Baden-Württemberg";
+
+"DE_HB" = "Bremen";
+
+"DE_HH" = "Hamburg";
+
+"DE_HE" = "Hesse";
+
+"DE_MV" = "Mecklenburg-Western Pomerania";
+
+"DE_NI" = "Lower Saxony";
+
+"DE_NW" = "Northrhine-Westphalia";
+
+"DE_RP" = "Rhineland-Palatinate";
+
+"DE_SN" = "Saxony";
+
+"DE_ST" = "Saxony-Anhalt";
+
+"DE_SL" = "Saarland";
+
+"DE_SH" = "Schleswig-Holstein";
+
+"DE_TH" = "Thuringia";
+
+
+/********** common a11y labels **********/
+
+"a11y_accordion_collapsed" = "collapsed";
+
+"a11y_accordion_expanded" = "expanded";
+
+"a11y_accordion_expand_hint_ios" = "Double tap to expand";
+
+"a11y_accordion_expand_hint_android" = "Expand";
+
+"a11y_accordion_collapse_hint_ios" = "Double tap to collapse";
+
+"a11y_accordion_collapse_hint_android" = "Collapse";

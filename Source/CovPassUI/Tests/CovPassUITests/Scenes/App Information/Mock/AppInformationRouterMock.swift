@@ -1,8 +1,8 @@
 //
 //  AppInformationRouterMock.swift
-//  
 //
-//  Created by Thomas Kuleßa on 09.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import CovPassUI
@@ -12,7 +12,7 @@ struct AppInformationRouterMock: AppInformationRouterProtocol {
     var sceneCoordinator: SceneCoordinator = SceneCoordinatorMock()
     let showSceneExpectation = XCTestExpectation()
 
-    func showScene(_ scene: SceneFactory) {
+    func showScene(_: SceneFactory) {
         showSceneExpectation.fulfill()
     }
 }

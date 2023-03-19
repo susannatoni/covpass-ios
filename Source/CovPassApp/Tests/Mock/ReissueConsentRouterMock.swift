@@ -5,17 +5,17 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import Foundation
 @testable import CovPassApp
-import CovPassUI
 import CovPassCommon
-import XCTest
+import CovPassUI
+import Foundation
 import PromiseKit
+import XCTest
 
 class ReissueConsentRouterMock: ReissueConsentRouterProtocol {
-
     var sceneCoordinator: SceneCoordinator = SceneCoordinatorMock()
     let showNextExpectation = XCTestExpectation(description: "showNextExpectation")
+    let showNextGenericPageExpectation = XCTestExpectation(description: "showNextExpectation")
     let cancelExpectation = XCTestExpectation(description: "cancelExpectation")
     let routeToPrivacyExpectation = XCTestExpectation(description: "routeToPrivacyExpectation")
     let showErrorExpectation = XCTestExpectation(description: "showErrorExpectation")
@@ -23,15 +23,20 @@ class ReissueConsentRouterMock: ReissueConsentRouterProtocol {
     var receivedErrorTitle: String?
     var receivedErrorMessage: String?
 
-    func showNext(newTokens: [ExtendedCBORWebToken], oldTokens: [ExtendedCBORWebToken], resolver: Resolver<Void>) {
+    func showReissueResultPage(newTokens _: [ExtendedCBORWebToken], oldTokens _: [ExtendedCBORWebToken], resolver _: Resolver<Void>) {
         showNextExpectation.fulfill()
     }
-    
-    func cancel(resolver:Resolver<Void>)  {
+
+    func showGenericResultPage(resolver _: Resolver<Void>,
+                               certificate _: ExtendedCBORWebToken) {
+        showNextGenericPageExpectation.fulfill()
+    }
+
+    func cancel(resolver: Resolver<Void>) {
         cancelExpectation.fulfill()
         resolver.fulfill_()
     }
-    
+
     func routeToPrivacyStatement() {
         routeToPrivacyExpectation.fulfill()
     }
@@ -43,5 +48,5 @@ class ReissueConsentRouterMock: ReissueConsentRouterProtocol {
         showErrorExpectation.fulfill()
     }
 
-    func showURL(_ url: URL) {}
+    func showURL(_: URL) {}
 }

@@ -1,8 +1,8 @@
 //
 //  CertificateRevocationRepository.swift
-//  
 //
-//  Created by Thomas Kuleßa on 21.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import Foundation
@@ -10,9 +10,9 @@ import PromiseKit
 
 public struct CertificateRevocationRepository: CertificateRevocationRepositoryProtocol {
     private typealias KIDList = Void
-    private let client: CertificateRevocationHTTPClientProtocol
+    private let client: CertificateRevocationDataSourceProtocol
 
-    public init(client: CertificateRevocationHTTPClientProtocol) {
+    public init(client: CertificateRevocationDataSourceProtocol) {
         self.client = client
     }
 
@@ -82,7 +82,8 @@ public struct CertificateRevocationRepository: CertificateRevocationRepositoryPr
                 assertionFailure("Must never happen.")
                 return .init(error: ApplicationError.unknownError)
             }
-            let isRevoked = chunkListResponse1.contains(hash) || chunkListResponse2.contains(hash)
+            let isRevoked = chunkListResponse1.hashes.contains(hash) ||
+                chunkListResponse2.hashes.contains(hash)
 
             return .value(isRevoked)
         }
@@ -104,7 +105,7 @@ private struct RevocationParameters {
 
         kid = message.keyIdentifier
         hashes = [
-            .signature:signatureHash,
+            .signature: signatureHash,
             .uci: uciHash,
             .countryCodeUCI: countryUCIHash
         ]

@@ -6,15 +6,21 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-import Foundation
-
 @testable import CovPassCommon
+import Foundation
+import XCTest
 
 class MockPersistence: Persistence {
     private var store = [String: Any]()
-
+    var storeExpectation = XCTestExpectation(description: "storeExpectation")
+    var deleteExpectation = XCTestExpectation(description: "deleteExpectation")
     var storeError: Error?
+    private(set) var receivedStoreKey: String?
+    private(set) var receivedStoreValue: Any?
     func store(_ key: String, value: Any) throws {
+        receivedStoreKey = key
+        receivedStoreValue = value
+        storeExpectation.fulfill()
         if let error = storeError {
             throw error
         }
@@ -31,6 +37,7 @@ class MockPersistence: Persistence {
 
     var deleteError: Error?
     func delete(_ key: String) throws {
+        deleteExpectation.fulfill()
         if let error = deleteError {
             throw error
         }

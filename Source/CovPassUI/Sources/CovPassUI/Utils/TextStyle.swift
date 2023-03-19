@@ -9,46 +9,26 @@
 import UIKit
 
 public enum TextStyle {
-    /// size: 34 lineHeight: 51 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case display
-
-    /// size: 28 lineHeight: 42 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case header_1
-
-    /// size: 18 lineHeight: 27 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case header_2
-
-    /// size: 14 lineHeight: 17 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case header_3
-
-    /// size: 16 lineHeight: 24 letterSpacing: 0.13 type: semi-bold color: onBackground100
-    case header_16
-
-    /// size: 18 lineHeight: 27 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case subheader_1
-
-    /// size: 14 lineHeight: 21 letterSpacing: 0.13 type: semi-bold color: onBackground70
     case subheader_2
-
-    /// size: 14 lineHeight: 21 letterSpacing: 0.13 type: regular color: onBackground100
     case body
-
-    /// size: 12 lineHeight: 18 letterSpacing: 0.13 type: regular color: onBackground100
     case label
-
-    /// size: 14 lineHeight: 18 letterSpacing: 0.13 type: semi-bold color: onBackground100
     case mainButton
 
     public func apply(_ string: NSAttributedString) -> NSAttributedString {
         switch self {
         case .display:
             return string
-                .font(named: UIFont.sansSemiBold, size: 36.0, lineHeight: 44.0, textStyle: .title2)
+                .font(named: UIFont.sansBold, size: 36.0, lineHeight: 51.0, textStyle: .title2)
                 .colored(.onBackground100)
 
         case .header_1:
             return string
-                .font(named: UIFont.sansBold, size: 26.0, lineHeight: 38.0, textStyle: .title3)
+                .font(named: UIFont.sansBold, size: 24.0, lineHeight: 36.0, textStyle: .title3)
                 .colored(.onBackground100)
 
         case .header_2:
@@ -58,12 +38,7 @@ public enum TextStyle {
 
         case .header_3:
             return string
-                .font(named: UIFont.sansSemiBold, size: 14.0, lineHeight: 21.0, textStyle: .subheadline)
-                .colored(.onBackground100)
-
-        case .header_16:
-            return string
-                .font(named: UIFont.sansSemiBold, size: 16, lineHeight: 30, textStyle: .headline)
+                .font(named: UIFont.sansBold, size: 14.0, lineHeight: 21.0, textStyle: .subheadline)
                 .colored(.onBackground100)
 
         case .subheader_1:

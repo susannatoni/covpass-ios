@@ -1,10 +1,11 @@
 //
-//  File.swift
-//  
+//  AppInformationBaseViewModel.swift
 //
-//  Created by Thomas Kuleßa on 09.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
+import CovPassCommon
 import Foundation
 
 open class AppInformationBaseViewModel: AppInformationViewModelProtocol {
@@ -12,21 +13,41 @@ open class AppInformationBaseViewModel: AppInformationViewModelProtocol {
     public let title: String
     public let descriptionText: String
     public let appVersionText: String
-    open var entries: [AppInformationEntry] { constantEntries }
-    private let constantEntries: [AppInformationEntry]
+    open var entries: [AppInformationEntry] {
+        []
+    }
+
+    public let persistence: Persistence
+    public let mainBundle: Bundle
+    public let licenseBundle: Bundle
+
+    public var whatsNewEntry: AppInformationEntry {
+        let router = WhatsNewSettingsRouter(sceneCoordinator: router.sceneCoordinator)
+        let scene = WhatsNewSettingsSceneFactory(router: router)
+        let rightTitle = persistence.disableWhatsNew ? Texts.whatsNewOff : Texts.whatsNewOn
+        return .init(
+            title: Texts.whatsNewTitle,
+            scene: scene,
+            rightTitle: rightTitle
+        )
+    }
 
     public init(
         router: AppInformationRouterProtocol,
-        entries: [AppInformationEntry],
         title: String = Texts.title,
         descriptionText: String = Texts.description,
-        appVersionText: String = Texts.appVersion
+        appVersionText: String = Texts.appVersion,
+        persistence: Persistence,
+        mainBundle: Bundle = .main,
+        licenseBundle: Bundle = .commonBundle
     ) {
         self.router = router
         self.title = title
         self.descriptionText = descriptionText
         self.appVersionText = appVersionText
-        self.constantEntries = entries
+        self.persistence = persistence
+        self.mainBundle = mainBundle
+        self.licenseBundle = licenseBundle
     }
 
     public func showSceneForEntry(_ entry: AppInformationEntry) {
@@ -34,19 +55,63 @@ open class AppInformationBaseViewModel: AppInformationViewModelProtocol {
     }
 }
 
-extension AppInformationBaseViewModel {
-    public enum Texts {
-        public static let leichteSprache = NSLocalizedString("app_information_title_company_easy_language", comment: "")
-        public static let contactTitle = NSLocalizedString("app_information_title_contact", comment: "")
-        public static let faqTitle = NSLocalizedString("app_information_title_faq", comment: "")
-        public static let datenschutzTitle = NSLocalizedString("app_information_title_datenschutz", comment: "")
-        public static let companyDetailsTitle = NSLocalizedString("app_information_title_company_details", comment: "")
-        public static let openSourceLicenseTitle = NSLocalizedString("app_information_title_open_source", comment: "")
-        public static let appInformationTitle = NSLocalizedString("app_information_title_update", comment: "")
-        public static let title = NSLocalizedString("app_information_title", comment: "")
-        public static let description = NSLocalizedString("app_information_message", comment: "")
-        public static let accessibilityStatementTitle = NSLocalizedString("app_information_title_accessibility_statement", comment: "")
-        public static let localRulesTitle = NSLocalizedString("app_information_title_local_rules", comment: "")
+public extension AppInformationBaseViewModel {
+    enum Texts {
+        public static let whatsNewTitle = "app_information_title_update_notifications".localized(bundle: .main)
+        public static let whatsNewOn = "settings_list_status_on".localized(bundle: .main)
+        public static let whatsNewOff = "settings_list_status_off".localized(bundle: .main)
+        public static let leichteSprache = "app_information_title_company_easy_language".localized(bundle: .main)
+        public static let contactTitle = "app_information_title_contact".localized(bundle: .main)
+        public static let faqTitle = "app_information_title_faq".localized(bundle: .main)
+        public static let datenschutzTitle = "app_information_title_datenschutz".localized(bundle: .main)
+        public static let companyDetailsTitle = "app_information_title_company_details".localized(bundle: .main)
+        public static let openSourceLicenseTitle = "app_information_title_open_source".localized(bundle: .main)
+        public static let appInformationTitle = "app_information_title_update".localized(bundle: .main)
+        public static let title = "app_information_title".localized(bundle: .main)
+        public static let description = "app_information_message".localized(bundle: .main)
+        public static let accessibilityStatementTitle = "app_information_title_accessibility_statement".localized(bundle: .main)
+        public static let federalStateTitle = "infschg_settings_federal_state_title".localized(bundle: .main)
         public static let appVersion = String(format: "Version %@", Bundle.main.appVersion())
+    }
+
+    enum Accessibility {
+        public enum Opening {
+            public static let informationAnnounce = "accessibility_app_information_title_information_announce".localized(bundle: .main)
+            public static let leichteSprache = "accessibility_app_information_title_simple_language_announce".localized(bundle: .main)
+            public static let contactTitle = "accessibility_app_information_title_contact_announce".localized(bundle: .main)
+            public static let faqTitle = "accessibility_app_information_title_faq_announce".localized(bundle: .main)
+            public static let datenschutzTitle = "accessibility_app_information_datenschutz_announce".localized(bundle: .main)
+            public static let companyDetailsTitle = "accessibility_app_information_title_legal_information_announce".localized(bundle: .main)
+            public static let openSourceLicenseTitle = "accessibility_app_information_title_open_source_announce".localized(bundle: .main)
+            public static let accessibilityStatementTitle = "accessibility_app_information_title_accessibility_statement_announce".localized(bundle: .main)
+        }
+
+        public enum Closing {
+            public static let informationAnnounce = "accessibility_app_information_title_information_closing_announce".localized(bundle: .main)
+            public static let leichteSprache = "accessibility_app_information_title_simple_language_announce_closing".localized(bundle: .main)
+            public static let contactTitle = "accessibility_app_information_title_contact_closing_announce".localized(bundle: .main)
+            public static let faqTitle = "accessibility_app_information_title_faq_announce_closing".localized(bundle: .main)
+            public static let datenschutzTitle = "accessibility_app_information_datenschutz_closing_announce".localized(bundle: .main)
+            public static let companyDetailsTitle = "accessibility_app_information_title_legal_information_announce_closing".localized(bundle: .main)
+            public static let openSourceLicenseTitle = "accessibility_app_information_title_open_source_announce_closing".localized(bundle: .main)
+            public static let accessibilityStatementTitle = "accessibility_app_information_title_accessibility_statement_announce_closing".localized(bundle: .main)
+        }
+    }
+}
+
+public extension AppInformationEntry {
+    static func webEntry(title: String,
+                         url: URL,
+                         enableDynamicFonts: Bool = false,
+                         openingAnnounce: String,
+                         closingAnnounce: String) -> AppInformationEntry {
+        .init(
+            title: title,
+            scene: WebviewSceneFactory(title: title,
+                                       url: url,
+                                       enableDynamicFonts: enableDynamicFonts,
+                                       openingAnnounce: openingAnnounce,
+                                       closingAnnounce: closingAnnounce)
+        )
     }
 }

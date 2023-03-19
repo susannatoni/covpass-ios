@@ -1,8 +1,8 @@
 //
 //  NSDictionary+CertificateRevocationMocks.swift
-//  
 //
-//  Created by Thomas Kuleßa on 01.04.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import Foundation
@@ -30,10 +30,10 @@ extension NSDictionary {
 
     static func invalidKidListResponse() -> Self {
         let dictionary: Self = [
-            0xf5c59: [
-                0x0a: 3,
-                0x0b: 2,
-                0x0c: 1
+            0xF5C59: [
+                0x0A: 3,
+                0x0B: 2,
+                0x0C: 1
             ]
         ]
         return dictionary
@@ -123,5 +123,4 @@ extension NSDictionary {
         ]
         return dictionary
     }
-
 }

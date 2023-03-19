@@ -15,16 +15,16 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "4b0565384d3c4c588af09e660535b2c7c9bf5b39",
-          "version": "1.4.2"
+          "revision": "19b3c3ceed117c5cc883517c4e658548315ba70b",
+          "version": "1.6.0"
         }
       },
       {
         "package": "CertLogic",
-        "repositoryURL": "https://github.com/eu-digital-green-certificates/dgc-certlogic-ios",
+        "repositoryURL": "https://github.com/Digitaler-Impfnachweis/dgc-certlogic-ios-covpass.git",
         "state": {
-          "branch": null,
-          "revision": "71ae0b8e789cf3edd087f8a02983a21249af84d5",
+          "branch": "main",
+          "revision": "150e119b46f722740a25bc816a5f5e12817f3444",
           "version": null
         }
       },
@@ -47,12 +47,12 @@
         }
       },
       {
-        "package": "jsonlogic",
+        "package": "JsonLogic",
         "repositoryURL": "https://github.com/eu-digital-green-certificates/json-logic-swift.git",
         "state": {
           "branch": null,
-          "revision": "e59a317e03491abe1f04c87b965a52abae243ddd",
-          "version": "1.1.8"
+          "revision": "10580f69c911df26736ebf31b4eaf629f2972d10",
+          "version": "1.2.4"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/mxcl/PromiseKit",
         "state": {
           "branch": null,
-          "revision": "d2f7ba14bcdc45e18f4f60ad9df883fb9055f081",
-          "version": "6.15.3"
+          "revision": "43772616c46a44a9977e41924ae01d0e55f2f9ca",
+          "version": "6.18.1"
         }
       },
       {

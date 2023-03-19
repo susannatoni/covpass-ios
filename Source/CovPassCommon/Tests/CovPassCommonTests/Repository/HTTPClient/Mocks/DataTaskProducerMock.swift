@@ -1,8 +1,8 @@
 //
 //  File.swift
-//  
 //
-//  Created by Thomas Kuleßa on 21.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassCommon
@@ -18,7 +18,7 @@ class DataTaskProducerMock: DataTaskProducerProtocol {
         headerFields: nil
     )
 
-    func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+    func dataTask(with _: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         let task = URLSessionDataTaskMock()
         task.data = data
         task.mockError = error

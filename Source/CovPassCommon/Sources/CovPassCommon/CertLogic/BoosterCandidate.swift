@@ -1,8 +1,8 @@
 //
 //  BoosterCandidate.swift
-//  
 //
-//  Created by Thomas Kuleßa on 09.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import CertLogic
@@ -25,7 +25,7 @@ public struct BoosterCandidate: Codable {
     public let dgc: DigitalGreenCertificate
 
     public init(dgc: DigitalGreenCertificate, state: BoosterState, validationRules: [Rule]) {
-        self.vaccinationIdentifier = dgc.uvci
+        vaccinationIdentifier = dgc.uvci
         self.state = state
         self.validationRules = validationRules
         self.dgc = dgc

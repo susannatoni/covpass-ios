@@ -5,15 +5,20 @@
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-@testable import CovPassUI
 import CovPassCommon
+@testable import CovPassUI
 
 class CheckSituationViewControllerSnapShotTests: BaseSnapShotTests {
-    
     func testInformation() {
+        let certLogicMock = DCCCertLogicMock()
+        let vaccinationRepositoryMock = VaccinationRepositoryMock()
         let vm = CheckSituationViewModel(context: .information,
                                          userDefaults: UserDefaultsPersistence(),
-                                         resolver: nil)
+                                         router: nil,
+                                         resolver: nil,
+                                         offlineRevocationService: nil,
+                                         repository: vaccinationRepositoryMock,
+                                         certLogic: certLogicMock)
         let vc = CheckSituationViewController(viewModel: vm)
         verifyView(vc: vc)
     }

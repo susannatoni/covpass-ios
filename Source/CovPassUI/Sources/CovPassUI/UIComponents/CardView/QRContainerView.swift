@@ -11,8 +11,10 @@ import UIKit
 
 private enum Constants {
     enum Accessibility {
-        static let qrCode = VoiceOverOptions.Settings(label: "qrCode".localized, hint: "accessibility_button".localized)
+        static let qrCode = VoiceOverOptions.Settings(label: "qrCode".localized, hint: "startscreen_card_title".localized(bundle: .main))
     }
+
+    static let alphaValue: CGFloat = 0.6
 }
 
 public class QRContainerView: XibView {
@@ -58,33 +60,50 @@ public class QRContainerView: XibView {
         }
     }
 
-    public var showOverlay: Bool = false {
+    public var isInvalid: Bool = false {
         didSet {
             updateViews()
         }
     }
 
-    private let cornerRadius: CGFloat = 10
+    public var subtitleColorValue: UIColor = .onBrandAccent70
+
+    public var titleColorValue: UIColor = .onBrandAccent70
+
+    private var subtitleColor: UIColor {
+        isInvalid ? invalidColor : subtitleColorValue
+    }
+
+    private var titleColor: UIColor {
+        isInvalid ? invalidColor : titleColorValue
+    }
+
+    private lazy var invalidColor = UIColor(hexString: "737373")
 
     // MARK: - Lifecycle
 
     override public func initView() {
         super.initView()
-        qrContainerView?.layer.cornerRadius = cornerRadius
-        qrContainerView?.layer.masksToBounds = true
         imageView.enableAccessibility(label: Constants.Accessibility.qrCode.label, hint: Constants.Accessibility.qrCode.hint)
     }
 
     private func updateViews() {
         iconView.image = icon
         imageView.image = image
-        qrContainerView?.backgroundColor = imageView.image == nil ? .clear : .neutralWhite
 
         titleLabel.isHidden = titleLabel.attributedText.isNilOrEmpty
         subtitleLabel.isHidden = subtitleLabel.attributedText.isNilOrEmpty
+        titleLabel.attributedText = title?
+            .styledAs(.header_3)
+            .colored(titleColor)
+        subtitleLabel.attributedText = subtitle?
+            .styledAs(.body)
+            .colored(subtitleColor)
+        qrInfoLabel.attributedText = NSAttributedString(string: qrInfoText ?? "")
+            .styledAs(.label)
+            .colored(.neutralBlack)
 
-        qrInfoLabel.attributedText = qrInfoText?.styledAs(.label).colored(.neutralBlack)
-
-        overlay.isHidden = !showOverlay
+        overlay.isHidden = !isInvalid
+        qrInfoLabel.isHidden = isInvalid
     }
 }

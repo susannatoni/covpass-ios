@@ -1,30 +1,33 @@
 //
 //  File.swift
-//  
 //
-//  Created by Fatih Karakurt on 19.01.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
+import CertLogic
 import Foundation
 import PromiseKit
-import CertLogic
 
 public protocol DCCCertLogicProtocol {
     var countries: [Country] { get }
+    var rulesShouldBeUpdated: Bool { get }
+    var boosterRulesShouldBeUpdated: Bool { get }
+    var valueSetsShouldBeUpdated: Bool { get }
+    var domesticRulesShouldBeUpdated: Bool { get }
+    func rulesAvailable(logicType: DCCCertLogic.LogicType, region: String?) -> Bool
+    func rules(logicType: DCCCertLogic.LogicType, country: String?, region: String?) -> [Rule]
     func validate(type: DCCCertLogic.LogicType,
                   countryCode: String,
+                  region: String?,
                   validationClock: Date,
                   certificate: CBORWebToken) throws -> [ValidationResult]
     func updateRulesIfNeeded() -> Promise<Void>
     func updateRules() -> Promise<Void>
+    func updateDomesticIfNeeded() -> Promise<Void>
+    func updateDomesticRules() -> Promise<Void>
     mutating func updateBoosterRules() -> Promise<Void>
     mutating func updateBoosterRulesIfNeeded() -> Promise<Void>
     func updateValueSets() -> Promise<Void>
     func updateValueSetsIfNeeded() -> Promise<Void>
-    func rulesShouldBeUpdated() -> Promise<Bool>
-    func rulesShouldBeUpdated() -> Bool
-    func boosterRulesShouldBeUpdated() -> Promise<Bool>
-    func boosterRulesShouldBeUpdated() -> Bool
-    func valueSetsShouldBeUpdated() -> Promise<Bool>
-    func valueSetsShouldBeUpdated() -> Bool
 }

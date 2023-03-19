@@ -12,17 +12,34 @@ import PromiseKit
 import XCTest
 
 class CertificatesOverviewRouterMock: CertificatesOverviewRouterProtocol {
+    let showStateSelectionOnboardingExpectation = XCTestExpectation(description: "showStateSelectionOnboardingExpectation")
     let showCheckSituationExpectation = XCTestExpectation(description: "showCheckSituationExpectation")
     let showDialogExpectation = XCTestExpectation(description: "showDialogExpectation")
-    let showCertificatesReissueExpectation = XCTestExpectation(description: "showCertificatesReissueExpectation")
+    let showBoosterRenewalReissueExpectation = XCTestExpectation(description: "showBoosterRenewalReissueExpectation")
+    let showExtensionRenewalReissueExpectation = XCTestExpectation(description: "showExtensionRenewalReissueExpectation")
     let showCertificateExpectation = XCTestExpectation(description: "showCertificateExpectation")
+    let showCertificateModalExpectation = XCTestExpectation(description: "showCertificateExpectation")
     let toWebsiteFAQExpectation = XCTestExpectation(description: "toWebsiteFAQExpectation")
+    let showCertificateImportErrorExpectation = XCTestExpectation(description: "showCertificateImportErrorExpectation")
+    let showCertificatePickerExpectation = XCTestExpectation(description: "showCertificatePickerExpectation")
+    let showQRCodeScanAndSelectionViewExpectation = XCTestExpectation(description: "showQRCodeScanAndSelectionViewExpectation")
+    let showHowToScanExpectation = XCTestExpectation(description: "showHowToScanExpectation")
+    let showCertificateExpiredNotDeExpectation = XCTestExpectation(description: "showCertificateExpiredNotDeExpectation")
+    let showAnnouncementExpectation = XCTestExpectation(description: "showAnnouncementExpectation")
+    let showNewRegulationsAnnouncementExpectation = XCTestExpectation(description: "showNewRegulationsAnnouncementExpectation")
     var sceneCoordinator: SceneCoordinator = SceneCoordinatorMock()
     var error: Error?
     var scanCountErrorResponse: ScanCountErrorResponse = .download
     var receivedFaqURL: URL?
+    var scanQRCodePayload: String = ""
+    var receivedCertificatePickerTokens: [ExtendedCBORWebToken]?
+    var showQRCodeScanAndSelectionViewValue = QRCodeImportResult.scanResult(.success(""))
 
-    func showCheckSituation(userDefaults: Persistence) -> Promise<Void> {
+    func showCertificateExpiredNotDe() {
+        showCertificateExpiredNotDeExpectation.fulfill()
+    }
+
+    func showCheckSituation(userDefaults _: Persistence) -> Promise<Void> {
         showCheckSituationExpectation.fulfill()
         return .value
     }
@@ -32,16 +49,30 @@ class CertificatesOverviewRouterMock: CertificatesOverviewRouterProtocol {
     }
 
     func showAnnouncement() -> Promise<Void> {
-        .value
+        showAnnouncementExpectation.fulfill()
+        return .value
     }
 
-    func showCertificates(_ certificates: [ExtendedCBORWebToken]) -> Promise<CertificateDetailSceneResult> {
+    func showNewRegulationsAnnouncement() -> Promise<Void> {
+        showNewRegulationsAnnouncementExpectation.fulfill()
+        return .value
+    }
+
+    func showCertificates(certificates: [ExtendedCBORWebToken],
+                          vaccinationRepository _: VaccinationRepositoryProtocol,
+                          boosterLogic _: BoosterLogicProtocol) -> Promise<CertificateDetailSceneResult> {
+        showCertificateModalExpectation.fulfill()
+        return .value(.showCertificatesOnOverview(certificates.first!))
+    }
+
+    func showCertificatesDetail(certificates: [ExtendedCBORWebToken]) -> Promise<CertificateDetailSceneResult> {
         showCertificateExpectation.fulfill()
-        return .value(.showCertificatesOnOverview(certificates))
+        return .value(.showCertificatesOnOverview(certificates.first!))
     }
 
     func showHowToScan() -> Promise<Void> {
-        .value
+        showHowToScanExpectation.fulfill()
+        return .value
     }
 
     func showScanCountWarning() -> Promise<Bool> {
@@ -56,16 +87,15 @@ class CertificatesOverviewRouterMock: CertificatesOverviewRouterProtocol {
         .value
     }
 
-    func scanQRCode() -> Promise<ScanResult> {
+    func showQRCodeScanAndSelectionView() -> Promise<QRCodeImportResult> {
+        showQRCodeScanAndSelectionViewExpectation.fulfill()
         if let error = error {
             return .init(error: error)
         }
-        return .value(.success(""))
+        return .value(showQRCodeScanAndSelectionViewValue)
     }
 
-    func showAppInformation() {
-
-    }
+    func showAppInformation() {}
 
     func showBoosterNotification() -> Promise<Void> {
         .value
@@ -75,7 +105,7 @@ class CertificatesOverviewRouterMock: CertificatesOverviewRouterProtocol {
         .value
     }
 
-    func showDialog(title: String?, message: String?, actions: [DialogAction], style: UIAlertController.Style) {
+    func showDialog(title _: String?, message _: String?, actions _: [DialogAction], style _: UIAlertController.Style) {
         showDialogExpectation.fulfill()
     }
 
@@ -84,9 +114,34 @@ class CertificatesOverviewRouterMock: CertificatesOverviewRouterProtocol {
         receivedFaqURL = url
         toWebsiteFAQExpectation.fulfill()
     }
-    func startValidationAsAService(with data: ValidationServiceInitialisation) {}
-    func showCertificatesReissue(for cborWebTokens: [ExtendedCBORWebToken]) -> Promise<Void> {
-        showCertificatesReissueExpectation.fulfill()
+
+    func startValidationAsAService(with _: ValidationServiceInitialisation) {}
+
+    func showExtensionRenewalReissue(for _: [ExtendedCBORWebToken]) -> Promise<Void> {
+        showExtensionRenewalReissueExpectation.fulfill()
+        return .value
+    }
+
+    func showBoosterRenewalReissue(for _: [ExtendedCBORWebToken]) -> Promise<Void> {
+        showBoosterRenewalReissueExpectation.fulfill()
+        return .value
+    }
+
+    func showCertificatePicker(tokens: [ExtendedCBORWebToken]) -> Promise<Void> {
+        receivedCertificatePickerTokens = tokens
+        showCertificatePickerExpectation.fulfill()
+        if let error = error {
+            return .init(error: error)
+        }
+        return .value
+    }
+
+    func showCertificateImportError() {
+        showCertificateImportErrorExpectation.fulfill()
+    }
+
+    func showStateSelectionOnboarding() -> PromiseKit.Promise<Void> {
+        showStateSelectionOnboardingExpectation.fulfill()
         return .value
     }
 }

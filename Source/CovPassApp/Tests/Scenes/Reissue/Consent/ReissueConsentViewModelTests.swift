@@ -6,46 +6,97 @@
 //
 
 @testable import CovPassApp
-import CovPassUI
-import XCTest
-import PromiseKit
 import CovPassCommon
+import CovPassUI
+import PromiseKit
+import XCTest
 
 class ReissueConsentViewModelTests: XCTestCase {
-    
+    private var delegate: MockViewModelDelegate!
     private var sut: ReissueConsentViewModel!
     private var mockRouter: ReissueConsentRouterMock!
-    private var token: ExtendedCBORWebToken!
     private var reissueRepository: CertificateReissueRepositoryMock!
-    
+    private var vaccinationRepository: VaccinationRepositoryMock!
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let (_, resolver) = Promise<Void>.pending()
         mockRouter = ReissueConsentRouterMock()
-        token = CBORWebToken.mockVaccinationCertificate.extended()
         reissueRepository = CertificateReissueRepositoryMock()
-        sut = ReissueConsentViewModel(router: mockRouter,
-                                      resolver: resolver,
-                                      tokens: [token],
-                                      reissueRepository: reissueRepository,
-                                      vaccinationRepository: VaccinationRepositoryMock(),
-                                      decoder: JSONDecoder(),
-                                      locale: .current)
+        delegate = .init()
+        vaccinationRepository = .init()
+        configureSut()
     }
-    
+
+    private func configureSut(
+        tokens: [ExtendedCBORWebToken] = [CBORWebToken.mockVaccinationCertificate.extended()],
+        context: ReissueContext = .boosterRenewal
+    ) {
+        let (_, resolver) = Promise<Void>.pending()
+        sut = ReissueConsentViewModel(
+            router: mockRouter,
+            resolver: resolver,
+            tokens: tokens,
+            reissueRepository: reissueRepository,
+            vaccinationRepository: vaccinationRepository,
+            decoder: JSONDecoder(),
+            locale: .current,
+            context: context
+        )
+        sut.delegate = delegate
+    }
+
     override func tearDownWithError() throws {
-        token = nil
+        delegate = nil
+        vaccinationRepository = nil
         mockRouter = nil
         sut = nil
         reissueRepository = nil
     }
-    
-    func testProcessAgree() {
+
+    func testProcessAgree_boosterRenewal() {
+        // Given
+        let tokensToRenew = [CBORWebToken.mockVaccinationCertificate3Of2.extended()]
+        let renewedTokens = [CBORWebToken.mockVaccinationCertificate.extended()]
+        configureSut(tokens: tokensToRenew)
+        reissueRepository.reissueResponse = renewedTokens
+        delegate.viewModelDidUpdateExpectation.expectedFulfillmentCount = 2
+
         // WHEN
         sut.processAgree()
+
         // THEN
-        wait(for: [mockRouter.showNextExpectation], timeout: 0.1)
+        wait(for: [
+            vaccinationRepository.addExpectation,
+            delegate.viewModelDidUpdateExpectation,
+            mockRouter.showNextExpectation
+        ], timeout: 0.1)
         XCTAssertFalse(sut.isLoading)
+        XCTAssertEqual(reissueRepository.receivedRenewTokens, tokensToRenew)
+        XCTAssertEqual(vaccinationRepository.receivedTokens, renewedTokens)
+    }
+
+    func testProcessAgree_certificateExtension() {
+        // Given
+        let tokenToRenew = CBORWebToken.mockVaccinationCertificate3Of2.extended()
+        let renewedTokens = [CBORWebToken.mockVaccinationCertificate.extended()]
+        configureSut(tokens: [tokenToRenew], context: .certificateExtension)
+        reissueRepository.reissueResponse = renewedTokens
+        delegate.viewModelDidUpdateExpectation.expectedFulfillmentCount = 2
+
+        // When
+        sut.processAgree()
+
+        // Then
+        wait(for: [
+            vaccinationRepository.addExpectation,
+            vaccinationRepository.deleteExpectation,
+            delegate.viewModelDidUpdateExpectation,
+            mockRouter.showNextGenericPageExpectation
+        ], timeout: 0.1)
+        XCTAssertFalse(sut.isLoading)
+        XCTAssertEqual(reissueRepository.receivedExtendTokens, [tokenToRenew])
+        XCTAssertEqual(vaccinationRepository.receivedTokens, renewedTokens)
+        XCTAssertEqual(vaccinationRepository.receivedDeleteToken, tokenToRenew)
     }
 
     func testProcessAgree_error_unexpected_error_type() throws {
@@ -54,7 +105,7 @@ class ReissueConsentViewModelTests: XCTestCase {
             URL(string: "https://www.digitaler-impfnachweis-app.de/en/faq#fragen-zur-covpass-app")
         )
         let expectedTitle = "Reissue failed"
-        let expectedMessage = "Unfortunately, there was a problem reissuing your certificate. Please check your Internet connection and note that the same certificate can be reissued a maximum of three times a year. If the error persists, please refer to the Frequently Asked Questions for more information using the error code below.\n\nError code: R000"
+        let expectedMessage = String(format: "certificate_renewal_error_copy".localized, "R000")
 
         let error = NSError(domain: "", code: 0)
         reissueRepository.error = error
@@ -99,7 +150,8 @@ class ReissueConsentViewModelTests: XCTestCase {
             reissueRepository: reissueRepository,
             vaccinationRepository: VaccinationRepositoryMock(),
             decoder: JSONDecoder(),
-            locale: Locale(identifier: "DE")
+            locale: Locale(identifier: "DE"),
+            context: .boosterRenewal
         )
 
         // When
@@ -109,14 +161,14 @@ class ReissueConsentViewModelTests: XCTestCase {
         wait(for: [mockRouter.showErrorExpectation], timeout: 1)
         XCTAssertEqual(mockRouter.receivedErrorFaqURL, expectedFaqURL)
     }
-    
+
     func testProcessDisagree() {
         // WHEN
         sut.processDisagree()
         // THEN
         wait(for: [mockRouter.cancelExpectation], timeout: 0.1)
     }
-    
+
     func testProcessPrivacyStatement() {
         // WHEN
         sut.processPrivacyStatement()

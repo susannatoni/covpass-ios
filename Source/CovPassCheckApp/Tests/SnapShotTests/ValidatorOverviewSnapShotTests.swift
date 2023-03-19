@@ -6,73 +6,77 @@
 //
 
 @testable import CovPassCheckApp
-import XCTest
-import CovPassUI
 import CovPassCommon
+import CovPassUI
 import PromiseKit
+import XCTest
 
 class ValidatorOverviewSnapShotTests: BaseSnapShotTests {
-    
-    func viewController(lastUpdateTrustList: Date? = nil,
-                        shouldTrustListUpdate: Bool = true,
-                        ntpDate: Date = Date(),
-                        ntpOffset: TimeInterval = 0.0,
-                        logicType: DCCCertLogic.LogicType = .de) -> ValidatorOverviewViewController {
+    func configureSut(lastUpdateTrustList: Date? = nil,
+                      shouldTrustListUpdate: Bool = true,
+                      ntpDate: Date = Date(),
+                      ntpOffset: TimeInterval = 0.0,
+                      logicType _: DCCCertLogic.LogicType = .deAcceptenceAndInvalidationRules,
+                      selectedCheckSituation: CheckSituationType = .enteringGermany) -> ValidatorOverviewViewController {
         let certLogicMock = DCCCertLogicMock()
         let vaccinationRepoMock = VaccinationRepositoryMock()
-        var userDefaults = UserDefaultsPersistence()
-        if let lastUpdateTrustList = lastUpdateTrustList {
-            userDefaults.lastUpdatedTrustList = lastUpdateTrustList
-        } else {
-            try? userDefaults.delete(UserDefaults.keyLastUpdatedTrustList)
-        }
-        try? userDefaults.delete(UserDefaults.keyLastUpdatedDCCRules)
+        var userDefaults = MockPersistence()
+        userDefaults.lastUpdatedTrustList = lastUpdateTrustList
         vaccinationRepoMock.shouldTrustListUpdate = shouldTrustListUpdate
-        userDefaults.selectedLogicType = logicType
+        userDefaults.checkSituation = selectedCheckSituation.rawValue
+        let certificateHolderStatus = CertificateHolderStatusModelMock()
         let vm = ValidatorOverviewViewModel(router: ValidatorMockRouter(),
                                             repository: vaccinationRepoMock,
                                             revocationRepository: CertificateRevocationRepositoryMock(),
+                                            certificateHolderStatus: certificateHolderStatus,
                                             certLogic: certLogicMock,
                                             userDefaults: userDefaults,
-                                            schedulerIntervall: TimeInterval(10.0))
+                                            privacyFile: "",
+                                            schedulerIntervall: TimeInterval(10.0),
+                                            audioPlayer: AudioPlayerMock())
         vm.ntpDate = ntpDate
         vm.ntpOffset = ntpOffset
         return ValidatorOverviewViewController(viewModel: vm)
     }
-    
+
     func testDefault() {
-        let vc = self.viewController()
-        verifyView(vc: vc)
+        let sut = configureSut()
+        verifyView(view: sut.view)
     }
-    
-    func testDefaultEUCheckSituation() {
-        let vc = self.viewController(logicType: .eu)
-        verifyView(vc: vc)
-    }
-    
-    func testSegment2GSelected() {
-        let vc = self.viewController()
-        vc.view.bounds = UIScreen.main.bounds
-        vc.scanTypeSegment.selectedSegmentIndex = 1
-        vc.segmentChanged(vc.scanTypeSegment)
-        verifyView(vc: vc)
-    }
-    
+
     func testOfflineModeAvailable() {
-        let vc = self.viewController(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"),
-                                     shouldTrustListUpdate: false)
-        verifyView(vc: vc)
+        let sut = configureSut(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"),
+                               shouldTrustListUpdate: false)
+        verifyView(view: sut.view)
     }
-    
+
     func testOfflineModeNotAvailable() {
-        let vc = self.viewController(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"))
-        verifyView(vc: vc)
+        let sut = configureSut(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"))
+        verifyView(view: sut.view)
     }
-    
+
     func testTimeHint() {
-        let vc = self.viewController(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"),
-                                     ntpDate: DateUtils.parseDate("2021-04-26T15:05:00")!,
-        ntpOffset: 7201)
-        verifyView(vc: vc)
+        let sut = configureSut(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"),
+                               ntpDate: DateUtils.parseDate("2021-04-26T15:05:00")!,
+                               ntpOffset: 7201)
+        verifyView(view: sut.view)
+    }
+
+    func testImmunitySelected() {
+        let sut = configureSut()
+        verifyView(view: sut.view, waitAfter: 0.1)
+    }
+
+    func testImmunitySelected_withinGermany() {
+        let sut = configureSut(selectedCheckSituation: .withinGermany)
+        verifyView(view: sut.view, waitAfter: 0.1)
+    }
+
+    func testImmunitySelected_timeHint() {
+        let sut = configureSut(lastUpdateTrustList: DateUtils.parseDate("2021-04-26T15:05:00"),
+                               ntpDate: DateUtils.parseDate("2021-04-26T15:05:00")!,
+                               ntpOffset: 7201,
+                               selectedCheckSituation: .withinGermany)
+        verifyView(view: sut.view, waitAfter: 0.0)
     }
 }

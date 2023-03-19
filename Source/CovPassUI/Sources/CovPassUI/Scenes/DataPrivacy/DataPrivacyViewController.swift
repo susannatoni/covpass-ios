@@ -9,10 +9,10 @@
 import UIKit
 import WebKit
 
-class DataPrivacyViewController: UIViewController {
+public class DataPrivacyViewController: UIViewController {
     // MARK: - IBOutlet
 
-    @IBOutlet var webView: WKWebView!
+    @IBOutlet var webView: StaticWebView!
     @IBOutlet var toolbarView: CustomToolbarView!
 
     // MARK: - Properties
@@ -24,15 +24,16 @@ class DataPrivacyViewController: UIViewController {
     @available(*, unavailable)
     required init?(coder _: NSCoder) { fatalError("init?(coder: NSCoder) not implemented yet") }
 
-    init(viewModel: DataPrivacyViewModel) {
+    public init(viewModel: DataPrivacyViewModel) {
         self.viewModel = viewModel
         super.init(nibName: String(describing: Self.self), bundle: .uiBundle)
     }
 
     // MARK: - Lifecycle
 
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor.backgroundPrimary
         configureWebView()
         configureToolbarView()
     }
@@ -40,8 +41,7 @@ class DataPrivacyViewController: UIViewController {
     // MARK: - Private
 
     private func configureWebView() {
-        guard let request = viewModel.webViewRequest else { return }
-        webView.load(request)
+        webView.load(viewModel.webViewRequest)
     }
 
     private func configureToolbarView() {
@@ -54,7 +54,7 @@ class DataPrivacyViewController: UIViewController {
 // MARK: - CustomToolbarViewDelegate
 
 extension DataPrivacyViewController: CustomToolbarViewDelegate {
-    func customToolbarView(_: CustomToolbarView, didTap buttonType: ButtonItemType) {
+    public func customToolbarView(_: CustomToolbarView, didTap buttonType: ButtonItemType) {
         switch buttonType {
         case .textButton:
             viewModel.done()
@@ -67,7 +67,7 @@ extension DataPrivacyViewController: CustomToolbarViewDelegate {
 // MARK: - ModalInteractiveDismissibleProtocol
 
 extension DataPrivacyViewController: ModalInteractiveDismissibleProtocol {
-    func modalViewControllerDidDismiss() {
+    public func modalViewControllerDidDismiss() {
         viewModel.cancel()
     }
 }

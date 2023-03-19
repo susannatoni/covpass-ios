@@ -11,6 +11,13 @@ import LocalAuthentication
 import PromiseKit
 import UIKit
 
+private enum Constants {
+    enum Accessibility {
+        static let sceneOpeningAnnouncement = "accessibility_certificate_add_popup_announce".localized
+        static let sceneClosingAnnouncement = "accessibility_certificate_add_popup_closing_announce".localized
+    }
+}
+
 class HowToScanViewModel: BaseViewModel, CancellableViewModelProtocol {
     // MARK: - Properties
 
@@ -36,9 +43,13 @@ class HowToScanViewModel: BaseViewModel, CancellableViewModelProtocol {
 
     var startButtonTitle: String { "certificate_add_popup_scan_button_title".localized }
 
+    var sceneOpeningAnnouncement: String = Constants.Accessibility.sceneOpeningAnnouncement
+
+    var sceneClosingAnnouncement: String = Constants.Accessibility.sceneClosingAnnouncement
+
     var showPasscodeHint: Bool {
         // check if device passcode is set
-        return !LAContext().canEvaluatePolicy(.deviceOwnerAuthentication, error: nil)
+        !LAContext().canEvaluatePolicy(.deviceOwnerAuthentication, error: nil)
     }
 
     // MARK: - Lifecycle

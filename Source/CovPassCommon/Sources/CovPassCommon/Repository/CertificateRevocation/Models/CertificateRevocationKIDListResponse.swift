@@ -1,17 +1,23 @@
 //
 //  CertificateRevocationKIDListResponse.swift
-//  
 //
-//  Created by Thomas Kuleßa on 25.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 import Foundation
 
 public struct CertificateRevocationKIDListResponse {
-    private let kIDs: [String: ValueType]
+    public let lastModified: String?
+    public let rawDictionary: NSDictionary
+    private let allKIDs: [KID]
+    private let kIDs: [String: KIDListValueType]
 
-    init(with dictionary: NSDictionary) throws {
+    init(with dictionary: NSDictionary, lastModified: String? = nil) throws {
+        rawDictionary = dictionary
+        self.lastModified = lastModified
         kIDs = try dictionary.kidDictionary()
+        allKIDs = kIDs.keys.map(\.hexToBytes)
     }
 
     public func contains(_ kid: KID) -> Bool {
@@ -29,24 +35,28 @@ public struct CertificateRevocationKIDListResponse {
             .map { hashType in
                 (hashType, count(kid, hashType: hashType))
             }
-            .filter { (_, count) in
+            .filter { _, count in
                 count > 0
             }
             .sorted { count1, count2 in
                 count1.1 > count2.1
             }
     }
+
+    public func kids(with hashType: CertificateRevocationHashType) -> [KID] {
+        allKIDs.filter { count($0, hashType: hashType) > 0 }
+    }
 }
 
-private typealias ValueType = Dictionary<CertificateRevocationHashType, Int>
+public typealias KIDListValueType = [CertificateRevocationHashType: Int]
 
 private extension NSDictionary {
-    func kidDictionary() throws -> Dictionary<String, ValueType> {
-        var result: [String: ValueType] = [:]
-        try forEach { (key, value) in
+    func kidDictionary() throws -> [String: KIDListValueType] {
+        var result: [String: KIDListValueType] = [:]
+        try forEach { key, value in
             guard let stringKey = key as? String,
                   let valueDictionary = value as? NSDictionary else {
-                throw CertificateRevocationHTTPClientError.cbor
+                throw CertificateRevocationDataSourceError.cbor
             }
             let resultValue = try valueDictionary.hashTypeDictionary()
             result[stringKey.lowercased()] = resultValue
@@ -54,17 +64,30 @@ private extension NSDictionary {
         return result
     }
 
-    func hashTypeDictionary() throws -> ValueType {
-        var result: ValueType = [:]
-        try forEach { (key, value) in
+    func hashTypeDictionary() throws -> KIDListValueType {
+        var result: KIDListValueType = [:]
+        try forEach { key, value in
             guard let stringKey = key as? String,
                   let intKey = UInt8(stringKey, radix: 16),
                   let hashKey = CertificateRevocationHashType(rawValue: intKey),
                   let value = value as? Int else {
-                throw CertificateRevocationHTTPClientError.cbor
+                throw CertificateRevocationDataSourceError.cbor
             }
             result[hashKey] = value
         }
         return result
+    }
+}
+
+// https://stackoverflow.com/questions/43360747/how-to-convert-hexadecimal-string-to-an-array-of-uint8-bytes-in-swift
+private extension StringProtocol {
+    var hexToBytes: [UInt8] { .init(hexa) }
+    private var hexa: UnfoldSequence<UInt8, Index> {
+        sequence(state: startIndex) { startIndex in
+            guard startIndex < self.endIndex else { return nil }
+            let endIndex = self.index(startIndex, offsetBy: 2, limitedBy: self.endIndex) ?? self.endIndex
+            defer { startIndex = endIndex }
+            return UInt8(self[startIndex ..< endIndex], radix: 16)
+        }
     }
 }

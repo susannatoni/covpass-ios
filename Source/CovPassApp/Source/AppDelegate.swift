@@ -18,9 +18,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _: UIApplication,
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-
         try? setupKeychain()
-        try? UIFont.loadCustomFonts()
+        UIFont.loadCustomFonts()
 
         guard NSClassFromString("XCTest") == nil else { return true }
 
@@ -39,6 +38,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             FileManager.default.printFileLocations()
         #endif
         return true
+    }
+
+    func application(_: UIApplication, handleOpen url: URL) -> Bool {
+        guard let window = window,
+              let rootViewController = window.rootViewController,
+              let navigationController = rootViewController as? UINavigationController,
+              let certificateOverviewViewController = navigationController.viewControllers.first as? CertificatesOverviewViewController else {
+            return false
+        }
+
+        return certificateOverviewViewController.viewModel.handleOpen(url: url)
     }
 
     private func setupKeychain() throws {

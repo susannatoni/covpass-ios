@@ -69,40 +69,44 @@ public class DCCCertLogic: DCCCertLogicProtocol {
     public enum LogicType: String {
         // validate against EU rules
         case eu
-        // validate against DE domestic rules
-        case de
+        // validate against EU rules
+        case euAcceptence
+        // validate against EU rules (only invalidations)
+        case euInvalidation
+        // validate against DE (acceptence and invalidation rules) domestic rules
+        case deAcceptenceAndInvalidationRules
+        // validate against DE (invalidation rules) domestic rules
+        case deInvalidationRules
+        // validate against DE domestic rules for ifsg22a rule types
+        case ifsg22a
         // validate against vaccination booster rules
         case booster
     }
-    
+
     var dccRules: [Rule] {
         // Try to load rules from keychain
         if let rulesData = try? keychain.fetch(KeychainPersistence.Keys.dccRules.rawValue) as? Data,
-           let rules = try? jsonDecoder.decode([Rule].self, from: rulesData)
-        {
+           let rules = try? jsonDecoder.decode([Rule].self, from: rulesData) {
             return rules
         }
         // Try to load local rules
         if let localRules = try? Data(contentsOf: initialDCCRulesURL),
-           let rules = try? jsonDecoder.decode([Rule].self, from: localRules)
-        {
+           let rules = try? jsonDecoder.decode([Rule].self, from: localRules) {
             return rules
         }
         return []
     }
-    
+
     var dccDomesticRules: [Rule] {
         // Try to load rules from keychain
         if let rulesData = try? keychain.fetch(KeychainPersistence.Keys.dccDomesticRules.rawValue) as? Data,
            let rules = try? jsonDecoder.decode([Rule].self, from: rulesData),
-           !rules.isEmpty 
-        {
+           !rules.isEmpty {
             return rules
         }
         // Try to load local rules
         if let localRules = try? Data(contentsOf: initialDomesticDCCRulesURL),
-           let rules = try? jsonDecoder.decode([Rule].self, from: localRules)
-        {
+           let rules = try? jsonDecoder.decode([Rule].self, from: localRules) {
             return rules
         }
         return []
@@ -111,8 +115,7 @@ public class DCCCertLogic: DCCCertLogicProtocol {
     var boosterRules: [Rule] {
         // Try to load rules from keychain
         if let rulesData = try? keychain.fetch(KeychainPersistence.Keys.boosterRules.rawValue) as? Data,
-           let rules = try? jsonDecoder.decode([Rule].self, from: rulesData)
-        {
+           let rules = try? jsonDecoder.decode([Rule].self, from: rulesData) {
             return rules
         }
         return []
@@ -129,8 +132,7 @@ public class DCCCertLogic: DCCCertLogicProtocol {
 
     var valueSets: [String: [String]] {
         if let valueSetData = userDefaults.valueSets,
-           let sets = try? jsonDecoder.decode([ValueSet].self, from: valueSetData)
-        {
+           let sets = try? jsonDecoder.decode([ValueSet].self, from: valueSetData) {
             var udValueSets = [String: [String]]()
             sets.forEach { udValueSets[$0.id] = DCCCertLogic.valueSet($0.id, $0.data) }
             return udValueSets
@@ -145,6 +147,22 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             "vaccines-covid-19-auth-holders": DCCCertLogic.valueSetFromFile("vaccines-covid-19-auth-holders"),
             "vaccines-covid-19-names": DCCCertLogic.valueSetFromFile("vaccines-covid-19-names")
         ]
+    }
+
+    public var rulesShouldBeUpdated: Bool {
+        userDefaults.lastUpdatedDCCRules?.passed24Hours ?? true
+    }
+
+    public var boosterRulesShouldBeUpdated: Bool {
+        userDefaults.lastUpdatedBoosterRules?.passed24Hours ?? true
+    }
+
+    public var valueSetsShouldBeUpdated: Bool {
+        userDefaults.lastUpdatedValueSets?.passed24Hours ?? true
+    }
+
+    public var domesticRulesShouldBeUpdated: Bool {
+        userDefaults.lastUpdateDomesticRules?.passed24Hours ?? true
     }
 
     private static func valueSetFromFile(_ name: String) -> [String] {
@@ -185,37 +203,67 @@ public class DCCCertLogic: DCCCertLogicProtocol {
         self.userDefaults = userDefaults
     }
 
-    public func validate(type: LogicType = .eu,
-                         countryCode: String,
-                         validationClock: Date,
-                         certificate: CBORWebToken) throws -> [ValidationResult] {
+    private func rulesFor(logicType: LogicType) -> [Rule] {
         var rules = [Rule]()
-        switch type {
+        switch logicType {
         case .eu:
             rules = dccRules
+        case .euAcceptence:
+            rules = dccRules.acceptanceRules
+        case .euInvalidation:
+            rules = dccRules.invalidationRules
         case .booster:
             rules = boosterRules
-        case .de:
-            rules = dccDomesticRules
+        case .deAcceptenceAndInvalidationRules:
+            rules = dccDomesticRules.acceptenceAndInvalidationRules
+        case .deInvalidationRules:
+            rules = dccDomesticRules.invalidationRules
+        case .ifsg22a:
+            rules = dccDomesticRules.ifsg22aRules
         }
+        return rules
+    }
+
+    public func rulesAvailable(logicType: DCCCertLogic.LogicType, region: String?) -> Bool {
+        rulesFor(logicType: logicType).filter { $0.region == region }.isEmpty == false
+    }
+
+    public func rules(logicType: DCCCertLogic.LogicType, country: String?, region: String?) -> [Rule] {
+        if country != nil {
+            return rulesFor(logicType: logicType).filter { $0.countryCode == country }.filter { $0.region == region }
+        }
+        return rulesFor(logicType: logicType).filter { $0.region == region }
+    }
+
+    public func validate(type: LogicType = .eu,
+                         countryCode: String,
+                         region: String? = nil,
+                         validationClock: Date,
+                         certificate: CBORWebToken) throws -> [ValidationResult] {
+        let rules = rulesFor(logicType: type)
+
         if rules.isEmpty {
             throw DCCCertLogicError.noRules
         }
 
-        var type = CertificateType.general
-        if certificate.isVaccination {
-            type = .vaccination
+        var validationType = ValidationType.all
+        var certificateType = CertificateType.general
+
+        if type == .ifsg22a {
+            validationType = .allRuleAndCertificateTypes
+        } else if certificate.isVaccination {
+            certificateType = .vaccination
         } else if certificate.isRecovery {
-            type = .recovery
+            certificateType = .recovery
         } else if certificate.isTest {
-            type = .test
+            certificateType = .test
         }
 
         let filter = FilterParameter(
             validationClock: validationClock,
             countryCode: countryCode,
-            certificationType: type,
-            region: nil
+            certificationType: certificateType,
+            region: region
         )
         let external = ExternalParameter(
             validationClock: validationClock,
@@ -230,38 +278,20 @@ public class DCCCertLogic: DCCCertLogicProtocol {
         guard let payload = String(data: data, encoding: .utf8) else {
             throw DCCCertLogicError.encodingError
         }
-        return engine.validate(filter: filter, external: external, payload: payload)
+        return engine.validate(filter: filter, external: external, payload: payload, validationType: validationType)
     }
 
     // MARK: - Updating local rules and data
 
-    public func rulesShouldBeUpdated() -> Bool {
-        if let lastUpdated = userDefaults.lastUpdatedDCCRules,
-           let date = Calendar.current.date(byAdding: .day, value: 1, to: lastUpdated),
-           Date() < date
-        {
-            return false
-        }
-        return true
-    }
-    
-    public func rulesShouldBeUpdated() -> Promise<Bool> {
-        Promise { seal in
-            seal.fulfill(rulesShouldBeUpdated())
-        }
-    }
-    
     public func updateRulesIfNeeded() -> Promise<Void> {
-        return firstly {
-            return rulesShouldBeUpdated()
+        guard rulesShouldBeUpdated else {
+            return .value
         }
-        .then(on: .global()) {
-            $0 ? self.updateRules() : .value
-        }
+        return updateRules()
     }
 
     public func updateRules() -> Promise<Void> {
-        return firstly {
+        firstly {
             service.loadCountryList()
         }.then(on: .global()) { _ in
             self.updateDCCRules()
@@ -285,34 +315,16 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             seal.fulfill(updatedRules)
         }
     }
-    
-    public func boosterRulesShouldBeUpdated() -> Bool {
-        if let lastUpdated = userDefaults.lastUpdatedBoosterRules,
-           let date = Calendar.current.date(byAdding: .day, value: 1, to: lastUpdated),
-           Date() < date
-        {
-            return false
-        }
-        return true
-    }
-    
-    public func boosterRulesShouldBeUpdated() -> Promise<Bool> {
-        Promise { seal in
-            seal.fulfill(boosterRulesShouldBeUpdated())
-        }
-    }
-    
+
     public func updateBoosterRulesIfNeeded() -> Promise<Void> {
-        return firstly {
-            return boosterRulesShouldBeUpdated()
+        guard boosterRulesShouldBeUpdated else {
+            return .value
         }
-        .then(on: .global()) {
-            $0 ? self.updateBoosterRules() : .value
-        }
+        return updateBoosterRules()
     }
-    
+
     public func updateBoosterRules() -> Promise<Void> {
-        return firstly {
+        firstly {
             service.loadBoosterRules()
         }
         .then(on: .global()) { (remoteRules: [RuleSimple]) throws -> Promise<[Rule]> in
@@ -327,32 +339,14 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             return .value
         }
     }
-    
-    public func valueSetsShouldBeUpdated() -> Bool {
-        if let lastUpdated = userDefaults.lastUpdatedValueSets,
-           let date = Calendar.current.date(byAdding: .day, value: 1, to: lastUpdated),
-           Date() < date
-        {
-            return false
-        }
-        return true
-    }
-    
-    public func valueSetsShouldBeUpdated() -> Promise<Bool> {
-        Promise { seal in
-            seal.fulfill(valueSetsShouldBeUpdated())
-        }
-    }
-    
+
     public func updateValueSetsIfNeeded() -> Promise<Void> {
-        return firstly {
-            return valueSetsShouldBeUpdated()
+        guard valueSetsShouldBeUpdated else {
+            return .value
         }
-        .then(on: .global()) {
-            $0 ? self.updateValueSets() : .value
-        }
+        return updateValueSets()
     }
-    
+
     public func updateValueSets() -> Promise<Void> {
         firstly {
             service.loadValueSets()
@@ -383,9 +377,16 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             return .value
         }
     }
-    
+
+    public func updateDomesticIfNeeded() -> Promise<Void> {
+        guard domesticRulesShouldBeUpdated else {
+            return .value
+        }
+        return updateDomesticRules()
+    }
+
     public func updateDomesticRules() -> Promise<Void> {
-        return firstly {
+        firstly {
             service.loadDomesticRules()
         }
         .then(on: .global()) { (remoteRules: [RuleSimple]) throws -> Promise<[Rule]> in
@@ -395,10 +396,14 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             let data = try self.jsonEncoder.encode(rules)
             try self.keychain.store(KeychainPersistence.Keys.dccDomesticRules.rawValue, value: data)
         }
+        .then(on: .global()) { () -> Promise<Void> in
+            self.userDefaults.lastUpdateDomesticRules = Date()
+            return .value
+        }
     }
-    
+
     public func updateDCCRules() -> Promise<Void> {
-        return firstly {
+        firstly {
             service.loadDCCRules()
         }
         .then(on: .global()) { (remoteRules: [RuleSimple]) throws -> Promise<[Rule]> in
@@ -413,7 +418,7 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             return .value
         }
     }
-    
+
     private func updateCountryDomesticRules(localRules: [Rule], remoteRules: [RuleSimple]) -> Promise<[Rule]> {
         Promise { seal in
             var updatedRules = [Rule]()
@@ -428,7 +433,7 @@ public class DCCCertLogic: DCCCertLogicProtocol {
             seal.fulfill(updatedRules)
         }
     }
-    
+
     private func updateCountryBoosterRules(localRules: [Rule], remoteRules: [RuleSimple]) -> Promise<[Rule]> {
         Promise { seal in
             var updatedRules = [Rule]()
@@ -444,4 +449,3 @@ public class DCCCertLogic: DCCCertLogicProtocol {
         }
     }
 }
-

@@ -13,8 +13,8 @@ open class WebviewViewController: UIViewController {
     // MARK: - Properties
 
     let viewModel: WebviewViewModelProtocol
-    @IBOutlet var webView: WKWebView!
-    @IBOutlet weak var toolbar: CustomToolbarView!
+    @IBOutlet var webView: StaticWebView!
+    @IBOutlet var toolbar: CustomToolbarView!
 
     // MARK: - Lifecycle
 
@@ -29,14 +29,21 @@ open class WebviewViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .neutralWhite
-
         setupTitle()
         setupNavigationBar()
-
         webView.backgroundColor = .neutralWhite
         webView.navigationDelegate = self
         webView.load(viewModel.urlRequest)
+    }
 
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.openingAnnounce)
+    }
+
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        UIAccessibility.post(notification: .layoutChanged, argument: viewModel.closingAnnounce)
     }
 
     private func setupTitle() {
@@ -46,7 +53,8 @@ open class WebviewViewController: UIViewController {
         }
         let label = UILabel()
         label.attributedText = viewModel.title?.styledAs(.header_3)
-        navigationItem.leftBarButtonItem = UIBarButtonItem.init(customView: label)
+        label.accessibilityTraits = .header
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: label)
     }
 
     private func setupNavigationBar() {
@@ -57,19 +65,29 @@ open class WebviewViewController: UIViewController {
             return
         }
 
-        if navigationController?.navigationBar.backItem != nil { return }
-        let button = UIButton(type: .custom)
-        button.setImage(.close, for: .normal)
-        button.accessibilityLabel = "accessibility_certificate_add_popup_label_close".localized
-        button.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: button)
-        navigationController?.navigationBar.setValue(true, forKey: "hidesShadow")
-        navigationController?.navigationBar.barTintColor = .neutralWhite
+        if navigationController?.navigationBar.backItem == nil {
+            let button = UIButton(type: .custom)
+            button.setImage(.close, for: .normal)
+            button.accessibilityLabel = "accessibility_certificate_add_popup_label_close".localized
+            button.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
+            button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: button)
+            navigationController?.navigationBar.setValue(true, forKey: "hidesShadow")
+            navigationController?.navigationBar.barTintColor = .neutralWhite
+        } else {
+            let backButton = UIBarButtonItem(image: .arrowBack, style: .done, target: self, action: #selector(backButtonTapped))
+            backButton.accessibilityLabel = "accessibility_app_information_contact_label_back".localized // TODO: change accessibility text when they are available
+            navigationItem.leftBarButtonItem = backButton
+            navigationController?.navigationBar.tintColor = .onBackground100
+        }
     }
 
     @objc func backButtonPressed() {
         dismiss(animated: true, completion: nil)
+    }
+
+    @objc private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
 }
 
@@ -99,9 +117,17 @@ extension WebviewViewController: WKNavigationDelegate {
             completionHandler(.cancelAuthenticationChallenge, nil)
             return
         }
-        let exceptions = SecTrustCopyExceptions(serverTrust)
-        SecTrustSetExceptions(serverTrust, exceptions)
-        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        DispatchQueue.global(qos: .userInitiated).async {
+            let exceptions = SecTrustCopyExceptions(serverTrust)
+            SecTrustSetExceptions(serverTrust, exceptions)
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        }
+    }
+
+    public func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
+        if !webView.isLoading {
+            self.webView.setDynamicFont()
+        }
     }
 }
 

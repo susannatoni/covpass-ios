@@ -18,9 +18,9 @@ public final class APIServiceDelegate: NSObject {
     public init(publicKeyHashes: [String]) {
         self.publicKeyHashes = publicKeyHashes
     }
-    
+
     public func extend(hash: String) {
-        self.publicKeyHashes.append(hash)
+        publicKeyHashes.append(hash)
     }
 }
 
@@ -76,16 +76,7 @@ extension APIServiceDelegate: URLSessionDelegate {
     ///   - challenge: A challenge from a server requiring authentication from the client.
     ///   - trust: Shortcut for `challenge.protectionSpace.serverTrust`
     ///   - completionHandler: the completion handler to accept or reject the request
-    private func evaluate(challenge: URLAuthenticationChallenge, trust: SecTrust, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        #if DEBUG
-            // debug/review: print the chain
-            for i in 0 ..< SecTrustGetCertificateCount(trust) {
-                if let cert = SecTrustGetCertificateAtIndex(trust, i) {
-                    print("certificate chain: [\(challenge.protectionSpace.host)] @ \(i): \(cert)")
-                }
-            }
-        #endif
-
+    private func evaluate(challenge _: URLAuthenticationChallenge, trust: SecTrust, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         if
             let serverCertificate = SecTrustGetCertificateAtIndex(trust, 0),
             let serverPublicKey = SecCertificateCopyKey(serverCertificate),
@@ -97,10 +88,6 @@ extension APIServiceDelegate: URLSessionDelegate {
                 // Success! This is our server
                 completionHandler(.useCredential, URLCredential(trust: trust))
                 return
-            } else {
-                #if DEBUG
-                    print("⛔️ \(keyHash) @ \(challenge.protectionSpace.host)")
-                #endif
             }
         }
 

@@ -11,6 +11,7 @@ import Foundation
 public extension UserDefaults {
     static let keyLastUpdatedTrustList = "keyLastUpdatedTrustList"
     static let keyLastUpdatedDCCRules = "keyLastUpdatedDCCRules"
+    static let keyLastUpdateDomesticRuless = "keyLastUpdateDomesticRuless"
     static let keyLastUpdatedBoosterRules = "keyLastUpdatedBoosterRules"
     static let keyLastUpdatedValueSets = "keyLastUpdatedValueSets"
     static let keyLastCheckedBooster = "keyLastCheckedBooster"
@@ -18,6 +19,7 @@ public extension UserDefaults {
     static let keyValueSets = "keyValueSets"
     static let keyAnnouncement = "keyAnnouncement"
     static let keyPrivacy = "keyPrivacy"
+    static let keyPrivacyShownForAppVersion = "keyPrivacyShownForAppVersion"
     static let keyRevocationExpertMode = "keyRevocationSettingsType"
     static let keyBoosterCandidates = "keyBoosterCandidates"
     static let keySelectedLogicType = "keySelectedLogicType"

@@ -1,12 +1,12 @@
 //
 //  SVGToPDFConverter.swift
-//  
 //
-//  Created by Thomas Kuleßa on 03.03.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
-import PromiseKit
 import PDFKit
+import PromiseKit
 import UIKit
 import WebKit
 
@@ -44,7 +44,12 @@ public final class SVGToPDFConverter: NSObject, SVGToPDFConverterProtocol {
             <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+            <style>
+                @font-face {
+                    font-family: 'Open Sans';
+                    src: url('OpenSans-Regular.ttf');
+                }
+            </style>
             </head>
             <div>
             \(svgString)

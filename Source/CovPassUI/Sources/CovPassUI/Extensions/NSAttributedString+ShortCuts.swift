@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 
+let MAX_SCALING_FACTOR = 2.0
+
 public extension NSAttributedString {
     func styledAs(_ style: TextStyle) -> NSAttributedString {
         style.apply(self)
@@ -23,16 +25,10 @@ public extension NSAttributedString {
               lineHeight: CGFloat? = nil,
               textStyle: UIFont.TextStyle = .body,
               in range: NSRange? = nil,
-              traitCollection: UITraitCollection? = nil) -> NSAttributedString
-    {
-        if NSClassFromString("XCTest") != nil {
-            try? UIFont.loadCustomFonts()
-        }
-
-        guard let font = UIFont(name: fontName, size: size) else { fatalError("Error loading font with name \(fontName)") }
-
+              traitCollection: UITraitCollection? = nil) -> NSAttributedString {
+        let font = UIFont(name: fontName, size: size) ?? UIFont.systemFont(ofSize: size)
         let fontMetrics = UIFontMetrics(forTextStyle: textStyle)
-        let scaledFont = fontMetrics.scaledFont(for: font, compatibleWith: traitCollection)
+        let scaledFont = fontMetrics.scaledFont(for: font, maximumPointSize: size * MAX_SCALING_FACTOR, compatibleWith: traitCollection)
 
         let result = setAttribute(.font, value: scaledFont, in: range)
         if let lineHeight = lineHeight {
@@ -44,8 +40,7 @@ public extension NSAttributedString {
 
     func underlined(style: NSUnderlineStyle = .single,
                     color: UIColor? = nil,
-                    in range: NSRange? = nil) -> NSAttributedString
-    {
+                    in range: NSRange? = nil) -> NSAttributedString {
         let result = setAttribute(.underlineStyle, value: style.rawValue, in: range)
 
         if let color = color ?? attribute(.foregroundColor, at: range?.location) {
@@ -60,10 +55,11 @@ public extension NSAttributedString {
     func lineHeight(_ value: CGFloat,
                     in range: NSRange? = nil,
                     fontMetrics: UIFontMetrics = .default,
-                    traitCollection: UITraitCollection? = nil) -> NSAttributedString
-    {
+                    traitCollection: UITraitCollection? = nil) -> NSAttributedString {
         paragraphStyled(in: range) { style in
             guard let font: UIFont = attribute(.font) else { return }
+
+            style.maximumLineHeight = value * MAX_SCALING_FACTOR
 
             // font.lineHeight is already scaled, so we must scale the requested lineHeight value too, to calculate the multiple.
             style.lineHeightMultiple = 1.0 / font.lineHeight * fontMetrics.scaledValue(for: value, compatibleWith: traitCollection)

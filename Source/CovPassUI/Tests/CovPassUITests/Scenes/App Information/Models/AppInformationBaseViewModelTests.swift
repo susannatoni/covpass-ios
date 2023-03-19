@@ -1,8 +1,8 @@
 //
 //  AppInformationBaseViewModelTests.swift
-//  
 //
-//  Created by Thomas Kuleßa on 09.02.22.
+//  © Copyright IBM Deutschland GmbH 2021
+//  SPDX-License-Identifier: Apache-2.0
 //
 
 @testable import CovPassUI
@@ -10,14 +10,19 @@ import XCTest
 
 class AppInformationBaseViewModelTests: XCTestCase {
     private var router: AppInformationRouterMock!
+    private var persistence: MockPersistence!
     private var sut: AppInformationBaseViewModel!
 
     override func setUpWithError() throws {
+        persistence = .init()
         router = .init()
-        sut = AppInformationBaseViewModel(router: router, entries: [])
+        sut = AppInformationBaseViewModel(router: router,
+                                          persistence: persistence)
     }
 
     override func tearDownWithError() throws {
+        persistence = nil
+        router = nil
         sut = nil
     }
 
@@ -52,10 +57,10 @@ class AppInformationBaseViewModelTests: XCTestCase {
         let version = UUID().uuidString
         sut = .init(
             router: router,
-            entries: [],
             title: title,
             descriptionText: description,
-            appVersionText: version
+            appVersionText: version,
+            persistence: persistence
         )
 
         // When & Then
@@ -72,27 +77,6 @@ class AppInformationBaseViewModelTests: XCTestCase {
         XCTAssertTrue(entries.isEmpty)
     }
 
-    func testEntries() {
-        // Given
-        let givenEntries: [AppInformationEntry] = [
-            .mock(),
-            .init(title: UUID().uuidString, scene: SceneFactoryMock()),
-            .mock(),
-            .init(title: UUID().uuidString, scene: SceneFactoryMock()),
-            .init(title: UUID().uuidString, scene: SceneFactoryMock()),
-        ]
-        sut = .init(router: router, entries: givenEntries)
-
-        // When
-        let entries = sut.entries
-
-        // Then
-        XCTAssertEqual(entries.count, 5)
-        for index in 0..<min(entries.count, givenEntries.count) {
-            XCTAssertEqual(entries[index].title, givenEntries[index].title)
-        }
-    }
-
     func testShowSceneForEntry() {
         // When
         sut.showSceneForEntry(.init(title: "", scene: SceneFactoryMock()))
@@ -101,5 +85,3 @@ class AppInformationBaseViewModelTests: XCTestCase {
         wait(for: [router.showSceneExpectation], timeout: 2)
     }
 }
-
-
